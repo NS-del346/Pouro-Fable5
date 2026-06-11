@@ -1,0 +1,1224 @@
+/* =============================================================================
+   Pourō — Production CSS
+   Design tokens extracted from design-artifact/Pouro-Fable5.dc.html
+   TODO(PR-006): self-host Google Fonts for offline/PWA support
+   ============================================================================= */
+
+/* ── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  /* Surface hierarchy */
+  --color-bg:             #E7DECC;
+  --color-surface:        #F4EDE1;
+  --color-surface-raised: #FCFAF5;
+  --color-surface-muted:  #F8F3E8;
+  --color-surface-ice:    #F4F6F4;
+
+  /* Text */
+  --color-text:           #2C241B;
+  --color-text-muted:     #8D7C69;
+  --color-text-faint:     #B3A38C;
+  --color-text-mid:       #6E5F4F;
+  --color-text-ice:       #7C8783;
+
+  /* Accent */
+  --color-accent:         #A2674E;
+  --color-accent-dark:    #8C5535;
+  --color-accent-soft:    #C9A77F;
+  --color-accent-warm:    #C49A7E;
+
+  /* Border */
+  --color-border:         #E0D5C0;
+  --color-border-card:    #E6DCC8;
+  --color-border-input:   #DDD1BA;
+  --color-border-divider: #EDE4D2;
+  --color-border-row:     #E5DAC5;
+  --color-border-chip:    #D9C3A6;
+  --color-border-ice:     #D9DEDC;
+
+  /* Semantic */
+  --color-cta-bg:         #2A221B;
+  --color-cta-text:       #F6EFE3;
+  --color-cta-accent-bg:  #A2674E;
+  --color-cta-accent-txt: #FBF4EA;
+  --color-next-note-bg:   #F4E6D3;
+  --color-next-note-border: #D9BE9C;
+  --color-next-hint-bg:   #F1E9D9;
+  --color-next-hint-border: #E3D7BE;
+  --color-chip-bg:        #FBF6EC;
+  --color-btn-light-bg:   #FBF7EF;
+
+  /* Typography */
+  --font-sans:   'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  --font-serif:  'Lora', Georgia, serif;
+  --font-mincho: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+  --font-mono:   'JetBrains Mono', 'Menlo', 'Courier New', monospace;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Border radius */
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-lg:   18px;
+  --radius-xl:   22px;
+  --radius-2xl:  24px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-soft:  0 2px 8px rgba(70, 52, 34, 0.08);
+  --shadow-card:  0 12px 28px rgba(70, 52, 34, 0.10);
+  --shadow-hero:  0 0 48px rgba(70, 52, 34, 0.18);
+  --shadow-feat:  0 10px 26px rgba(70, 52, 34, 0.08);
+  --shadow-brew:  0 8px 22px rgba(70, 52, 34, 0.07);
+  --shadow-cta:   0 8px 20px rgba(162, 103, 78, 0.28);
+  --shadow-pause: 0 8px 18px rgba(162, 103, 78, 0.30);
+
+  /* Safe area */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+
+  /* Motion */
+  --motion-fast: 160ms;
+  --motion-base: 200ms;
+  --motion-slow: 260ms;
+  --ease-ios: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Tab bar */
+  --tab-height: 58px;
+
+  /* Aliases for spec completeness */
+  --color-app-bg:        var(--color-surface);
+  --color-surface-soft:  var(--color-surface-muted);
+  --color-text-soft:     var(--color-text-faint);
+  --color-accent-strong: var(--color-accent-dark);
+  --color-border-soft:   var(--color-border-divider);
+}
+
+/* ── Reset & Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+textarea {
+  font-family: inherit;
+}
+
+textarea:focus {
+  outline: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Scrollbar hide */
+[data-scroll] {
+  scrollbar-width: none;
+}
+[data-scroll]::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── App Shell ─────────────────────────────────────────────────────────────── */
+#app-outer {
+  min-height: 100svh;
+  min-height: 100dvh;
+  background: var(--color-bg);
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-hero);
+}
+
+/* ── Screens ───────────────────────────────────────────────────────────────── */
+.screen {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* Screen that has a fixed-bottom CTA leaves space for tab bar */
+.screen-with-tab {
+  /* tab bar is always present in DOM; screens just hide/show it */
+}
+
+/* Scrollable content area */
+.screen-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  scrollbar-width: none;
+}
+.screen-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Screen Header (back + title) ──────────────────────────────────────────── */
+.screen-header {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  padding: 14px 16px 4px;
+  flex-shrink: 0;
+}
+
+.screen-header-title {
+  text-align: center;
+  font-family: var(--font-mincho);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--color-text);
+}
+
+.screen-header-sub {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 12px;
+  color: var(--color-accent);
+  margin-top: 2px;
+}
+
+/* ── Back Button ───────────────────────────────────────────────────────────── */
+.btn-back {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-input);
+  background: var(--color-surface-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-back svg {
+  pointer-events: none;
+}
+
+/* ── Bottom CTA bar ────────────────────────────────────────────────────────── */
+.cta-bar {
+  padding: 10px 18px;
+  padding-bottom: calc(12px + var(--safe-bottom));
+  background: linear-gradient(180deg, rgba(244, 237, 225, 0) 0%, var(--color-surface) 40%);
+  flex-shrink: 0;
+}
+
+.cta-bar-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-faint);
+  margin-top: 7px;
+}
+
+/* ── Primary CTA Button ────────────────────────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-cta-accent-bg);
+  color: var(--color-cta-accent-txt);
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: var(--shadow-cta);
+}
+
+.btn-primary-dark {
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  box-shadow: none;
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+}
+
+.card-xl {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Section Divider ───────────────────────────────────────────────────────── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--space-5);
+}
+
+.section-divider-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ── Method Row (unselected) ───────────────────────────────────────────────── */
+.method-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 6px;
+  border-bottom: 1px solid var(--color-border-row);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.method-row-icon {
+  display: inline-flex;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.method-row-num {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+}
+
+.method-row-name {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--color-text);
+}
+
+.method-row-sub {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+.method-row-time {
+  font-size: 11px;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+}
+
+/* ── Selected Method Card ──────────────────────────────────────────────────── */
+.method-selected-card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-xl);
+  padding: 18px 18px 16px;
+  margin: 10px 0;
+  box-shadow: var(--shadow-card);
+}
+
+.method-selected-name {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 26px;
+  color: var(--color-text);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.method-selected-sub {
+  font-size: 13px;
+  color: var(--color-text-mid);
+  margin-top: 2px;
+}
+
+/* Meter dots row */
+.meters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.meter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 5px 11px;
+  background: var(--color-btn-light-bg);
+}
+
+.meter-chip-label {
+  font-size: 11.5px;
+  color: var(--color-text-mid);
+  white-space: nowrap;
+}
+
+.meter-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.meter-dot {
+  width: 5.5px;
+  height: 5.5px;
+  border-radius: 50%;
+}
+
+.meter-dot.filled { background: var(--color-accent); }
+.meter-dot.empty  { background: #E3D7C2; }
+
+/* ── Recipe Summary Grid ───────────────────────────────────────────────────── */
+.summary-grid {
+  display: flex;
+  border-top: 1px solid var(--color-border-divider);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.summary-col {
+  flex: 1;
+  text-align: center;
+  border-left: 1px solid var(--color-border-divider);
+  padding: 0 1px;
+}
+
+.summary-col:first-child {
+  border-left: none;
+}
+
+.summary-col-icon {
+  display: inline-flex;
+  color: var(--color-accent);
+}
+
+.summary-col-label {
+  display: block;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+
+.summary-col-value {
+  display: block;
+  margin-top: 2px;
+}
+
+.summary-col-num {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 17.5px;
+  color: var(--color-text);
+}
+
+.summary-col-unit {
+  font-family: var(--font-serif);
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+}
+
+/* ── Pour Steps Timeline ───────────────────────────────────────────────────── */
+.steps-list {
+  margin-top: 6px;
+}
+
+.step-row {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+}
+
+.step-rail {
+  width: 18px;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.step-rail-line {
+  flex: 1;
+  width: 1.5px;
+}
+
+.step-rail-line.filled   { background: var(--color-accent-soft); }
+.step-rail-line.empty    { background: var(--color-border-card); }
+.step-rail-line.none     { background: transparent; }
+
+.step-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.step-dot.active   { background: var(--color-accent); }
+.step-dot.done     { background: var(--color-accent-soft); }
+.step-dot.upcoming { background: var(--color-border-card); }
+.step-dot.draw     { background: #C9A77F; }
+
+.step-time {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 15.5px;
+  color: var(--color-text);
+  width: 56px;
+  padding-left: 10px;
+}
+
+.step-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border-card);
+  flex-shrink: 0;
+}
+
+.step-amt {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
+  width: 60px;
+  text-align: center;
+}
+
+.step-cum {
+  font-family: var(--font-serif);
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  width: 44px;
+  text-align: right;
+}
+
+.step-cum-label {
+  font-size: 11px;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+
+.step-switch-chip {
+  font-family: var(--font-serif);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  padding: 2.5px 7px;
+  border-radius: var(--radius-pill);
+  margin-right: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.step-switch-open   { border: 1px solid #C9B88C; background: #FBF4E5; color: #8C5535; }
+.step-switch-closed { border: 1px solid var(--color-border-ice); background: var(--color-surface-ice); color: var(--color-text-ice); }
+
+/* ── Spinner Control ───────────────────────────────────────────────────────── */
+.spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 4px;
+}
+
+.btn-spinner {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-input);
+  background: var(--color-btn-light-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-value {
+  min-width: 110px;
+  text-align: center;
+}
+
+.spinner-num {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 46px;
+  color: var(--color-text);
+}
+
+.spinner-unit {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--color-text-muted);
+  margin-left: 3px;
+}
+
+/* ── Chip Selector ─────────────────────────────────────────────────────────── */
+.chip-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 9px;
+  margin-top: 11px;
+}
+
+.chip-btn {
+  height: 44px;
+  border-radius: var(--radius-pill);
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.chip-btn.active {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.chip-btn.inactive {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-input);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.chip-ratio {
+  font-family: var(--font-serif);
+  font-size: 16px;
+}
+
+/* ── Toggle ────────────────────────────────────────────────────────────────── */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+  border-bottom: 1px solid var(--color-border-divider);
+}
+
+.toggle-label {
+  font-size: 13px;
+  color: var(--color-text-mid);
+  flex: 1;
+}
+
+.toggle-track {
+  width: 46px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: #E0D5C0;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-track.on {
+  background: var(--color-accent);
+}
+
+.toggle-knob {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 4px rgba(60, 45, 30, 0.25);
+}
+
+.toggle-track.on .toggle-knob {
+  left: 21px;
+}
+
+/* ── Settings Row ──────────────────────────────────────────────────────────── */
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  border-bottom: 1px solid var(--color-border-divider);
+}
+
+.settings-row-label {
+  font-size: 13px;
+  color: var(--color-text-mid);
+  flex: 1;
+}
+
+.settings-row-value {
+  font-family: var(--font-serif);
+  font-size: 13.5px;
+  color: var(--color-accent-dark);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── History Cards ─────────────────────────────────────────────────────────── */
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 4px;
+  border-bottom: 1px solid var(--color-border-row);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.history-tags {
+  display: inline-flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.tag-chip {
+  font-size: 10.5px;
+  color: var(--color-accent-dark);
+  border: 1px solid var(--color-border-chip);
+  background: var(--color-chip-bg);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  padding: 3px 9px;
+}
+
+.tag-chip-lg {
+  font-size: 12px;
+  padding: 5px 13px;
+}
+
+/* ── Rating Dots ───────────────────────────────────────────────────────────── */
+.rating-dots {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  padding: 12px 0 4px;
+}
+
+.rating-dot-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.rating-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  transition: background 0.15s;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface-raised);
+}
+
+.rating-dot.selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Rating display (small stars in history) */
+.rating-star {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.rating-star.filled {
+  background: var(--color-accent);
+}
+
+/* ── Active Brew Timer ─────────────────────────────────────────────────────── */
+.timer-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 200px;
+  margin: 4px 0;
+}
+
+.timer-svg {
+  position: absolute;
+  max-width: 70vw;
+}
+
+.timer-time {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 78px;
+  color: var(--color-text);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+}
+
+/* Step progress dots (brew screen) */
+.brew-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 0 4px 14px;
+}
+
+.brew-dot-col {
+  flex: 1;
+  max-width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+
+.brew-dot-line {
+  position: absolute;
+  top: 5.5px;
+  left: -50%;
+  right: 50%;
+  height: 1.5px;
+}
+
+.brew-dot-circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: relative;
+  z-index: 1;
+  border: 1.5px solid transparent;
+}
+
+.brew-dot-circle.active   { background: var(--color-accent); border-color: var(--color-accent); }
+.brew-dot-circle.done     { background: var(--color-accent-soft); border-color: var(--color-accent-soft); }
+.brew-dot-circle.upcoming { background: var(--color-surface-raised); border-color: var(--color-border-card); }
+
+.brew-dot-label {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* Brew controls */
+.brew-controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding: 16px 8px 2px;
+  margin-top: auto;
+}
+
+.brew-ctrl-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.brew-ctrl-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.btn-ctrl-sm {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-input);
+  background: var(--color-btn-light-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-ctrl-primary {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pause {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-accent-warm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-pause);
+}
+
+/* ── Tab Bar ───────────────────────────────────────────────────────────────── */
+#tab-bar {
+  display: flex;
+  align-items: stretch;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border-row);
+  height: calc(var(--tab-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+#tab-bar.hidden {
+  display: none;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  background: none;
+  padding: 0;
+  position: relative;
+}
+
+.tab-icon {
+  display: inline-flex;
+  color: var(--color-text-faint);
+}
+
+.tab-label {
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.tab-btn.active .tab-icon,
+.tab-btn.active .tab-label {
+  color: var(--color-accent);
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.tab-btn.active .tab-indicator {
+  background: var(--color-accent);
+}
+
+/* ── Checklist ─────────────────────────────────────────────────────────────── */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-text-mid);
+  line-height: 1.55;
+}
+
+.checklist-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* ── Equipment List ────────────────────────────────────────────────────────── */
+.equip-list {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-md);
+  margin-top: 10px;
+  padding: 0 14px;
+}
+
+.equip-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 50px;
+  border-bottom: 1px solid var(--color-border-divider);
+}
+
+.equip-row:last-child {
+  border-bottom: none;
+}
+
+.equip-label {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  width: 58px;
+  flex-shrink: 0;
+}
+
+.equip-icon {
+  display: inline-flex;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.equip-value {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Rebrew Banner ─────────────────────────────────────────────────────────── */
+.rebrew-banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--color-next-note-bg);
+  border: 1px solid var(--color-next-note-border);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  margin: 0 18px 4px;
+}
+
+.rebrew-banner-text {
+  font-size: 12.5px;
+  color: var(--color-text-mid);
+  flex: 1;
+}
+
+/* ── Ice Brew Section ──────────────────────────────────────────────────────── */
+.ice-section {
+  background: var(--color-surface-ice);
+  border: 1px solid var(--color-border-ice);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-top: 8px;
+}
+
+.ice-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-ice);
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+/* ── Settings About Card ───────────────────────────────────────────────────── */
+.about-card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-lg);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.about-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 11px;
+  overflow: hidden;
+}
+
+.about-version {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.about-legal {
+  font-size: 11px;
+  color: var(--color-text-faint);
+  line-height: 1.6;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* ── Toast ─────────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: calc(var(--tab-height) + var(--safe-bottom) + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  z-index: 100;
+  animation: pfToast 0.25s ease both;
+  pointer-events: none;
+}
+
+/* ── Confirm Overlay ───────────────────────────────────────────────────────── */
+.overlay-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 32, 20, 0.38);
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.overlay-bg.hidden {
+  display: none;
+}
+
+.overlay-sheet {
+  width: 100%;
+  max-width: 430px;
+  background: var(--color-surface);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  animation: pfSheet 0.25s ease both;
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes pfToast {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes pfSheet {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pfFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pfRise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pfScreenIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Screen entrance — uses motion tokens */
+.screen.active {
+  animation: pfScreenIn var(--motion-base) var(--ease-ios) both;
+}
+
+/* Button tap feedback */
+.btn-primary:active,
+.btn-primary-dark:active {
+  transform: scale(0.98);
+  transition: transform var(--motion-fast) var(--ease-ios);
+}
+
+.btn-back:active,
+.btn-spinner:active {
+  transform: scale(0.92);
+  transition: transform var(--motion-fast) var(--ease-ios);
+}
+
+.card-tap:active {
+  transform: scale(0.985);
+  transition: transform var(--motion-fast) var(--ease-ios);
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .screen.active {
+    animation: none;
+  }
+  .btn-primary:active,
+  .btn-primary-dark:active,
+  .btn-back:active,
+  .btn-spinner:active,
+  .card-tap:active {
+    transform: none;
+    transition: none;
+  }
+  .overlay-sheet {
+    animation: none;
+  }
+  .pf-toast {
+    animation: none;
+  }
+}
+
+/* ── Utility ───────────────────────────────────────────────────────────────── */
+.hidden { display: none !important; }
+.flex-1 { flex: 1; }
+.text-accent { color: var(--color-accent); }
+.text-accent-dark { color: var(--color-accent-dark); }
+.text-muted  { color: var(--color-text-muted); }
+.text-faint  { color: var(--color-text-faint); }
+.font-serif  { font-family: var(--font-serif); }
+.font-mincho { font-family: var(--font-mincho); }
