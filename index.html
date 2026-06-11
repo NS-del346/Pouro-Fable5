@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Pourō</title>
+  <!-- TODO(PR-006): self-host these fonts for offline/PWA support -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app-outer">
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       01  BREW HOME
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-home" class="screen active">
+    <div class="screen-scroll" data-scroll style="padding: 26px 18px 24px;">
+
+      <div style="text-align:center;">
+        <img src="assets/wordmark-ink.png" alt="pourō" style="height:32px;margin:0 auto;">
+        <div style="margin-top:8px;font-size:12px;letter-spacing:0.04em;color:var(--color-text-muted);">Pour slowly. Brew deeply.</div>
+        <div style="margin-top:18px;font-family:var(--font-mincho);font-weight:700;font-size:22px;color:var(--color-text);">今日の抽出を整える</div>
+      </div>
+
+      <div class="section-divider" style="margin-top:26px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>
+        <span class="section-divider-label">抽出方法</span>
+        <span class="section-divider-line"></span>
+      </div>
+
+      <!-- Method list — rendered by JS -->
+      <div id="method-list" style="margin-top:14px;display:flex;flex-direction:column;"></div>
+
+    </div>
+  </div><!-- /screen-home -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       02  RECIPE SETUP
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-setup" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-setup-back" aria-label="戻る">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+      </button>
+      <div class="screen-header-title">レシピ設定</div>
+      <span></span>
+    </div>
+
+    <div class="screen-scroll" data-scroll style="padding:8px 18px 8px;">
+      <!-- Method header -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:6px 0 14px;">
+        <span id="setup-method-icon" style="display:inline-flex;color:var(--color-accent);"></span>
+        <span>
+          <span id="setup-method-name" style="display:block;font-family:var(--font-serif);font-weight:600;font-size:24px;color:var(--color-text);line-height:1.15;"></span>
+          <span id="setup-method-sub"  style="display:block;font-size:12.5px;color:var(--color-text-muted);margin-top:1px;"></span>
+        </span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- Dose card -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">コーヒー量</span>
+          </div>
+          <div class="spinner-wrap">
+            <button class="btn-spinner" id="btn-dose-dec" aria-label="減らす">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+            </button>
+            <span class="spinner-value">
+              <span class="spinner-num" id="dose-display">20</span><span class="spinner-unit">g</span>
+            </span>
+            <button class="btn-spinner" id="btn-dose-inc" aria-label="増やす">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Ratio card -->
+        <div class="card" id="ratio-card">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v14.5"/><path d="M8 19h8"/><path d="M4.5 7.5h15"/><path d="M4.5 7.5l-2 5a2.7 2.7 0 0 0 4 0Z"/><path d="M19.5 7.5l-2 5a2.7 2.7 0 0 0 4 0Z"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">比率</span>
+            <span style="flex:1;"></span>
+            <button id="btn-custom-ratio" style="border:none;background:none;font-size:12px;padding:4px 2px;color:var(--color-text-muted);">カスタム</button>
+          </div>
+          <div class="chip-grid-3" id="ratio-chips">
+            <button class="chip-btn chip-ratio inactive" data-ratio="14">1:14</button>
+            <button class="chip-btn chip-ratio active"   data-ratio="15">1:15</button>
+            <button class="chip-btn chip-ratio inactive" data-ratio="16">1:16</button>
+          </div>
+          <div id="custom-ratio-row" class="hidden" style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:12px;border-top:1px dashed var(--color-border);padding-top:12px;">
+            <button class="btn-spinner" style="width:40px;height:40px;" id="btn-ratio-dec" aria-label="減らす">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+            </button>
+            <span id="custom-ratio-display" style="font-family:var(--font-serif);font-weight:600;font-size:24px;color:var(--color-accent-dark);min-width:76px;text-align:center;">1:15</span>
+            <button class="btn-spinner" style="width:40px;height:40px;" id="btn-ratio-inc" aria-label="増やす">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4:6 Flavor card -->
+        <div class="card" id="flavor-card" style="display:none;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8.5h12v5.5a6 6 0 0 1-12 0Z"/><path d="M16.5 9.5h2.2a2.6 2.6 0 0 1 0 5.2h-2.4"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">味の方向</span>
+            <span style="flex:1;"></span>
+            <span style="font-size:11px;color:var(--color-text-faint);white-space:nowrap;">前半の2投に反映</span>
+          </div>
+          <div class="chip-grid-3" id="flavor-chips">
+            <button class="chip-btn inactive" data-flavor="sweet">甘め</button>
+            <button class="chip-btn active"   data-flavor="balanced">バランス</button>
+            <button class="chip-btn inactive" data-flavor="bright">明るめ</button>
+          </div>
+        </div>
+
+        <!-- 4:6 Strength card -->
+        <div class="card" id="strength-card" style="display:none;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8" stroke-dasharray="2.4 3.4"/><circle cx="12" cy="12" r="2.4" fill="var(--color-accent)" stroke="none"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">濃度</span>
+            <span style="flex:1;"></span>
+            <span style="font-size:11px;color:var(--color-text-faint);white-space:nowrap;">後半の投数に反映</span>
+          </div>
+          <div class="chip-grid-3" id="strength-chips">
+            <button class="chip-btn inactive" data-strength="light">ライト</button>
+            <button class="chip-btn active"   data-strength="standard">標準</button>
+            <button class="chip-btn inactive" data-strength="strong">リッチ</button>
+          </div>
+        </div>
+
+        <!-- Hybrid Switch card -->
+        <div class="card" id="hybrid-card" style="display:none;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="var(--color-accent)" stroke="none"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">スイッチ設定</span>
+            <span style="flex:1;"></span>
+            <span style="font-size:11px;color:var(--color-text-faint);">HARIO Switch</span>
+          </div>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--color-border-divider);">
+              <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;padding:3px 8px;border-radius:var(--radius-pill);background:#FBF4E5;border:1px solid #C9B88C;color:#8C5535;">OPEN</span>
+              <span style="flex:1;font-size:13px;color:var(--color-text-mid);">浸漬フェーズ（蓋を開けて注湯）</span>
+              <span style="font-family:var(--font-serif);font-size:13px;color:var(--color-text-muted);">0:00〜1:30</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;">
+              <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;padding:3px 8px;border-radius:var(--radius-pill);background:var(--color-surface-ice);border:1px solid var(--color-border-ice);color:var(--color-text-ice);">CLOSED</span>
+              <span style="flex:1;font-size:13px;color:var(--color-text-mid);">透過フェーズ（弁を閉じて落とす）</span>
+              <span style="font-family:var(--font-serif);font-size:13px;color:var(--color-text-muted);">1:30〜3:00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10-pour rhythm card -->
+        <div class="card" id="neo-card" style="display:none;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10"/><path d="M7 20.5h10"/><path d="M8 3.5c0 7 8 7 8 17"/><path d="M16 3.5c0 7-8 7-8 17"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">10回注湯リズム</span>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="background:var(--color-accent);color:#fff;font-family:var(--font-serif);font-size:11px;font-weight:700;padding:6px 10px;border-radius:var(--radius-sm);width:52px;text-align:center;">第1投</div>
+              <div style="font-size:10.5px;color:var(--color-text-muted);">0:00</div>
+              <div style="font-size:10px;color:var(--color-text-faint);">30s待機</div>
+            </div>
+            <div style="display:flex;align-items:center;padding-bottom:14px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="1.5"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="background:var(--color-surface-raised);border:1px solid var(--color-border-card);font-family:var(--font-serif);font-size:11px;font-weight:600;padding:6px 10px;border-radius:var(--radius-sm);width:52px;text-align:center;color:var(--color-text);">第2〜10</div>
+              <div style="font-size:10.5px;color:var(--color-text-muted);">+0:30</div>
+              <div style="font-size:10px;color:var(--color-text-faint);">15s待機</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:var(--color-text-mid);line-height:1.6;">第1投のみ30秒待機、第2投以降は15秒間隔で均等に注湯します。</div>
+        </div>
+
+        <!-- Ice Brew hot/ice card -->
+        <div class="card" id="ice-card" style="display:none;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">ホット / アイス比率</span>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;">
+            <div style="flex:1;background:var(--color-btn-light-bg);border:1px solid var(--color-border-card);border-radius:var(--radius-md);padding:12px;text-align:center;">
+              <div style="font-size:11px;font-weight:700;color:var(--color-accent);letter-spacing:0.05em;margin-bottom:4px;">HOT</div>
+              <div style="font-family:var(--font-serif);font-weight:600;font-size:28px;color:var(--color-text);" id="ice-hot-display">200</div>
+              <div style="font-size:11px;color:var(--color-text-muted);">ml のお湯</div>
+            </div>
+            <div class="ice-section" style="flex:1;text-align:center;margin-top:0;padding:12px;">
+              <div class="ice-section-label" style="margin-bottom:4px;">ICE</div>
+              <div style="font-family:var(--font-serif);font-weight:600;font-size:28px;color:var(--color-text-ice);" id="ice-ice-display">100</div>
+              <div style="font-size:11px;color:var(--color-text-ice);">g の氷</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recipe summary -->
+        <div class="card" id="setup-summary-card">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6"/><path d="M9 12.5h6"/><path d="M9 16.5h3.5"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">レシピ概要</span>
+          </div>
+          <div class="summary-grid" id="setup-summary-grid">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+
+      </div><!-- /flex-col gap-12 -->
+
+      <div style="height:8px;"></div>
+    </div><!-- /scroll -->
+
+    <div class="cta-bar">
+      <button class="btn-primary" id="btn-go-preview">
+        レシピを確認
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-cta-accent-txt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div><!-- /screen-setup -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       03  PREVIEW  (+ Rebrew state)
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-preview" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-preview-back" aria-label="戻る">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+      </button>
+      <div class="screen-header-title">プレビュー</div>
+      <span></span>
+    </div>
+
+    <!-- Rebrew banner (hidden unless rebrewing) -->
+    <div id="rebrew-banner" class="rebrew-banner hidden">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-dark)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></svg>
+      <span class="rebrew-banner-text" id="rebrew-banner-text">前回の記録をもとにレシピを読み込みました</span>
+    </div>
+
+    <div class="screen-scroll" data-scroll style="padding:6px 18px 8px;">
+
+      <!-- Method header -->
+      <div style="display:flex;align-items:center;gap:12px;padding:4px 0 14px;">
+        <span id="preview-method-icon" style="display:inline-flex;color:var(--color-accent);"></span>
+        <span>
+          <span id="preview-method-name" style="display:block;font-family:var(--font-serif);font-weight:600;font-size:22px;color:var(--color-text);line-height:1.15;"></span>
+          <span id="preview-method-sub"  style="display:block;font-size:12px;color:var(--color-text-muted);margin-top:1px;"></span>
+        </span>
+      </div>
+
+      <!-- Recipe summary -->
+      <div class="card card-xl" style="padding:14px 10px 15px;">
+        <div style="display:flex;align-items:center;gap:7px;padding:0 6px 0;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6"/><path d="M9 12.5h6"/><path d="M9 16.5h3.5"/></svg>
+          <span style="font-size:13px;font-weight:700;color:var(--color-text);">レシピ</span>
+          <span id="preview-flavor-chips" style="flex:1;display:flex;justify-content:flex-end;gap:5px;padding-right:4px;"></span>
+        </div>
+        <div class="summary-grid" id="preview-summary-grid"></div>
+      </div>
+
+      <!-- Extraction steps -->
+      <div class="card" style="margin-top:12px;padding:14px 16px 13px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>
+          <span style="font-size:13px;font-weight:700;color:var(--color-text);">抽出ステップ</span>
+          <span style="flex:1;"></span>
+          <span id="preview-draw-label" style="font-size:11px;color:var(--color-text-faint);"></span>
+        </div>
+        <div class="steps-list" id="preview-steps-list"></div>
+      </div>
+
+      <!-- Pre-brew checklist -->
+      <div class="card" style="margin-top:12px;padding:13px 16px 14px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>
+          <span style="font-size:13px;font-weight:700;color:var(--color-text);">準備チェック</span>
+        </div>
+        <div class="checklist" id="preview-checklist"></div>
+      </div>
+
+      <div style="height:8px;"></div>
+    </div>
+
+    <div class="cta-bar">
+      <button class="btn-primary" id="btn-start-brew">
+        抽出を開始
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-cta-accent-txt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div><!-- /screen-preview -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       04  ACTIVE BREW
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-brew" class="screen">
+    <div class="screen-scroll" data-scroll style="padding:16px 18px calc(12px + var(--safe-bottom));display:flex;flex-direction:column;">
+
+      <!-- Method + step header -->
+      <div style="display:flex;align-items:center;gap:11px;">
+        <span id="brew-method-icon" style="display:inline-flex;color:var(--color-accent);"></span>
+        <span style="flex:1;min-width:0;">
+          <span id="brew-method-name" style="display:block;font-family:var(--font-serif);font-weight:600;font-size:18px;color:var(--color-text);line-height:1.15;"></span>
+          <span id="brew-method-sub"  style="display:block;font-size:11.5px;color:var(--color-text-muted);"></span>
+        </span>
+        <span style="text-align:right;white-space:nowrap;">
+          <span id="brew-step-big"   style="font-family:var(--font-serif);font-weight:600;font-size:21px;color:var(--color-accent);"></span>
+          <span id="brew-step-small" style="font-size:12.5px;color:var(--color-text-muted);"></span>
+        </span>
+      </div>
+
+      <!-- State chip (PAUSED etc.) -->
+      <div id="brew-chip-wrap" class="hidden" style="display:flex;justify-content:center;margin-top:12px;">
+        <span id="brew-chip" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-serif);font-weight:600;font-size:13px;letter-spacing:0.06em;padding:7px 16px;border-radius:var(--radius-pill);white-space:nowrap;border:1px solid var(--color-border-input);background:var(--color-surface-raised);color:var(--color-text-muted);">PAUSED</span>
+      </div>
+
+      <!-- Timer circle -->
+      <div class="timer-area">
+        <svg class="timer-svg" width="252" height="252" viewBox="0 0 252 252">
+          <circle cx="126" cy="126" r="112" fill="none" stroke="#E2D5BE" stroke-width="1.5" stroke-dasharray="1.5 7.5"/>
+          <circle id="brew-arc" cx="126" cy="126" r="112" fill="none" stroke="#B98A63" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="703.7 703.7" transform="rotate(-90 126 126)"/>
+        </svg>
+        <span class="timer-time" id="brew-time-display">0:00</span>
+      </div>
+
+      <!-- Step progress dots -->
+      <div class="brew-dots" id="brew-dots-row"></div>
+
+      <!-- Pour info card -->
+      <div id="brew-pour-card" class="card" style="box-shadow:var(--shadow-brew);">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>
+          <span style="font-size:12.5px;font-weight:700;color:var(--color-text);white-space:nowrap;">今回の注湯</span>
+        </div>
+        <div style="display:flex;align-items:center;margin-top:2px;">
+          <span style="flex:1;">
+            <span id="brew-pour-amt" style="font-family:var(--font-serif);font-weight:600;font-size:54px;color:var(--color-text);line-height:1.1;">60</span>
+            <span style="font-family:var(--font-serif);font-size:20px;color:var(--color-text-muted);margin-left:3px;">g</span>
+          </span>
+          <span style="width:1px;align-self:stretch;background:#EDE4D2;margin:6px 16px;"></span>
+          <span style="text-align:center;padding-right:4px;">
+            <span style="display:block;font-size:11px;color:var(--color-text-muted);">累計</span>
+            <span style="display:block;margin-top:1px;">
+              <span id="brew-cum-amt" style="font-family:var(--font-serif);font-weight:600;font-size:24px;color:var(--color-text);">60</span>
+              <span style="font-family:var(--font-serif);font-size:13px;color:var(--color-text-muted);">g</span>
+            </span>
+          </span>
+        </div>
+        <div id="brew-pour-note" style="border-top:1px solid #F0E8D8;margin-top:9px;padding-top:9px;font-size:13px;color:var(--color-text-mid);"></div>
+      </div>
+
+      <!-- Draw-down card (shown during drawdown phase) -->
+      <div id="brew-draw-card" class="card hidden" style="text-align:center;box-shadow:var(--shadow-brew);">
+        <div id="brew-draw-title" style="font-family:var(--font-mincho);font-weight:600;font-size:26px;color:var(--color-text);"></div>
+        <div id="brew-draw-sub"   style="font-size:13px;color:var(--color-text-muted);margin-top:6px;"></div>
+      </div>
+
+      <!-- Next step hint -->
+      <div id="brew-next-hint" class="hidden" style="display:flex;align-items:center;gap:10px;background:var(--color-next-hint-bg);border:1px solid var(--color-next-hint-border);border-radius:var(--radius-md);padding:11px 16px;margin-top:10px;">
+        <span style="font-size:11px;font-weight:700;color:var(--color-text-muted);display:flex;flex-direction:column;align-items:center;gap:1px;">次
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10"/><path d="M7 20.5h10"/><path d="M8 3.5c0 7 8 7 8 17"/><path d="M16 3.5c0 7-8 7-8 17"/></svg>
+        </span>
+        <span id="brew-next-time" style="font-family:var(--font-serif);font-weight:600;font-size:21px;color:var(--color-text);"></span>
+        <span id="brew-next-amt"  style="font-family:var(--font-serif);font-weight:600;font-size:19px;color:var(--color-text);"></span>
+        <span style="width:1px;height:22px;background:#DCCFB4;"></span>
+        <span id="brew-next-tip"  style="font-size:12px;color:var(--color-text-mid);flex:1;line-height:1.45;"></span>
+      </div>
+
+      <!-- Controls -->
+      <div class="brew-controls">
+        <span class="brew-ctrl-col">
+          <button class="btn-ctrl-sm" id="btn-brew-back" aria-label="戻る">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+          </button>
+          <span class="brew-ctrl-label">戻る</span>
+        </span>
+        <span class="brew-ctrl-col">
+          <button class="btn-pause" id="btn-brew-pause" aria-label="一時停止 / 再開">
+            <svg id="brew-pause-icon"  width="22" height="22" viewBox="0 0 24 24" fill="#FBF4EA"><rect x="6.5"  y="5" width="3.6" height="14" rx="1.4"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.4"/></svg>
+            <svg id="brew-play-icon" class="hidden" width="22" height="22" viewBox="0 0 24 24" fill="#FBF4EA"><path d="M8 5.5v13l11-6.5Z"/></svg>
+          </button>
+          <span class="brew-ctrl-label" id="brew-pause-label">一時停止</span>
+        </span>
+        <span class="brew-ctrl-col">
+          <button class="btn-ctrl-sm" id="btn-brew-next" aria-label="次のステップ">
+            <svg id="brew-next-icon"   width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+            <svg id="brew-finish-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBF4EA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>
+          </button>
+          <span class="brew-ctrl-label" id="brew-next-label">次へ</span>
+        </span>
+      </div>
+
+    </div>
+  </div><!-- /screen-brew -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       05  BREW LOG
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-log" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-log-back" aria-label="戻る">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+      </button>
+      <div>
+        <div class="screen-header-title">抽出記録</div>
+        <span class="screen-header-sub" id="log-method-label"></span>
+      </div>
+      <span></span>
+    </div>
+
+    <div class="screen-scroll" data-scroll style="padding:10px 18px 8px;">
+
+      <!-- Method recap card -->
+      <div class="card" style="background:var(--color-surface-muted);">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 8px;">
+          <span id="log-method-icon" style="display:inline-flex;color:var(--color-accent);"></span>
+          <span>
+            <span id="log-method-name" style="display:block;font-family:var(--font-serif);font-weight:600;font-size:21px;color:var(--color-text);line-height:1.15;"></span>
+            <span id="log-method-sub"  style="display:block;font-size:12px;color:var(--color-text-muted);"></span>
+          </span>
+        </div>
+        <div class="summary-grid" id="log-summary-grid"></div>
+      </div>
+
+      <!-- Rating -->
+      <div class="section-divider" style="margin-top:18px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2.2 4.8 5.3.6-3.9 3.6 1 5.2-4.6-2.6-4.6 2.6 1-5.2L4.5 9.4l5.3-.6Z"/></svg>
+        <span class="section-divider-label">評価</span>
+        <span style="flex:1;"></span>
+        <span id="log-rate-label" style="font-size:11.5px;color:var(--color-text-faint);"></span>
+      </div>
+      <div class="rating-dots" id="log-rating-dots"></div>
+
+      <!-- Taste tags -->
+      <div class="section-divider" style="margin-top:12px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 13.5c1 1.4 2.2 2.1 3.5 2.1s2.5-.7 3.5-2.1"/></svg>
+        <span class="section-divider-label">テイスト</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;" id="log-taste-tags"></div>
+
+      <!-- Details (equipment) -->
+      <div class="section-divider" style="margin-top:20px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6"/><path d="M9 12.5h6"/><path d="M9 16.5h3.5"/></svg>
+        <span class="section-divider-label">抽出の詳細</span>
+      </div>
+      <div class="equip-list" id="log-equip-list">
+        <div class="equip-row">
+          <span class="equip-label">豆</span>
+          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>
+          <span class="equip-value">エチオピア ゲデオ</span>
+        </div>
+        <div class="equip-row">
+          <span class="equip-label">挽き目</span>
+          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+          <span class="equip-value">中細挽き (#16)</span>
+        </div>
+        <div class="equip-row">
+          <span class="equip-label">湯温</span>
+          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><path d="M12 2v11"/><circle cx="12" cy="17" r="4"/></svg>
+          <span class="equip-value">93°C</span>
+        </div>
+        <div class="equip-row">
+          <span class="equip-label">ドリッパー</span>
+          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-4 9H8Z"/><path d="M12 15v3"/><path d="M8 21h8"/></svg>
+          <span class="equip-value">ハリオ V60</span>
+        </div>
+      </div>
+
+      <!-- Memo -->
+      <div class="section-divider" style="margin-top:20px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v12l-4 4H5Z"/><path d="M15 20.5v-4h4"/></svg>
+        <span class="section-divider-label">メモ</span>
+        <span style="font-size:11.5px;color:var(--color-text-faint);margin-left:4px;">今回の味・気づき</span>
+      </div>
+      <textarea id="log-memo" placeholder="例：余韻にピーチのような甘さ" rows="3"
+        style="width:100%;margin-top:10px;border:1px dashed var(--color-border-chip);border-radius:12px;background:var(--color-surface-raised);padding:12px 14px;font-size:13.5px;color:var(--color-text);line-height:1.8;resize:none;"></textarea>
+
+      <!-- Next adjustment -->
+      <div class="section-divider" style="margin-top:16px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5"/><path d="M12 12l4.5 2.5"/></svg>
+        <span class="section-divider-label">次回の調整</span>
+        <span style="font-size:11.5px;color:var(--color-text-faint);margin-left:4px;">次回変える条件</span>
+      </div>
+      <textarea id="log-next-note" placeholder="例：湯温を92℃に下げる" rows="2"
+        style="width:100%;margin-top:10px;border:1px dashed var(--color-border-chip);border-radius:12px;background:var(--color-surface-raised);padding:12px 14px;font-size:13.5px;color:var(--color-text);line-height:1.8;resize:none;"></textarea>
+
+      <div style="height:8px;"></div>
+    </div>
+
+    <div class="cta-bar">
+      <button class="btn-primary" id="btn-save-log">
+        記録を保存
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-cta-accent-txt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+      <div class="cta-bar-hint">保存すると履歴に追加されます</div>
+    </div>
+  </div><!-- /screen-log -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       06  HISTORY
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-history" class="screen">
+    <div class="screen-scroll" data-scroll style="padding:24px 18px 20px;">
+
+      <div style="display:flex;align-items:flex-start;">
+        <span>
+          <span style="display:block;font-family:var(--font-mincho);font-weight:700;font-size:34px;color:var(--color-text);line-height:1.1;">履歴</span>
+          <span style="display:block;font-size:13px;color:var(--color-text-muted);margin-top:5px;">抽出の記録</span>
+        </span>
+        <span style="flex:1;"></span>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#D8C5A8" stroke-width="1.4" stroke-linecap="round" style="margin-top:4px;"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+      </div>
+
+      <!-- Has history -->
+      <div id="history-content">
+        <div class="section-divider" style="margin-top:22px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+          <span class="section-divider-label">最近の抽出</span>
+          <span class="section-divider-line"></span>
+        </div>
+
+        <!-- Featured card -->
+        <div class="card card-xl" style="padding:16px 16px 6px;margin-top:13px;box-shadow:var(--shadow-feat);">
+          <div style="display:flex;align-items:center;gap:13px;">
+            <span id="hist-feat-icon" style="display:inline-flex;color:var(--color-accent);"></span>
+            <span style="flex:1;min-width:0;">
+              <span id="hist-feat-name" style="display:block;font-family:var(--font-serif);font-weight:600;font-size:23px;color:var(--color-text);line-height:1.15;"></span>
+              <span id="hist-feat-sub"  style="display:block;font-size:12.5px;color:var(--color-text-muted);margin-top:1px;"></span>
+            </span>
+            <span id="hist-feat-date" style="font-size:11px;color:var(--color-text-faint);align-self:flex-start;"></span>
+          </div>
+          <div class="summary-grid" id="hist-feat-summary"></div>
+          <div id="hist-feat-tags-row" style="display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;" class="hidden">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text-muted);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7l9 9-7 7-9-9Z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg>
+              テイスト
+            </span>
+            <span id="hist-feat-tags" style="display:inline-flex;gap:5px;flex-wrap:wrap;"></span>
+          </div>
+          <div id="hist-feat-note-row" style="margin-top:12px;" class="hidden">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text-muted);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v12l-4 4H5Z"/><path d="M15 20.5v-4h4"/></svg>
+              前回のメモ
+            </span>
+            <div id="hist-feat-note" style="font-size:13px;color:var(--color-text-mid);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          </div>
+          <div style="display:flex;border-top:1px solid var(--color-border-divider);margin-top:13px;">
+            <button id="btn-hist-detail" style="flex:1;min-height:48px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--color-accent-dark);">
+              詳細を見る
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-dark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <span style="width:1px;background:var(--color-border-divider);margin:8px 0;"></span>
+            <button id="btn-hist-rebrew" style="flex:1;min-height:48px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700;color:var(--color-accent-dark);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-dark)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></svg>
+              もう一度淹れる
+            </button>
+          </div>
+        </div>
+
+        <!-- History list -->
+        <div class="section-divider" style="margin-top:24px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M18 2.5v4h-4"/><path d="M12 8v4l2.6 1.7"/></svg>
+          <span class="section-divider-label">抽出履歴</span>
+          <span class="section-divider-line"></span>
+        </div>
+        <div id="history-list" style="margin-top:4px;"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="history-empty" class="hidden" style="text-align:center;padding:70px 20px 40px;color:var(--color-text-faint);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D8C5A8" stroke-width="1.2" stroke-linecap="round" style="margin:0 auto;"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        <div style="font-family:var(--font-mincho);font-size:16px;color:var(--color-text-muted);margin-top:14px;">記録はまだありません</div>
+        <div style="font-size:12.5px;margin-top:6px;">一杯淹れて、最初の記録を残しましょう</div>
+      </div>
+
+    </div>
+  </div><!-- /screen-history -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       HISTORY DETAIL
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-detail" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-detail-back" aria-label="戻る">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+      </button>
+      <div>
+        <div class="screen-header-title">記録の詳細</div>
+        <span class="screen-header-sub" id="detail-date-label"></span>
+      </div>
+      <span></span>
+    </div>
+
+    <div class="screen-scroll" data-scroll style="padding:10px 18px 8px;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- Entry card -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:13px;">
+            <span id="detail-icon" style="display:inline-flex;color:var(--color-accent);"></span>
+            <span style="flex:1;min-width:0;">
+              <span id="detail-name" style="display:block;font-family:var(--font-serif);font-weight:600;font-size:22px;color:var(--color-text);line-height:1.15;"></span>
+              <span id="detail-sub"  style="display:block;font-size:12px;color:var(--color-text-muted);margin-top:1px;"></span>
+            </span>
+            <span style="text-align:right;flex-shrink:0;white-space:nowrap;">
+              <span style="display:block;font-size:10.5px;color:var(--color-text-faint);">評価</span>
+              <span id="detail-rating" style="display:inline-flex;gap:4px;margin-top:4px;"></span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Next-time note -->
+        <div id="detail-next-note-card" class="hidden" style="background:var(--color-next-note-bg);border:1px solid var(--color-next-note-border);border-radius:var(--radius-lg);padding:13px 16px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--color-accent-dark);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-dark)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v5"/><path d="M12 12l4.5 2.5"/></svg>
+            次回の調整
+          </span>
+          <div id="detail-next-note-text" style="font-size:13.5px;color:#5E4630;margin-top:6px;line-height:1.7;"></div>
+        </div>
+
+        <!-- Recipe snapshot -->
+        <div class="card" style="padding:14px 10px 15px;">
+          <div style="display:flex;align-items:center;gap:7px;padding:0 6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6"/><path d="M9 12.5h6"/><path d="M9 16.5h3.5"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">レシピ</span>
+            <span id="detail-flavor-chips" style="flex:1;display:flex;justify-content:flex-end;gap:5px;padding-right:4px;"></span>
+          </div>
+          <div class="summary-grid" id="detail-summary-grid"></div>
+        </div>
+
+        <!-- Steps timeline -->
+        <div class="card" style="padding:14px 16px 13px;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--color-text);">抽出ステップ</span>
+          </div>
+          <div class="steps-list" id="detail-steps-list"></div>
+        </div>
+
+        <!-- Taste tags -->
+        <div id="detail-tags-card" class="card hidden" style="padding:13px 16px 14px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--color-text);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7l9 9-7 7-9-9Z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg>
+            テイスト
+          </span>
+          <div id="detail-tags-list" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;"></div>
+        </div>
+
+        <!-- Memo -->
+        <div id="detail-memo-card" class="card hidden" style="padding:13px 16px 14px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--color-text);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v12l-4 4H5Z"/><path d="M15 20.5v-4h4"/></svg>
+            メモ
+          </span>
+          <div id="detail-memo-text" style="font-size:13.5px;color:#5C4F3E;margin-top:8px;line-height:1.8;"></div>
+        </div>
+
+        <!-- Equipment -->
+        <div class="card" style="padding:5px 16px;">
+          <div class="equip-row">
+            <span class="equip-label">豆</span>
+            <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>
+            <span class="equip-value" id="detail-equip-bean">—</span>
+          </div>
+          <div class="equip-row">
+            <span class="equip-label">挽き目</span>
+            <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+            <span class="equip-value" id="detail-equip-grind">—</span>
+          </div>
+          <div class="equip-row">
+            <span class="equip-label">湯温</span>
+            <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><path d="M12 2v11"/><circle cx="12" cy="17" r="4"/></svg>
+            <span class="equip-value" id="detail-equip-temp">—</span>
+          </div>
+          <div class="equip-row" style="border-bottom:none;">
+            <span class="equip-label">ドリッパー</span>
+            <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-4 9H8Z"/><path d="M12 15v3"/><path d="M8 21h8"/></svg>
+            <span class="equip-value" id="detail-equip-dripper">—</span>
+          </div>
+        </div>
+
+      </div>
+      <div style="height:8px;"></div>
+    </div>
+
+    <div class="cta-bar">
+      <button class="btn-primary" id="btn-detail-rebrew">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-cta-accent-txt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></svg>
+        この記録でもう一度淹れる
+      </button>
+      <div class="cta-bar-hint">プレビューで確認してから開始します</div>
+    </div>
+  </div><!-- /screen-detail -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       07  SETTINGS
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-settings" class="screen">
+    <div class="screen-scroll" data-scroll style="padding:24px 18px 20px;">
+
+      <div style="display:flex;align-items:flex-start;">
+        <span>
+          <span style="display:block;font-family:var(--font-mincho);font-weight:700;font-size:34px;color:var(--color-text);line-height:1.1;">設定</span>
+          <span style="display:block;font-size:13px;color:var(--color-text-muted);margin-top:5px;">抽出環境を整える</span>
+        </span>
+        <span style="flex:1;"></span>
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#D8C5A8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin-top:4px;"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8"/></svg>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:22px;">
+
+        <!-- Card 1: Default brew -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--color-border-divider);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-4 9H8Z"/><path d="M12 15v3"/><path d="M8 21h8"/></svg>
+            <span style="font-size:13.5px;font-weight:700;color:var(--color-text);">デフォルト抽出</span>
+          </div>
+          <div class="settings-row" id="sett-method-row" style="cursor:pointer;">
+            <span class="settings-row-label">抽出方法</span>
+            <span class="settings-row-value" id="sett-method-val">4:6 Method</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8BBA3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+          </div>
+          <div class="settings-row">
+            <span class="settings-row-label">コーヒー量</span>
+            <button style="width:32px;height:32px;border-radius:50%;border:1px solid var(--color-border-input);background:var(--color-btn-light-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;" id="sett-dose-dec">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+            </button>
+            <span style="font-family:var(--font-serif);font-size:14.5px;color:var(--color-text);min-width:38px;text-align:center;" id="sett-dose-val">20g</span>
+            <button style="width:32px;height:32px;border-radius:50%;border:1px solid var(--color-border-input);background:var(--color-btn-light-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;" id="sett-dose-inc">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </button>
+          </div>
+          <div class="settings-row" style="border-bottom:none;">
+            <span class="settings-row-label">比率</span>
+            <button style="width:32px;height:32px;border-radius:50%;border:1px solid var(--color-border-input);background:var(--color-btn-light-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;" id="sett-ratio-dec">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+            </button>
+            <span style="font-family:var(--font-serif);font-size:14.5px;color:var(--color-text);min-width:38px;text-align:center;" id="sett-ratio-val">1:15</span>
+            <button style="width:32px;height:32px;border-radius:50%;border:1px solid var(--color-border-input);background:var(--color-btn-light-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;" id="sett-ratio-inc">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 2: Brew assist -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--color-border-divider);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2.2 4.8 5.3.6-3.9 3.6 1 5.2-4.6-2.6-4.6 2.6 1-5.2L4.5 9.4l5.3-.6Z"/></svg>
+            <span style="font-size:13.5px;font-weight:700;color:var(--color-text);">ブリューアシスト</span>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">スクリーン常時点灯</span>
+            <div class="toggle-track" id="toggle-wake" onclick="App.toggleSetting('wake')">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">サウンド通知</span>
+            <div class="toggle-track" id="toggle-sound" onclick="App.toggleSetting('sound')">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+          <div class="toggle-wrap" style="border-bottom:none;">
+            <span class="toggle-label">ハプティクス</span>
+            <div class="toggle-track" id="toggle-haptic" onclick="App.toggleSetting('haptic')">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Data -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--color-border-divider);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+            <span style="font-size:13.5px;font-weight:700;color:var(--color-text);">データ</span>
+          </div>
+          <div class="settings-row" style="cursor:pointer;" id="btn-export-json">
+            <span class="settings-row-label">JSON でエクスポート</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14"/><path d="M5 9l7 7 7-7"/><path d="M5 21h14"/></svg>
+          </div>
+          <div class="settings-row" style="cursor:pointer;" id="btn-export-csv">
+            <span class="settings-row-label">CSV でエクスポート</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14"/><path d="M5 9l7 7 7-7"/><path d="M5 21h14"/></svg>
+          </div>
+          <div class="settings-row" style="border-bottom:none;cursor:pointer;" id="btn-clear-history">
+            <span style="font-size:13px;color:#A3543A;flex:1;">履歴をすべて削除</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A3543A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+
+        <!-- Card 4: About -->
+        <div class="about-card">
+          <img src="assets/app-icon.png" alt="pourō icon" class="about-icon">
+          <img src="assets/wordmark-ink.png" alt="pourō" style="height:22px;margin-top:4px;">
+          <span class="about-version">Version 0.2.0 (PR-002)</span>
+          <p class="about-legal">Pourō は個人の手淹れコーヒー体験を記録するアプリです。<br>Fable5 design artifact より構築。</p>
+        </div>
+
+      </div><!-- /flex-col gap-14 -->
+    </div>
+  </div><!-- /screen-settings -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       BOTTOM TAB BAR
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <nav id="tab-bar" role="tablist">
+    <button class="tab-btn active" id="tab-brew" data-tab="brew" role="tab" aria-selected="true" aria-label="抽出">
+      <svg class="tab-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>
+      <span class="tab-label">抽出</span>
+      <span class="tab-indicator"></span>
+    </button>
+    <button class="tab-btn" id="tab-history" data-tab="history" role="tab" aria-selected="false" aria-label="履歴">
+      <svg class="tab-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+      <span class="tab-label">履歴</span>
+      <span class="tab-indicator"></span>
+    </button>
+    <button class="tab-btn" id="tab-settings" data-tab="settings" role="tab" aria-selected="false" aria-label="設定">
+      <svg class="tab-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8"/></svg>
+      <span class="tab-label">設定</span>
+      <span class="tab-indicator"></span>
+    </button>
+  </nav>
+
+
+  <!-- Clear confirm overlay -->
+  <div id="confirm-overlay" class="overlay-bg hidden">
+    <div class="overlay-sheet">
+      <div style="font-family:var(--font-mincho);font-weight:600;font-size:18px;color:var(--color-text);margin-bottom:8px;">履歴を削除しますか？</div>
+      <div style="font-size:13px;color:var(--color-text-muted);margin-bottom:20px;line-height:1.6;">すべての抽出記録が削除されます。この操作は取り消せません。</div>
+      <div style="display:flex;gap:12px;">
+        <button id="btn-confirm-cancel" style="flex:1;height:48px;border:1px solid var(--color-border-input);border-radius:var(--radius-md);background:var(--color-surface-raised);font-size:14px;font-weight:600;color:var(--color-text-muted);cursor:pointer;">キャンセル</button>
+        <button id="btn-confirm-ok"     style="flex:1;height:48px;border:none;border-radius:var(--radius-md);background:#A3543A;font-size:14px;font-weight:700;color:#fff;cursor:pointer;">削除する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+</div><!-- /app -->
+</div><!-- /app-outer -->
+
+<script src="app.js"></script>
+</body>
+</html>
