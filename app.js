@@ -1,21 +1,19 @@
 /* =============================================================================
    Pourō — app.js
-   PR-003: Recipe engine + real brew timer
+   PR-004: History persistence + localStorage + Rebrew persistence
 
-   PR-003 adds:
-   - RecipeEngine: generates recipe objects for all 4 methods
-   - RAF-based real brew timer with pause/resume/next/back/finish
-   - 4:6 Method: 5-pour with flavor/strength reflection
-   - Hybrid: Switch OPEN/CLOSED/OPEN state sequence
-   - 10 Pour: 30s then 15s rhythm (not 45s equal intervals)
-   - Ice Brew: hot/ice separated, cumulative is hot pours only
-   - In-memory brew result draft for Brew Log handoff
+   PR-004 adds:
+   - localStorage-backed brew history (key: pouroFable5.history.v1)
+   - Brew Log Save: real persistence with history entry schema v1
+   - normalizeHistoryEntry + normalizeRating (safe reading, old-schema compat)
+   - History screen: reads persisted entries on boot, shows empty state
+   - History Detail: uses persisted recipe.steps snapshot (not rebuilt)
+   - Rebrew: restores from persisted entry into Preview
+   - Ice Brew HOT/ICE persistence, Hybrid switchState, 10 Pour timeline
 
    STILL STUB (→ later PRs):
-   - localStorage History persistence (→ PR-004)
-   - Rebrew full persistence (→ PR-004)
    - Export JSON / CSV real implementation (→ PR-005)
-   - Clear history persistence (→ PR-005)
+   - Clear history full persistence (→ PR-005)
    - Service worker / manifest / offline (→ PR-006)
    ============================================================================= */
 
@@ -358,7 +356,7 @@ const state = {
   // Persistence will be implemented in PR-004.
   brewResultDraft: null,
 
-  history: [...SAMPLE_HISTORY],
+  history: [],  // loaded from localStorage on boot via safeReadHistory()
   currentDetailId: null,
   settings: {
     defMethodId: 'yon-roku',
@@ -378,6 +376,102 @@ const STRENGTH_LABELS  = { light: 'ライト', standard: '標準', strong: 'リ�
 const METHOD_DISPLAY_NAMES = {
   'yon-roku': '4:6 Method', 'hybrid': 'Hybrid', 'neo': '10 Pour', 'ice': 'Ice Brew',
 };
+
+/* ── Storage ────────────────────────────────────────────────────────────────── */
+const STORAGE_KEYS = { history: 'pouroFable5.history.v1' };
+const MAX_HISTORY_ENTRIES = 500;
+
+function normalizeRating(v) {
+  if (v === null || v === undefined || v === 0) return null;
+  const n = Number(v);
+  if (!Number.isFinite(n) || n < 1 || n > 5) return null;
+  return Math.round(n);
+}
+
+function normalizeHistoryEntry(entry) {
+  if (!entry || typeof entry !== 'object') return null;
+
+  const methodId = entry.methodId || entry.recipe?.id || 'yon-roku';
+  const dose     = Number(entry.dose || entry.recipe?.dose || 20);
+  const ratio    = methodId === 'ice'
+    ? null
+    : Number(entry.ratio ?? entry.recipe?.ratio ?? 15);
+
+  const flavor   = entry.recipe?.flavor   || entry.flavor   || 'balanced';
+  const strength = entry.recipe?.strength || entry.strength || 'standard';
+
+  const recipe = entry.recipe?.steps?.length
+    ? entry.recipe
+    : RecipeEngine.build(methodId, dose, ratio || 15, flavor, strength);
+
+  return {
+    schemaVersion: 1,
+    id:          entry.id          || `h_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    createdAt:   entry.createdAt   || entry.completedAt || new Date().toISOString(),
+    completedAt: entry.completedAt || entry.createdAt   || new Date().toISOString(),
+    methodId,
+    methodName:  entry.methodName  || recipe.name || METHOD_DISPLAY_NAMES[methodId] || methodId,
+    dose,
+    ratio,
+    recipe,
+    brew: {
+      elapsedSec: Number(entry.brew?.elapsedSec || entry.elapsedSec || recipe.targetDrawdownSec || 0),
+      startedAt:  entry.brew?.startedAt  || entry.startedAt  || null,
+      finishedAt: entry.brew?.finishedAt || entry.finishedAt || null,
+    },
+    log: {
+      rating:      normalizeRating(entry.log?.rating ?? entry.rating),
+      tags:        Array.isArray(entry.log?.tags ?? entry.tags)
+                     ? (entry.log?.tags || entry.tags || [])
+                     : [],
+      note:        entry.log?.note        || entry.note     || '',
+      nextNote:    entry.log?.nextNote    || entry.nextNote || '',
+      grind:       entry.log?.grind       || '',
+      temperature: entry.log?.temperature || '',
+      bean:        entry.log?.bean        || '',
+      equipment:   entry.log?.equipment   || '',
+    },
+  };
+}
+
+function safeReadHistory() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.history);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeHistoryEntry).filter(Boolean);
+  } catch (error) {
+    console.warn('[Pouro] Failed to read history:', error);
+    return [];
+  }
+}
+
+function safeWriteHistory(entries) {
+  try {
+    const normalized = entries
+      .map(normalizeHistoryEntry)
+      .filter(Boolean)
+      .slice(0, MAX_HISTORY_ENTRIES);
+    localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(normalized));
+    return true;
+  } catch (error) {
+    console.warn('[Pouro] Failed to write history:', error);
+    return false;
+  }
+}
+
+function _formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  } catch {
+    return '—';
+  }
+}
 
 /* ── DOM cache (populated after DOMContentLoaded) ───────────────────────────── */
 let DOM = {};
@@ -1039,54 +1133,76 @@ function renderHistory() {
   document.getElementById('history-empty').classList.add('hidden');
 
   const feat = history[0];
-  const fm   = METHODS[feat.methodId];
-  const featRecipe = RecipeEngine.build(feat.methodId, feat.dose, feat.ratio,
-    feat.flavor || 'balanced', feat.strength || 'standard');
+  const fm   = METHODS[feat.methodId] || METHODS['yon-roku'];
+  const featRecipe = feat.recipe?.steps?.length
+    ? feat.recipe
+    : RecipeEngine.build(feat.methodId, feat.dose, feat.ratio || 15,
+        feat.recipe?.flavor || feat.flavor || 'balanced',
+        feat.recipe?.strength || feat.strength || 'standard');
 
-  document.getElementById('hist-feat-icon').innerHTML      = fm.icon;
-  document.getElementById('hist-feat-name').textContent    = fm.name;
-  document.getElementById('hist-feat-sub').textContent     = fm.sub;
-  document.getElementById('hist-feat-date').textContent    = feat.date;
-  document.getElementById('hist-feat-summary').innerHTML   = buildSummaryCols(featRecipe);
+  document.getElementById('hist-feat-icon').innerHTML    = fm.icon;
+  document.getElementById('hist-feat-name').textContent  = feat.methodName || fm.name;
+  document.getElementById('hist-feat-sub').textContent   = fm.sub;
+  document.getElementById('hist-feat-date').textContent  = _formatDate(feat.completedAt || feat.createdAt || feat.date);
+  document.getElementById('hist-feat-summary').innerHTML = buildSummaryCols(featRecipe);
+
+  const featTags = feat.log?.tags || feat.tags || [];
+  const featNote = feat.log?.note || feat.note || '';
 
   const tagsRow = document.getElementById('hist-feat-tags-row');
   const tagsEl  = document.getElementById('hist-feat-tags');
-  if (feat.tags && feat.tags.length) {
+  if (featTags.length) {
     tagsRow.classList.remove('hidden');
-    tagsEl.innerHTML = feat.tags.map(t => `<span class="tag-chip">${t}</span>`).join('');
+    tagsEl.innerHTML = featTags.map(t => `<span class="tag-chip">${t}</span>`).join('');
   } else {
     tagsRow.classList.add('hidden');
   }
 
   const noteRow = document.getElementById('hist-feat-note-row');
   const noteEl  = document.getElementById('hist-feat-note');
-  if (feat.note) {
+  if (featNote) {
     noteRow.classList.remove('hidden');
-    noteEl.textContent = feat.note;
+    noteEl.textContent = featNote;
   } else {
     noteRow.classList.add('hidden');
   }
 
   const listEl = document.getElementById('history-list');
   listEl.innerHTML = history.slice(1).map(h => {
-    const hm    = METHODS[h.methodId];
-    const meta  = `${h.dose}g · 1:${h.ratio}`;
+    const hm      = METHODS[h.methodId] || METHODS['yon-roku'];
+    const hRating = h.log?.rating ?? h.rating ?? null;
+    const hTags   = h.log?.tags   || h.tags   || [];
+    const dateStr = _formatDate(h.completedAt || h.createdAt || h.date);
+
+    // Ice Brew: show HOT/ICE instead of ratio
+    let meta;
+    if (h.methodId === 'ice' || h.ratio === null) {
+      const hr = h.recipe || {};
+      meta = (hr.hotWater != null && hr.ice != null)
+        ? `${h.dose}g · HOT ${hr.hotWater}g / ICE ${hr.ice}g`
+        : `${h.dose}g · Ice Brew`;
+    } else {
+      meta = `${h.dose}g · 1:${h.ratio}`;
+    }
+
     const stars = Array.from({ length: 5 }, (_, i) =>
-      `<span class="rating-star ${i < h.rating ? 'filled' : ''}"></span>`
+      `<span class="rating-star ${hRating !== null && i < hRating ? 'filled' : ''}"></span>`
     ).join('');
-    const tags = (h.tags || []).slice(0, 2).map(t =>
-      `<span class="tag-chip">${t}</span>`
-    ).join('');
+    const ratingDisp = hRating !== null
+      ? `<span style="display:inline-flex;gap:3px;">${stars}</span>`
+      : `<span style="font-size:11px;color:var(--color-text-faint);">未評価</span>`;
+    const tags = hTags.slice(0, 2).map(t => `<span class="tag-chip">${t}</span>`).join('');
+
     return `<div class="history-row" data-history-id="${h.id}">
       <span style="display:inline-flex;color:var(--color-accent);flex-shrink:0;">${hm.iconSm}</span>
       <span style="flex:1;min-width:0;">
         <span style="display:flex;align-items:baseline;gap:8px;">
-          <span style="font-family:var(--font-serif);font-weight:600;font-size:16px;color:var(--color-text);">${hm.name}</span>
-          <span style="font-size:10.5px;color:var(--color-text-faint);white-space:nowrap;">${h.date}</span>
+          <span style="font-family:var(--font-serif);font-weight:600;font-size:16px;color:var(--color-text);">${h.methodName || hm.name}</span>
+          <span style="font-size:10.5px;color:var(--color-text-faint);white-space:nowrap;">${dateStr}</span>
         </span>
         <span style="display:flex;align-items:center;gap:8px;margin-top:4px;">
           <span style="font-family:var(--font-serif);font-size:12.5px;color:var(--color-text-muted);white-space:nowrap;">${meta}</span>
-          <span style="display:inline-flex;gap:3px;">${stars}</span>
+          ${ratingDisp}
         </span>
       </span>
       <span class="history-tags">${tags}</span>
@@ -1108,57 +1224,70 @@ function renderDetail() {
   const entry = state.history.find(h => h.id === state.currentDetailId) || state.history[0];
   if (!entry) return;
 
-  const m      = METHODS[entry.methodId];
-  const recipe = RecipeEngine.build(entry.methodId, entry.dose, entry.ratio,
-    entry.flavor || 'balanced', entry.strength || 'standard');
+  const m = METHODS[entry.methodId] || METHODS['yon-roku'];
 
-  document.getElementById('detail-date-label').textContent  = entry.date;
+  // Prefer persisted recipe snapshot; fallback to rebuilding
+  const flavor   = entry.recipe?.flavor   || entry.flavor   || 'balanced';
+  const strength = entry.recipe?.strength || entry.strength || 'standard';
+  const recipe   = entry.recipe?.steps?.length
+    ? entry.recipe
+    : RecipeEngine.build(entry.methodId, entry.dose, entry.ratio || 15, flavor, strength);
+
+  const dateStr  = _formatDate(entry.completedAt || entry.createdAt || entry.date);
+  const rating   = entry.log?.rating ?? entry.rating ?? null;
+  const tags     = entry.log?.tags   || entry.tags   || [];
+  const note     = entry.log?.note   || entry.note   || '';
+  const nextNote = entry.log?.nextNote || entry.nextNote || '';
+
+  document.getElementById('detail-date-label').textContent  = dateStr;
   document.getElementById('detail-icon').innerHTML           = m.icon;
-  document.getElementById('detail-name').textContent         = m.name;
+  document.getElementById('detail-name').textContent         = entry.methodName || m.name;
   document.getElementById('detail-sub').textContent          = m.sub;
-  document.getElementById('detail-rating').innerHTML         = buildRatingStars(entry.rating);
+  document.getElementById('detail-rating').innerHTML         = rating !== null
+    ? buildRatingStars(rating)
+    : '<span style="font-size:12px;color:var(--color-text-faint);">未評価</span>';
   document.getElementById('detail-summary-grid').innerHTML   = buildSummaryCols(recipe);
   document.getElementById('detail-steps-list').innerHTML     = buildStepsHTML(recipe.steps);
 
   const nextCard = document.getElementById('detail-next-note-card');
-  if (entry.nextNote) {
+  if (nextNote) {
     nextCard.classList.remove('hidden');
-    document.getElementById('detail-next-note-text').textContent = entry.nextNote;
+    document.getElementById('detail-next-note-text').textContent = nextNote;
   } else {
     nextCard.classList.add('hidden');
   }
 
   const flavorChips = document.getElementById('detail-flavor-chips');
-  if (m.hasFlavorStrength && entry.flavor && entry.strength) {
+  if (m.hasFlavorStrength && flavor && strength) {
     flavorChips.innerHTML =
-      `<span class="tag-chip">${FLAVOR_LABELS[entry.flavor] || entry.flavor}</span>` +
-      `<span class="tag-chip">${STRENGTH_LABELS[entry.strength] || entry.strength}</span>`;
+      `<span class="tag-chip">${FLAVOR_LABELS[flavor] || flavor}</span>` +
+      `<span class="tag-chip">${STRENGTH_LABELS[strength] || strength}</span>`;
   } else {
     flavorChips.innerHTML = '';
   }
 
   const tagsCard = document.getElementById('detail-tags-card');
   const tagsList = document.getElementById('detail-tags-list');
-  if (entry.tags && entry.tags.length) {
+  if (tags.length) {
     tagsCard.classList.remove('hidden');
-    tagsList.innerHTML = entry.tags.map(t => `<span class="tag-chip tag-chip-lg">${t}</span>`).join('');
+    tagsList.innerHTML = tags.map(t => `<span class="tag-chip tag-chip-lg">${t}</span>`).join('');
   } else {
     tagsCard.classList.add('hidden');
   }
 
   const memoCard = document.getElementById('detail-memo-card');
-  if (entry.note) {
+  if (note) {
     memoCard.classList.remove('hidden');
-    document.getElementById('detail-memo-text').textContent = entry.note;
+    document.getElementById('detail-memo-text').textContent = note;
   } else {
     memoCard.classList.add('hidden');
   }
 
-  const eq = entry.equip || {};
-  document.getElementById('detail-equip-bean').textContent    = eq.bean    || '—';
-  document.getElementById('detail-equip-grind').textContent   = eq.grind   || '—';
-  document.getElementById('detail-equip-temp').textContent    = eq.temp    || '—';
-  document.getElementById('detail-equip-dripper').textContent = eq.dripper || '—';
+  const eq = entry.log || entry.equip || {};
+  document.getElementById('detail-equip-bean').textContent    = eq.bean        || '—';
+  document.getElementById('detail-equip-grind').textContent   = eq.grind       || '—';
+  document.getElementById('detail-equip-temp').textContent    = eq.temperature || eq.temp    || '—';
+  document.getElementById('detail-equip-dripper').textContent = eq.equipment   || eq.dripper || '—';
 }
 
 /* ── Settings screen ────────────────────────────────────────────────────────── */
@@ -1185,6 +1314,20 @@ function showToast(msg) {
   el.classList.remove('hidden');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
+}
+
+/* ── Rebrew helper ──────────────────────────────────────────────────────────── */
+function _applyRebrewEntry(entry) {
+  state.selectedMethodId    = entry.methodId;
+  state.draft.dose          = entry.dose;
+  state.draft.ratio         = entry.ratio !== null ? entry.ratio : 15;
+  state.draft.flavor        = entry.recipe?.flavor   || entry.flavor   || 'balanced';
+  state.draft.strength      = entry.recipe?.strength || entry.strength || 'standard';
+  state.draft.customRatio   = false;
+  const dateStr             = _formatDate(entry.completedAt || entry.createdAt || entry.date);
+  state.rebrewFrom          = { id: entry.id, date: dateStr };
+  renderPreview();
+  showScreen('preview');
 }
 
 /* ── Public API ─────────────────────────────────────────────────────────────── */
@@ -1360,30 +1503,53 @@ function wireEvents() {
     }
   });
 
-  // Log — Save  [PR-003 STUB: in-memory only, no localStorage persistence — real persistence in PR-004]
+  // Log — Save  [PR-004: real localStorage persistence]
   document.getElementById('btn-save-log').addEventListener('click', () => {
-    const recipe = state.activeRecipe || {};
-    const draft  = state.brewResultDraft || {};
+    const recipe   = state.activeRecipe;
+    const draft    = state.brewResultDraft || {};
+    const methodId = recipe?.id || state.selectedMethodId;
+    const completedAt = draft.completedAt || new Date().toISOString();
+
     const entry = {
-      id:       `h${Date.now()}`,
-      methodId: recipe.id || state.selectedMethodId,
-      date:     new Date().toISOString().slice(0, 10),
-      dose:     recipe.dose     || state.draft.dose,
-      ratio:    recipe.ratio    || state.draft.ratio,
-      flavor:   recipe.flavor   || state.draft.flavor,
-      strength: recipe.strength || state.draft.strength,
-      rating:   state.log.rating,
-      tags:     [...state.log.tags],
-      note:     document.getElementById('log-memo').value,
-      nextNote: document.getElementById('log-next-note').value,
-      equip:    { bean: 'エチオピア ゲデオ', grind: '中細挽き (#16)', temp: '93°C', dripper: 'ハリオ V60' },
+      schemaVersion: 1,
+      id:          `h_${Date.now()}`,
+      createdAt:   completedAt,
+      completedAt,
+      methodId,
+      methodName:  recipe?.name || METHOD_DISPLAY_NAMES[methodId] || methodId,
+      dose:        recipe?.dose     || state.draft.dose,
+      ratio:       recipe?.ratio    ?? null,
+      recipe:      recipe           || RecipeEngine.build(methodId, state.draft.dose, state.draft.ratio,
+                     state.draft.flavor, state.draft.strength),
+      brew: {
+        elapsedSec: draft.elapsedSec  || 0,
+        startedAt:  draft.startedAt   || null,
+        finishedAt: draft.finishedAt  || null,
+      },
+      log: {
+        rating:      normalizeRating(state.log.rating),
+        tags:        [...state.log.tags],
+        note:        document.getElementById('log-memo').value.trim(),
+        nextNote:    document.getElementById('log-next-note').value.trim(),
+        grind:       '',
+        temperature: '',
+        bean:        '',
+        equipment:   '',
+      },
     };
+
     state.history.unshift(entry);
-    showToast('記録を保存しました');
-    setTimeout(() => {
-      renderHistory();
-      showScreen('history');
-    }, 600);
+    const saved = safeWriteHistory(state.history);
+
+    if (saved) {
+      showToast('履歴に保存しました');
+      setTimeout(() => {
+        renderHistory();
+        showScreen('history');
+      }, 600);
+    } else {
+      showToast('保存できませんでした。端末のストレージ容量を確認してください。');
+    }
   });
 
   // History — featured detail
@@ -1396,15 +1562,7 @@ function wireEvents() {
   // History — featured rebrew
   document.getElementById('btn-hist-rebrew').addEventListener('click', () => {
     const entry = state.history[0];
-    if (!entry) return;
-    state.selectedMethodId = entry.methodId;
-    state.draft.dose       = entry.dose;
-    state.draft.ratio      = entry.ratio;
-    state.draft.flavor     = entry.flavor   || 'balanced';
-    state.draft.strength   = entry.strength || 'standard';
-    state.rebrewFrom       = { id: entry.id, date: entry.date };
-    renderPreview();
-    showScreen('preview');
+    if (entry) _applyRebrewEntry(entry);
   });
 
   // Detail ← back
@@ -1415,15 +1573,7 @@ function wireEvents() {
   // Detail — rebrew
   document.getElementById('btn-detail-rebrew').addEventListener('click', () => {
     const entry = state.history.find(h => h.id === state.currentDetailId);
-    if (!entry) return;
-    state.selectedMethodId = entry.methodId;
-    state.draft.dose       = entry.dose;
-    state.draft.ratio      = entry.ratio;
-    state.draft.flavor     = entry.flavor   || 'balanced';
-    state.draft.strength   = entry.strength || 'standard';
-    state.rebrewFrom       = { id: entry.id, date: entry.date };
-    renderPreview();
-    showScreen('preview');
+    if (entry) _applyRebrewEntry(entry);
   });
 
   // Settings — method cycle
@@ -1459,9 +1609,11 @@ function wireEvents() {
     document.getElementById('confirm-overlay').classList.add('hidden');
   });
   document.getElementById('btn-confirm-ok').addEventListener('click', () => {
+    // PR-004: in-memory clear only. localStorage is NOT cleared here to prevent data loss.
+    // Full clear (including localStorage) will be implemented in PR-005.
     state.history = [];
     document.getElementById('confirm-overlay').classList.add('hidden');
-    showToast('履歴を削除しました');
+    showToast('表示をリセットしました（再読み込みで復元されます）');
     renderHistory();
   });
 }
@@ -1469,6 +1621,7 @@ function wireEvents() {
 /* ── Boot ───────────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   cacheDOM();
+  state.history = safeReadHistory();  // PR-004: load persisted history on startup
   renderHome();
   renderHistory();
   renderSettings();
