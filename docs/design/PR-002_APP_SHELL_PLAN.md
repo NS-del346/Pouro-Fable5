@@ -142,6 +142,26 @@ History / History Detail
 - pause / resume の実実装
 - SVG arc の tick-by-tick アニメーション
 
+---
+
+## PR-002 Stub 範囲の明記
+
+PR-002 の以下の処理は **UI ナビゲーション確認用の mock / stub** です。永続化・本物の処理は未実装です。
+
+| 機能 | PR-002 の状態 | 本実装 PR |
+|---|---|---|
+| history save | in-memory 配列のみ（localStorage なし） | PR-004 |
+| history clear | in-memory 配列をリセットするだけ | PR-005 |
+| export (JSON/CSV) | toast 表示のみ（実ファイル出力なし） | PR-005 |
+| timer | 静的ステップ表示のみ（実時間カウントなし） | PR-003 |
+| recipe engine | method 固定の `buildSteps()` スタブ | PR-003 |
+
+> PR-002 の history / save / clear / export / timer-like behavior は UI navigation 確認用の mock/stub です。
+> 永続化・本物の export・本物の clear・実時間 timer は未実装です。
+> 本物の timer は PR-003、history persistence は PR-004、export/clear は PR-005 で実装します。
+
+---
+
 ### PR-004: History + Persistence
 - `state.history` を localStorage に接続
 - ログ保存時のエントリ構造確定

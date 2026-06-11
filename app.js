@@ -1,7 +1,13 @@
 /* =============================================================================
    Pourō — app.js
    PR-002: Static app shell + screen navigation
-   Recipe engine, real timer, and persistence are PR-003+
+
+   STUB SCOPE — the following are UI navigation mock/stubs only, NOT real implementations:
+   - history save/clear: in-memory array, no localStorage persistence (→ PR-004)
+   - export (JSON/CSV): toast placeholder only (→ PR-005)
+   - clear history: in-memory only (→ PR-005)
+   - timer: static step display only, no real countdown (→ PR-003)
+   - recipe engine: hardcoded buildSteps() per method (→ PR-003)
    ============================================================================= */
 
 'use strict';
@@ -105,18 +111,19 @@ const METHODS = {
       'テンポよく注ぐための湯ポットを準備してください',
     ],
     buildSteps(dose, ratio) {
+      // PR-002 stub timeline: first pour 0:00, wait 30s, then 15s intervals → 0:00/0:30/0:45…2:30, drawdown ~3:30
       const water = dose * ratio;
       const each = Math.round(water / 10);
       let cum = 0;
       const steps = [];
       for (let i = 0; i < 10; i++) {
-        const sec = i === 0 ? 0 : i * 45;
+        const sec = i === 0 ? 0 : 30 + (i - 1) * 15;
         const m = Math.floor(sec / 60);
         const s = sec % 60;
         const amt = i === 9 ? water - cum : each;
         steps.push({ time: `${m}:${String(s).padStart(2,'0')}`, amt: `${amt}g`, note: `第${i+1}投`, cum: (cum += amt) });
       }
-      steps.push({ time: '7:15', amt: '—', note: 'ドローダウン', cum: null, isDraw: true });
+      steps.push({ time: '3:30', amt: '—', note: 'ドローダウン目安', cum: null, isDraw: true });
       return steps;
     },
   },
@@ -969,7 +976,7 @@ function wireEvents() {
     showScreen('brew');
   });
 
-  // Log → save
+  // Log → save  [PR-002 STUB: in-memory only, no localStorage persistence — real persistence in PR-004]
   document.getElementById('btn-save-log').addEventListener('click', () => {
     const m = METHODS[state.selectedMethodId];
     const d = state.draft;
@@ -1058,11 +1065,12 @@ function wireEvents() {
     if (state.settings.defRatio < 20) { state.settings.defRatio++; renderSettings(); }
   });
 
-  // Settings → export (stub)
+  // Settings → export  [PR-002 STUB: toast placeholder only, no real export — real export in PR-005]
   document.getElementById('btn-export-json').addEventListener('click', () => showToast('JSON エクスポートは PR-005 で実装予定'));
   document.getElementById('btn-export-csv').addEventListener('click',  () => showToast('CSV エクスポートは PR-005 で実装予定'));
 
   // Settings → clear history
+  // Clear history  [PR-002 STUB: clears in-memory array only, no real persistence — real clear in PR-005]
   document.getElementById('btn-clear-history').addEventListener('click', () => {
     document.getElementById('confirm-overlay').classList.remove('hidden');
   });
