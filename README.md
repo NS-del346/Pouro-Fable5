@@ -44,13 +44,16 @@ npx serve .
 | PR-001 | Design artifact intake |
 | PR-002 | App shell + design token system |
 | PR-003 | Recipe engine + real timer |
-| **PR-004** | **History + localStorage persistence + Rebrew** ← current |
-| PR-005 | Settings + export / clear history |
+| PR-004 | History + localStorage persistence + Rebrew |
+| **PR-005** | **Settings persistence + export + clear history** ← current |
 | PR-006 | PWA manifest + service worker + offline |
 
-> **PR-004:** Brew history is persisted to `localStorage` (`pouroFable5.history.v1`).
-> Rebrew restores method/dose/ratio/options from persisted entry into Preview.
-> Export and full Clear History are implemented in PR-005.
+> **PR-005** adds settings persistence (`pouroFable5.settings.v1`).
+> Default brew settings (method, dose, ratio) are applied to Recipe Setup on boot.
+> Brew Log now has equipment input fields (bean, grind, temperature, dripper).
+> JSON and CSV export are fully implemented.
+> Clear History now fully removes `pouroFable5.history.v1` from localStorage.
+> Clearing history does not delete settings.
 > PWA manifest and service worker remain PR-006.
 
-See [`docs/design/PR-004_HISTORY_REBREW_PERSISTENCE.md`](docs/design/PR-004_HISTORY_REBREW_PERSISTENCE.md) for full details on the storage key, entry schema, rating null handling, and Rebrew flow.
+See [`docs/design/PR-005_SETTINGS_EXPORT_CLEAR.md`](docs/design/PR-005_SETTINGS_EXPORT_CLEAR.md) for full details.

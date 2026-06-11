@@ -1222,3 +1222,39 @@ img {
 .text-faint  { color: var(--color-text-faint); }
 .font-serif  { font-family: var(--font-serif); }
 .font-mincho { font-family: var(--font-mincho); }
+
+/* ── PR-005: Brew Log equipment input fields ───────────────────────────────── */
+.equip-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-divider);
+}
+
+.equip-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  min-width: 56px;
+}
+
+.equip-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  padding: 0;
+  outline: none;
+}
+
+.equip-input::placeholder {
+  color: var(--color-text-faint);
+  font-size: 12.5px;
+}
