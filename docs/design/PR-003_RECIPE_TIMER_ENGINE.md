@@ -146,7 +146,9 @@ Only two DOM writes occur per frame: the time display text node and the SVG arc 
 | Resume | Resumes timer from pause point. |
 | Finish | Shown on Drawdown card. Stops timer, builds `state.brewResultDraft`, navigates to Brew Log. |
 
-**Back at step 0** snaps `elapsedSec` to the target time of step 0. A precise elapsed-rewind implementation is deferred to PR-004.
+**Back at step 0** abandons the brew and returns to Preview.
+**Back at later steps** moves to the previous step and snaps elapsed time to that step's `timeSec`.
+A more precise rewind implementation is deferred to a later PR if needed.
 
 ---
 
