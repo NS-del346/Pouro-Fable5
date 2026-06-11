@@ -1,18 +1,50 @@
 # Fable5 Artifact Report
 
-## Overview
+## What this document is
 
-This document describes the Claude Design / Fable5 prototype received for `NS-del346/Pouro-Fable5`. It serves as the design source of truth for the production PWA implementation.
+This is the artifact intake report for PR-001 of `NS-del346/Pouro-Fable5`.
+
+**PR-001 is an intake PR only.** It receives the Claude Design / Fable5 prototype as the design source of truth. It does not implement application code. No production `index.html`, CSS, or JS is added in this PR.
+
+The Fable5 prototype (`design-artifact/Pouro-Fable5.dc.html`) is the sole visual reference for all future production PRs. The current Pourō-Claude repository (`NS-del346/Pouro-Claude`) must not be used as a layout or visual reference at any point.
 
 Prototype file: `design-artifact/Pouro-Fable5.dc.html`
 Runtime dependency: `design-artifact/support.js`
 
 ---
 
+## Design source of truth
+
+The following priority order applies to all future implementation PRs:
+
+```
+1. design-artifact/Pouro-Fable5.dc.html  ← primary
+2. design-artifact/assets/*
+3. Source ZIPs in Drive (see reference/source-zips/SOURCE_ZIPS_LOCATION.md)
+4. Written spec docs (behavior and recipe requirements only)
+5. NS-del346/Pouro-Claude (recipe logic / method specs only — UI strictly prohibited)
+```
+
+### Pourō-Claude prohibition
+
+The following must NOT be copied, imitated, or inherited from the current `NS-del346/Pouro-Claude` repository:
+
+- HTML structure
+- CSS
+- Card layout
+- CTA placement
+- Tab bar treatment
+- Spacing system
+- Any prior visual polish output
+
+`Pouro-Claude` may only be referenced for: recipe logic, method timing, timer behavior, history/rebrew/settings behavior, PWA constraints, and past specification decisions.
+
+---
+
 ## How to open the prototype locally
 
 1. Open a terminal in the repo root.
-2. Serve the repo with any static file server — for example:
+2. Serve with any static file server:
 
 ```sh
 npx serve .
@@ -21,9 +53,9 @@ python -m http.server 8000
 ```
 
 3. Navigate to `http://localhost:PORT/design-artifact/Pouro-Fable5.dc.html`
-4. Open DevTools and set the viewport to **375 × 667** (iPhone SE / primary target).
+4. Set DevTools viewport to **375 × 667** (iPhone SE — primary target).
 
-> Do not open the `.dc.html` as a `file://` URL directly. `support.js` and relative asset paths require a local server.
+> Do not open as a `file://` URL. `support.js` and relative asset paths require a local server.
 
 ---
 
@@ -52,13 +84,13 @@ The prototype loads three font families from Google Fonts:
 
 No other CDN or external runtime is loaded. The Claude Design runtime is bundled locally as `support.js`.
 
-**Note for production:** Google Fonts requests require a network connection. For full offline PWA support, fonts must be self-hosted or bundled. See §Production implementation options below.
+**Note for production:** Google Fonts requires a network connection. For full offline PWA support, fonts must be self-hosted or bundled. See §Production implementation options.
 
 ### Screen inventory
 
 The artifact contains 8 named screens plus 3 overlay elements:
 
-| # | Label | Screens |
+| # | Label | Content |
 |---|---|---|
 | 01 | Brew Home | Method list + selected method card + CTA |
 | 02 | Recipe Setup | Dose / water / flavor / strength / notes / grind controls |
@@ -67,12 +99,12 @@ The artifact contains 8 named screens plus 3 overlay elements:
 | 05 | Brew Log | Post-brew rating and note entry |
 | 06 | History | Scrollable history list with rebrew action |
 | — | History Detail | Single entry detail with rebrew CTA |
-| 07 | Settings | Language toggle, caffeine flag, export, factory reset |
+| 07 | Settings | Default brew / Brew assist / Data / About |
 | — | Tab Bar | Persistent bottom navigation (Home / History / Settings) |
 | — | Toast | Success/info notification overlay |
 | — | Clear Confirm Sheet | Confirm sheet for factory reset |
 
-**Rebrew state:** Not a separate screen. `rebrewFrom` state flag on the Preview screen (line 1319 `rebrewFromEntry`) shows a banner and pre-fills the draft from history.
+**Rebrew state:** Not a separate screen. `rebrewFrom` state flag on the Preview screen (`rebrewFromEntry`, line 1319) shows a banner and pre-fills the draft from history.
 
 ---
 
@@ -93,43 +125,42 @@ design-artifact/
 reference/
   optional-ui-icons/       ← Supplemental icon set (not yet applied — optional)
   source-zips/
-    Pouro-Fable5｜Final Mock Rebuild.zip     ← 337 KB, included
-    Pouro-Fable5｜Final Mock Rebuild (1).zip ← 30 KB, included
-    Pouro-Fable5｜Final Mock Rebuild (2).zip ← 13.4 MB, excluded from git
-                                               (add to .gitignore; store separately)
+    SOURCE_ZIPS_LOCATION.md ← Drive location note; ZIP files are NOT in this repo
 
 docs/
   design/
     FABLE5_ARTIFACT_REPORT.md  ← this file
-
 ```
+
+**Source ZIPs** are stored in Google Drive (see [`reference/source-zips/SOURCE_ZIPS_LOCATION.md`](../../reference/source-zips/SOURCE_ZIPS_LOCATION.md)). They are excluded from git via `.gitignore` to avoid bloating repository history with large binaries.
 
 ---
 
 ## Production implementation options
 
-Three paths forward — decide before starting PR-002:
+Decide before starting PR-002:
 
 | Option | Description | Tradeoff |
 |---|---|---|
-| **A — Prototype-only** | Keep `.dc.html` + `support.js` as a design reference under `design-artifact/`. Build production app separately. | Clean separation; Claude Design runtime never ships to users. Recommended. |
-| **B — Convert** | Hand-convert the `.dc.html` into plain `index.html` + CSS + JS. Remove `support.js` and all `<x-dc>` / `<sc-if>` custom elements. | Clean production output; significant manual effort; must preserve Fable5 visual fidelity exactly. |
-| **C — Use as-is** | Ship the `.dc.html` + `support.js` directly as the production PWA. | Fast, but the Claude Design runtime adds ~49 KB of JS and custom element overhead; offline font dependency remains. Needs documented acceptance. |
+| **A — Prototype-only** | Keep `.dc.html` + `support.js` as a design reference under `design-artifact/`. Build production app separately. | Clean separation; Claude Design runtime never ships to users. **Recommended.** |
+| **B — Convert** | Hand-convert `.dc.html` into plain `index.html` + CSS + JS. Remove `support.js` and all `<x-dc>` / `<sc-if>` custom elements. | Clean production output; significant manual effort; must preserve Fable5 visual fidelity exactly. |
+| **C — Use as-is** | Ship `.dc.html` + `support.js` directly as the production PWA. | Fast, but the Claude Design runtime adds ~49 KB overhead; offline font dependency remains. Requires documented acceptance. |
 
-The recommended path for this project is **Option A**: build production `index.html` against the Fable5 design as a pixel-accurate visual reference.
+Recommended path: **Option A** — build production `index.html` against the Fable5 prototype as a pixel-accurate visual reference.
 
 ---
 
-## Pouro-Fable5 production implementation plan
+## Production implementation plan
 
-### PR-001 — Design artifact intake *(this PR)*
+### PR-001 — Design artifact intake *(this PR — intake only, no app code)*
 - Import `design-artifact/`, `reference/`, `docs/design/FABLE5_ARTIFACT_REPORT.md`
-- Document how to open prototype locally
+- Document prototype local preview instructions
+- Establish Pourō-Claude UI prohibition
 
 ### PR-002 — App shell and design token system
 - Create `index.html`, `app.css`, `app.js` skeleton
 - Extract Fable5 color tokens, typography scale, spacing
-- Set up tab-bar navigation shell
+- Tab-bar navigation shell
 - No logic yet — layout only
 
 ### PR-003 — Recipe/timer logic
@@ -139,13 +170,11 @@ The recommended path for this project is **Option A**: build production `index.h
 
 ### PR-004 — History and Rebrew
 - LocalStorage history persistence
-- History list screen
-- History Detail screen
+- History list screen + History Detail screen
 - Rebrew → Preview state
 
-### PR-005 — Settings / Export / Clear
-- Language toggle (JA/EN)
-- Caffeine flag
+### PR-005 — Settings
+- Default brew / Brew assist / Data / About sections
 - Export (JSON download)
 - Factory reset with confirm sheet
 

@@ -1,5 +1,5 @@
-# Large source-zip excluded from repo (13.4 MB — store separately)
-reference/source-zips/Pouro-Fable5｜Final Mock Rebuild (2).zip
+# Source ZIPs are not stored in this repository — see reference/source-zips/SOURCE_ZIPS_LOCATION.md
+reference/source-zips/*.zip
 
 # OS
 .DS_Store
