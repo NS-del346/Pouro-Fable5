@@ -80,7 +80,8 @@ Any change to a toggle calls `renderSettings()`, which calls `safeWriteSettings(
 | `log-temperature`| 湯温        | `log.temperature`  |
 | `log-equipment`  | ドリッパー    | `log.equipment`    |
 
-Inputs are cleared on each `renderLog()` call (fresh brew = fresh inputs).  
+Inputs are cleared only when entering Brew Log for a newly completed brew.
+They are not cleared on `renderLog()` re-renders, so rating/tag changes do not erase equipment input values.
 Values are read on Save and stored inside the history entry `log` object, same structure as PR-004.
 
 History Detail reads `entry.log.bean`, `entry.log.grind`, `entry.log.temperature`, `entry.log.equipment` — no change to Detail rendering was needed as PR-004 already handled these.
