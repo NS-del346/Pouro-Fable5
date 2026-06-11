@@ -84,8 +84,21 @@
   --safe-left:   env(safe-area-inset-left, 0px);
   --safe-right:  env(safe-area-inset-right, 0px);
 
+  /* Motion */
+  --motion-fast: 160ms;
+  --motion-base: 200ms;
+  --motion-slow: 260ms;
+  --ease-ios: cubic-bezier(0.2, 0.8, 0.2, 1);
+
   /* Tab bar */
   --tab-height: 58px;
+
+  /* Aliases for spec completeness */
+  --color-app-bg:        var(--color-surface);
+  --color-surface-soft:  var(--color-surface-muted);
+  --color-text-soft:     var(--color-text-faint);
+  --color-accent-strong: var(--color-accent-dark);
+  --color-border-soft:   var(--color-border-divider);
 }
 
 /* ── Reset & Base ──────────────────────────────────────────────────────────── */
@@ -1149,6 +1162,55 @@ img {
 @keyframes pfRise {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pfScreenIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Screen entrance — uses motion tokens */
+.screen.active {
+  animation: pfScreenIn var(--motion-base) var(--ease-ios) both;
+}
+
+/* Button tap feedback */
+.btn-primary:active,
+.btn-primary-dark:active {
+  transform: scale(0.98);
+  transition: transform var(--motion-fast) var(--ease-ios);
+}
+
+.btn-back:active,
+.btn-spinner:active {
+  transform: scale(0.92);
+  transition: transform var(--motion-fast) var(--ease-ios);
+}
+
+.card-tap:active {
+  transform: scale(0.985);
+  transition: transform var(--motion-fast) var(--ease-ios);
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .screen.active {
+    animation: none;
+  }
+  .btn-primary:active,
+  .btn-primary-dark:active,
+  .btn-back:active,
+  .btn-spinner:active,
+  .card-tap:active {
+    transform: none;
+    transition: none;
+  }
+  .overlay-sheet {
+    animation: none;
+  }
+  .pf-toast {
+    animation: none;
+  }
 }
 
 /* ── Utility ───────────────────────────────────────────────────────────────── */
