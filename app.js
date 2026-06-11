@@ -1,19 +1,17 @@
 /* =============================================================================
    Pourō — app.js
-   PR-004: History persistence + localStorage + Rebrew persistence
+   PR-005: Settings persistence + JSON/CSV export + Clear history
 
-   PR-004 adds:
-   - localStorage-backed brew history (key: pouroFable5.history.v1)
-   - Brew Log Save: real persistence with history entry schema v1
-   - normalizeHistoryEntry + normalizeRating (safe reading, old-schema compat)
-   - History screen: reads persisted entries on boot, shows empty state
-   - History Detail: uses persisted recipe.steps snapshot (not rebuilt)
-   - Rebrew: restores from persisted entry into Preview
-   - Ice Brew HOT/ICE persistence, Hybrid switchState, 10 Pour timeline
+   PR-005 adds:
+   - Settings localStorage persistence (key: pouroFable5.settings.v1)
+   - Default brew settings (method, dose, ratio) applied on boot
+   - Brew assist toggle persistence (wake, sound, haptic)
+   - JSON export (full history with metadata)
+   - CSV export (all fields, quote-escaped)
+   - Clear History: full localStorage removal
+   - Brew Log equipment input fields (bean, grind, temperature, equipment)
 
    STILL STUB (→ later PRs):
-   - Export JSON / CSV real implementation (→ PR-005)
-   - Clear history full persistence (→ PR-005)
    - Service worker / manifest / offline (→ PR-006)
    ============================================================================= */
 
@@ -360,10 +358,12 @@ const state = {
   currentDetailId: null,
   settings: {
     defMethodId: 'yon-roku',
-    defDose: 20,
-    defRatio: 15,
-    wake: false,
-    sound: true,
+    defDose:     20,
+    defRatio:    15,
+    defFlavor:   'balanced',
+    defStrength: 'standard',
+    wake:   false,
+    sound:  true,
     haptic: true,
   },
 };
@@ -378,7 +378,10 @@ const METHOD_DISPLAY_NAMES = {
 };
 
 /* ── Storage ────────────────────────────────────────────────────────────────── */
-const STORAGE_KEYS = { history: 'pouroFable5.history.v1' };
+const STORAGE_KEYS = {
+  history:  'pouroFable5.history.v1',
+  settings: 'pouroFable5.settings.v1',
+};
 const MAX_HISTORY_ENTRIES = 500;
 
 function normalizeRating(v) {
@@ -457,6 +460,72 @@ function safeWriteHistory(entries) {
     return true;
   } catch (error) {
     console.warn('[Pouro] Failed to write history:', error);
+    return false;
+  }
+}
+
+/* ── Settings storage ───────────────────────────────────────────────────────── */
+function getDefaultSettings() {
+  return {
+    defMethodId: 'yon-roku',
+    defDose:     20,
+    defRatio:    15,
+    defFlavor:   'balanced',
+    defStrength: 'standard',
+    wake:   false,
+    sound:  true,
+    haptic: true,
+  };
+}
+
+function normalizeSettings(raw) {
+  const d = getDefaultSettings();
+  if (!raw || typeof raw !== 'object') return d;
+
+  // Support both flat (PR-005) and the nested schema form for forward-compat
+  const db = raw.defaultBrew  || {};
+  const ba = raw.brewAssist   || {};
+
+  return {
+    defMethodId: (raw.defMethodId  || db.methodId  || d.defMethodId),
+    defDose:     Number(raw.defDose     || db.dose      || d.defDose),
+    defRatio:    Number(raw.defRatio    || db.ratio     || d.defRatio),
+    defFlavor:   (raw.defFlavor   || db.flavor    || d.defFlavor),
+    defStrength: (raw.defStrength || db.strength  || d.defStrength),
+    wake:        Boolean(raw.wake   ?? ba.wakeLock  ?? d.wake),
+    sound:       Boolean(raw.sound  ?? ba.sound     ?? d.sound),
+    haptic:      Boolean(raw.haptic ?? ba.vibration ?? d.haptic),
+  };
+}
+
+function safeReadSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.settings);
+    if (!raw) return getDefaultSettings();
+    return normalizeSettings(JSON.parse(raw));
+  } catch (err) {
+    console.warn('[Pouro] Failed to read settings:', err);
+    return getDefaultSettings();
+  }
+}
+
+function safeWriteSettings(settings) {
+  try {
+    const payload = {
+      schemaVersion: 1,
+      defMethodId:   settings.defMethodId,
+      defDose:       settings.defDose,
+      defRatio:      settings.defRatio,
+      defFlavor:     settings.defFlavor,
+      defStrength:   settings.defStrength,
+      wake:          settings.wake,
+      sound:         settings.sound,
+      haptic:        settings.haptic,
+    };
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(payload));
+    return true;
+  } catch (err) {
+    console.warn('[Pouro] Failed to write settings:', err);
     return false;
   }
 }
@@ -1073,6 +1142,13 @@ function renderPreview() {
   ).join('');
 }
 
+function clearLogEquipmentInputs() {
+  ['log-bean', 'log-grind', 'log-temperature', 'log-equipment'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
 /* ── Brew Log screen ────────────────────────────────────────────────────────── */
 function renderLog() {
   const recipe = state.activeRecipe || RecipeEngine.build(
@@ -1304,6 +1380,9 @@ function renderSettings() {
       else        track.classList.remove('on');
     }
   });
+
+  // Persist after every render that reflects a change
+  safeWriteSettings(s);
 }
 
 /* ── Toast ──────────────────────────────────────────────────────────────────── */
@@ -1314,6 +1393,96 @@ function showToast(msg) {
   el.classList.remove('hidden');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
+}
+
+/* ── Export helpers ─────────────────────────────────────────────────────────── */
+function _exportFilename(ext) {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const ts  = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+  return `pouro-fable5-history-${ts}.${ext}`;
+}
+
+function _downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportJSON() {
+  const history = safeReadHistory();
+  if (!history.length) { showToast('書き出す履歴がありません'); return; }
+
+  const payload = {
+    app:          'Pouro-Fable5',
+    schemaVersion: 1,
+    exportedAt:   new Date().toISOString(),
+    historyCount: history.length,
+    history,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+  _downloadBlob(blob, _exportFilename('json'));
+  showToast('JSONを書き出しました');
+}
+
+function _csvEscape(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportCSV() {
+  const history = safeReadHistory();
+  if (!history.length) { showToast('書き出す履歴がありません'); return; }
+
+  const cols = ['id','completedAt','methodId','methodName','dose','ratio',
+                'totalWater','hotWater','ice','elapsedSec',
+                'rating','tags','note','nextNote','bean','grind','temperature','equipment'];
+
+  const rows = [cols.join(',')];
+  history.forEach(h => {
+    const log = h.log || {};
+    const row = [
+      h.id,
+      h.completedAt || h.createdAt || '',
+      h.methodId,
+      h.methodName || '',
+      h.dose,
+      h.ratio !== null && h.ratio !== undefined ? h.ratio : '',
+      h.recipe?.totalWater ?? '',
+      h.recipe?.hotWater   ?? '',
+      h.recipe?.ice        ?? '',
+      h.brew?.elapsedSec   ?? '',
+      log.rating !== null && log.rating !== undefined ? log.rating : '',
+      (log.tags || []).join('|'),
+      log.note     || '',
+      log.nextNote || '',
+      log.bean        || '',
+      log.grind       || '',
+      log.temperature || '',
+      log.equipment   || '',
+    ].map(_csvEscape).join(',');
+    rows.push(row);
+  });
+
+  const bom  = '﻿';
+  const blob = new Blob([bom + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  _downloadBlob(blob, _exportFilename('csv'));
+  showToast('CSVを書き出しました');
+}
+
+/* ── Clear history ──────────────────────────────────────────────────────────── */
+function safeClearHistory() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.history);
+    return true;
+  } catch (err) {
+    console.warn('[Pouro] Failed to clear history:', err);
+    return false;
+  }
 }
 
 /* ── Rebrew helper ──────────────────────────────────────────────────────────── */
@@ -1490,6 +1659,7 @@ function wireEvents() {
         completedAt:  new Date(t.finishedAtWall || Date.now()).toISOString(),
       };
 
+      clearLogEquipmentInputs();
       renderLog();
       showScreen('log');
     }
@@ -1531,10 +1701,10 @@ function wireEvents() {
         tags:        [...state.log.tags],
         note:        document.getElementById('log-memo').value.trim(),
         nextNote:    document.getElementById('log-next-note').value.trim(),
-        grind:       '',
-        temperature: '',
-        bean:        '',
-        equipment:   '',
+        bean:        document.getElementById('log-bean').value.trim(),
+        grind:       document.getElementById('log-grind').value.trim(),
+        temperature: document.getElementById('log-temperature').value.trim(),
+        equipment:   document.getElementById('log-equipment').value.trim(),
       },
     };
 
@@ -1597,11 +1767,11 @@ function wireEvents() {
     if (state.settings.defRatio < 20) { state.settings.defRatio++; renderSettings(); }
   });
 
-  // Settings — export  [PR-003 STUB: toast only — real export in PR-005]
-  document.getElementById('btn-export-json').addEventListener('click', () => showToast('JSON エクスポートは PR-005 で実装予定'));
-  document.getElementById('btn-export-csv').addEventListener('click',  () => showToast('CSV エクスポートは PR-005 で実装予定'));
+  // Settings — export
+  document.getElementById('btn-export-json').addEventListener('click', () => exportJSON());
+  document.getElementById('btn-export-csv').addEventListener('click',  () => exportCSV());
 
-  // Settings — clear history  [PR-003 STUB: in-memory only — real persistence in PR-005]
+  // Settings — clear history (full localStorage removal)
   document.getElementById('btn-clear-history').addEventListener('click', () => {
     document.getElementById('confirm-overlay').classList.remove('hidden');
   });
@@ -1609,19 +1779,35 @@ function wireEvents() {
     document.getElementById('confirm-overlay').classList.add('hidden');
   });
   document.getElementById('btn-confirm-ok').addEventListener('click', () => {
-    // PR-004: in-memory clear only. localStorage is NOT cleared here to prevent data loss.
-    // Full clear (including localStorage) will be implemented in PR-005.
-    state.history = [];
+    const ok = safeClearHistory();
     document.getElementById('confirm-overlay').classList.add('hidden');
-    showToast('表示をリセットしました（再読み込みで復元されます）');
-    renderHistory();
+    if (ok) {
+      state.history = [];
+      renderHistory();
+      showToast('履歴を削除しました');
+    } else {
+      showToast('履歴を削除できませんでした');
+    }
   });
 }
 
 /* ── Boot ───────────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   cacheDOM();
-  state.history = safeReadHistory();  // PR-004: load persisted history on startup
+
+  // Load persisted settings and apply to state
+  const savedSettings = safeReadSettings();
+  state.settings = savedSettings;
+
+  // Apply default brew to draft so Recipe Setup opens with saved defaults
+  state.draft.dose     = savedSettings.defDose;
+  state.draft.ratio    = savedSettings.defRatio;
+  state.draft.flavor   = savedSettings.defFlavor;
+  state.draft.strength = savedSettings.defStrength;
+  state.selectedMethodId = savedSettings.defMethodId;
+
+  state.history = safeReadHistory();
+
   renderHome();
   renderHistory();
   renderSettings();

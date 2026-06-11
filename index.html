@@ -462,26 +462,34 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6"/><path d="M9 12.5h6"/><path d="M9 16.5h3.5"/></svg>
         <span class="section-divider-label">抽出の詳細</span>
       </div>
-      <div class="equip-list" id="log-equip-list">
-        <div class="equip-row">
-          <span class="equip-label">豆</span>
-          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>
-          <span class="equip-value">エチオピア ゲデオ</span>
+      <div class="card" style="padding:6px 4px;" id="log-equip-list">
+        <div class="equip-input-row">
+          <label class="equip-input-label" for="log-bean">
+            <svg class="equip-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>
+            豆
+          </label>
+          <input id="log-bean" class="equip-input" type="text" placeholder="例：エチオピア ゲデオ" autocomplete="off">
         </div>
-        <div class="equip-row">
-          <span class="equip-label">挽き目</span>
-          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
-          <span class="equip-value">中細挽き (#16)</span>
+        <div class="equip-input-row">
+          <label class="equip-input-label" for="log-grind">
+            <svg class="equip-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+            挽き目
+          </label>
+          <input id="log-grind" class="equip-input" type="text" placeholder="例：中細挽き #16" autocomplete="off">
         </div>
-        <div class="equip-row">
-          <span class="equip-label">湯温</span>
-          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><path d="M12 2v11"/><circle cx="12" cy="17" r="4"/></svg>
-          <span class="equip-value">93°C</span>
+        <div class="equip-input-row">
+          <label class="equip-input-label" for="log-temperature">
+            <svg class="equip-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round"><path d="M12 2v11"/><circle cx="12" cy="17" r="4"/></svg>
+            湯温
+          </label>
+          <input id="log-temperature" class="equip-input" type="text" placeholder="例：93°C" autocomplete="off">
         </div>
-        <div class="equip-row">
-          <span class="equip-label">ドリッパー</span>
-          <svg class="equip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-4 9H8Z"/><path d="M12 15v3"/><path d="M8 21h8"/></svg>
-          <span class="equip-value">ハリオ V60</span>
+        <div class="equip-input-row" style="border-bottom:none;">
+          <label class="equip-input-label" for="log-equipment">
+            <svg class="equip-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-4 9H8Z"/><path d="M12 15v3"/><path d="M8 21h8"/></svg>
+            ドリッパー
+          </label>
+          <input id="log-equipment" class="equip-input" type="text" placeholder="例：ハリオ V60" autocomplete="off">
         </div>
       </div>
 
@@ -814,7 +822,7 @@
         <div class="about-card">
           <img src="assets/app-icon.png" alt="pourō icon" class="about-icon">
           <img src="assets/wordmark-ink.png" alt="pourō" style="height:22px;margin-top:4px;">
-          <span class="about-version">Version 0.4.0 (PR-004)</span>
+          <span class="about-version">Version 0.5.0 (PR-005)</span>
           <p class="about-legal">Pourō は個人の手淹れコーヒー体験を記録するアプリです。<br>Fable5 design artifact より構築。</p>
         </div>
 
@@ -849,10 +857,10 @@
   <div id="confirm-overlay" class="overlay-bg hidden">
     <div class="overlay-sheet">
       <div style="font-family:var(--font-mincho);font-weight:600;font-size:18px;color:var(--color-text);margin-bottom:8px;">履歴を削除しますか？</div>
-      <div style="font-size:13px;color:var(--color-text-muted);margin-bottom:20px;line-height:1.6;">すべての抽出記録が削除されます。この操作は取り消せません。</div>
+      <div style="font-size:13px;color:var(--color-text-muted);margin-bottom:20px;line-height:1.6;">保存済みの抽出履歴をすべて削除します。<br>この操作は元に戻せません。</div>
       <div style="display:flex;gap:12px;">
         <button id="btn-confirm-cancel" style="flex:1;height:48px;border:1px solid var(--color-border-input);border-radius:var(--radius-md);background:var(--color-surface-raised);font-size:14px;font-weight:600;color:var(--color-text-muted);cursor:pointer;">キャンセル</button>
-        <button id="btn-confirm-ok"     style="flex:1;height:48px;border:none;border-radius:var(--radius-md);background:#A3543A;font-size:14px;font-weight:700;color:#fff;cursor:pointer;">削除する</button>
+        <button id="btn-confirm-ok"     style="flex:1;height:48px;border:1px solid #C0684A;border-radius:var(--radius-md);background:var(--color-surface-raised);font-size:14px;font-weight:600;color:#A3543A;cursor:pointer;">削除する</button>
       </div>
     </div>
   </div>
