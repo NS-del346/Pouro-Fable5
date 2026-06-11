@@ -321,6 +321,12 @@
         </span>
       </div>
 
+      <!-- Hybrid switch state row (shown only for Hybrid method during brew) -->
+      <div id="brew-switch-row" class="hidden" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;">
+        <span id="brew-switch-chip" style="font-size:10px;font-weight:700;letter-spacing:0.08em;padding:4px 12px;border-radius:var(--radius-pill);"></span>
+        <span id="brew-switch-desc" style="font-size:12px;color:var(--color-text-muted);"></span>
+      </div>
+
       <!-- State chip (PAUSED etc.) -->
       <div id="brew-chip-wrap" class="hidden" style="display:flex;justify-content:center;margin-top:12px;">
         <span id="brew-chip" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-serif);font-weight:600;font-size:13px;letter-spacing:0.06em;padding:7px 16px;border-radius:var(--radius-pill);white-space:nowrap;border:1px solid var(--color-border-input);background:var(--color-surface-raised);color:var(--color-text-muted);">PAUSED</span>
@@ -808,7 +814,7 @@
         <div class="about-card">
           <img src="assets/app-icon.png" alt="pourō icon" class="about-icon">
           <img src="assets/wordmark-ink.png" alt="pourō" style="height:22px;margin-top:4px;">
-          <span class="about-version">Version 0.2.0 (PR-002)</span>
+          <span class="about-version">Version 0.3.0 (PR-003)</span>
           <p class="about-legal">Pourō は個人の手淹れコーヒー体験を記録するアプリです。<br>Fable5 design artifact より構築。</p>
         </div>
 

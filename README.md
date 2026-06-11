@@ -42,10 +42,13 @@ npx serve .
 | PR | Scope |
 |----|-------|
 | PR-001 | Design artifact intake |
-| **PR-002** | **App shell + design token system** ← current |
-| PR-003 | Recipe engine + real timer |
+| PR-002 | App shell + design token system |
+| **PR-003** | **Recipe engine + real timer** ← current |
 | PR-004 | History + localStorage persistence |
 | PR-005 | Settings + export / reset |
 | PR-006 | PWA manifest + service worker + offline |
 
-See [`docs/design/FABLE5_ARTIFACT_REPORT.md`](docs/design/FABLE5_ARTIFACT_REPORT.md) and [`docs/design/PR-002_APP_SHELL_PLAN.md`](docs/design/PR-002_APP_SHELL_PLAN.md) for full details.
+> **PR-003 note:** Brew results are held in memory (`state.brewResultDraft`) and are not persisted.
+> localStorage persistence is implemented in PR-004.
+
+See [`docs/design/FABLE5_ARTIFACT_REPORT.md`](docs/design/FABLE5_ARTIFACT_REPORT.md), [`docs/design/PR-002_APP_SHELL_PLAN.md`](docs/design/PR-002_APP_SHELL_PLAN.md), and [`docs/design/PR-003_RECIPE_TIMER_ENGINE.md`](docs/design/PR-003_RECIPE_TIMER_ENGINE.md) for full details.
