@@ -1,16 +1,31 @@
 /* =============================================================================
    Pourō — app.js
-   PR-002: Static app shell + screen navigation
+   PR-003: Recipe engine + real brew timer
 
-   STUB SCOPE — the following are UI navigation mock/stubs only, NOT real implementations:
-   - history save/clear: in-memory array, no localStorage persistence (→ PR-004)
-   - export (JSON/CSV): toast placeholder only (→ PR-005)
-   - clear history: in-memory only (→ PR-005)
-   - timer: static step display only, no real countdown (→ PR-003)
-   - recipe engine: hardcoded buildSteps() per method (→ PR-003)
+   PR-003 adds:
+   - RecipeEngine: generates recipe objects for all 4 methods
+   - RAF-based real brew timer with pause/resume/next/back/finish
+   - 4:6 Method: 5-pour with flavor/strength reflection
+   - Hybrid: Switch OPEN/CLOSED/OPEN state sequence
+   - 10 Pour: 30s then 15s rhythm (not 45s equal intervals)
+   - Ice Brew: hot/ice separated, cumulative is hot pours only
+   - In-memory brew result draft for Brew Log handoff
+
+   STILL STUB (→ later PRs):
+   - localStorage History persistence (→ PR-004)
+   - Rebrew full persistence (→ PR-004)
+   - Export JSON / CSV real implementation (→ PR-005)
+   - Clear history persistence (→ PR-005)
+   - Service worker / manifest / offline (→ PR-006)
    ============================================================================= */
 
 'use strict';
+
+/* ── Utility ─────────────────────────────────────────────────────────────────── */
+function formatTime(sec) {
+  const s = Math.max(0, Math.floor(sec));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
 
 /* ── Method definitions ─────────────────────────────────────────────────────── */
 const METHODS = {
@@ -35,24 +50,6 @@ const METHODS = {
       'コーヒーをセットし、タイマーの準備をしてください',
       '目標湯量を確認してください — 分量通りに注ぎます',
     ],
-    buildSteps(dose, ratio) {
-      const water = dose * ratio;
-      const p1 = Math.round(water * 0.2);
-      const p2 = Math.round(water * 0.2);
-      const rem = water - p1 - p2;
-      const p3 = Math.round(rem / 3);
-      const p4 = Math.round(rem / 3);
-      const p5 = rem - p3 - p4;
-      let cum = 0;
-      return [
-        { time: '0:00', amt: `${p1}g`, note: '1投目：蒸らし', cum: (cum += p1) },
-        { time: '0:45', amt: `${p2}g`, note: '2投目：味の方向', cum: (cum += p2) },
-        { time: '1:30', amt: `${p3}g`, note: '3投目：濃度調整', cum: (cum += p3) },
-        { time: '2:00', amt: `${p4}g`, note: '4投目', cum: (cum += p4) },
-        { time: '2:30', amt: `${p5}g`, note: '5投目（最終）', cum: (cum += p5) },
-        { time: '3:00', amt: '—', note: 'ドローダウン待機', cum: null, isDraw: true },
-      ];
-    },
   },
 
   'hybrid': {
@@ -60,8 +57,8 @@ const METHODS = {
     num: 'Hybrid',
     name: 'Hybrid',
     sub: 'HARIO Switch 浸漬 + 透過',
-    time: '約3:00',
-    desc: 'スイッチを使って浸漬と透過を組み合わせた方法。前半は弁を開いて注湯、後半は弁を閉じて落とします。',
+    time: '約3:30',
+    desc: 'スイッチを使って浸漬と透過を組み合わせた方法。前半は弁を開いて注湯・浸漬、後半は弁を閉じて透過させます。',
     meters: [
       { label: 'ボディ', dots: [true, true, true, true, true, false] },
       { label: '甘さ',   dots: [true, true, true, true, false, false] },
@@ -72,21 +69,10 @@ const METHODS = {
     iconSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor" stroke="none"/></svg>`,
     img: 'assets/method-hybrid.png',
     checklist: [
-      'スイッチを「開」の状態にしてセットしてください',
+      'スイッチを「開（OPEN）」の状態にしてセットしてください',
       'フィルターをリンスし、ドリッパーを温めてください',
-      '1:30 でスイッチを「閉」に切り替える準備をしてください',
+      '0:45 でスイッチを「閉（CLOSED）」に切り替える準備をしてください',
     ],
-    buildSteps(dose, ratio) {
-      const water = dose * ratio;
-      const p1 = Math.round(water * 0.5);
-      const p2 = water - p1;
-      let cum = 0;
-      return [
-        { time: '0:00', amt: `${p1}g`, note: 'OPEN — 浸漬フェーズ', sw: 'OPEN', cum: (cum += p1) },
-        { time: '1:30', amt: `${p2}g`, note: 'CLOSED — 透過フェーズ', sw: 'CLOSED', cum: (cum += p2) },
-        { time: '2:30', amt: '—', note: 'ドローダウン', cum: null, isDraw: true },
-      ];
-    },
   },
 
   'neo': {
@@ -95,7 +81,7 @@ const METHODS = {
     name: '10 Pour',
     sub: '均等10回注湯・高再現性',
     time: '約3:30',
-    desc: '均等な10回注湯で安定した抽出を実現。第1投は30秒待機、以降は15秒間隔でリズムよく注ぎます。',
+    desc: '第1投は30秒待機、第2投以降は15秒間隔でリズムよく注ぎます。10回均等注湯で安定した抽出を実現します。',
     meters: [
       { label: 'クリーン', dots: [true, true, true, true, true, false] },
       { label: '明るさ',   dots: [true, true, true, true, false, false] },
@@ -107,25 +93,9 @@ const METHODS = {
     img: 'assets/method-10-pour.png',
     checklist: [
       'フィルターをリンスし、ドリッパーを温めてください',
-      '10回分の注湯量を事前に計算してください',
-      'テンポよく注ぐための湯ポットを準備してください',
+      '第1投 30秒待機、第2投以降は15秒間隔でテンポよく注ぎます',
+      '湯温と注湯量を事前に確認してください',
     ],
-    buildSteps(dose, ratio) {
-      // PR-002 stub timeline: first pour 0:00, wait 30s, then 15s intervals → 0:00/0:30/0:45…2:30, drawdown ~3:30
-      const water = dose * ratio;
-      const each = Math.round(water / 10);
-      let cum = 0;
-      const steps = [];
-      for (let i = 0; i < 10; i++) {
-        const sec = i === 0 ? 0 : 30 + (i - 1) * 15;
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-        const amt = i === 9 ? water - cum : each;
-        steps.push({ time: `${m}:${String(s).padStart(2,'0')}`, amt: `${amt}g`, note: `第${i+1}投`, cum: (cum += amt) });
-      }
-      steps.push({ time: '3:30', amt: '—', note: 'ドローダウン目安', cum: null, isDraw: true });
-      return steps;
-    },
   },
 
   'ice': {
@@ -145,28 +115,181 @@ const METHODS = {
     iconSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/></svg>`,
     img: 'assets/method-ice-brew.png',
     checklist: [
-      '氷をサーバーにセットしてください（目標量の約1/3）',
+      '氷をサーバーにセットしてください',
       'フィルターをリンスし、ドリッパーを温めてください',
-      '通常より湯量を少なくして濃く抽出します',
+      '通常より湯量を少なくして濃く抽出します — 急冷で完成します',
     ],
-    buildSteps(dose, ratio) {
-      const total = dose * ratio;
-      const hot = Math.round(total * 0.67);
-      const p1 = Math.round(hot * 0.25);
-      const p2 = Math.round(hot * 0.375);
-      const p3 = hot - p1 - p2;
-      let cum = 0;
-      return [
-        { time: '0:00', amt: `${p1}g`, note: '蒸らし（HOT）', cum: (cum += p1) },
-        { time: '0:45', amt: `${p2}g`, note: '2投目（HOT）', cum: (cum += p2) },
-        { time: '1:30', amt: `${p3}g`, note: '最終投（HOT）', cum: (cum += p3) },
-        { time: '2:15', amt: '—', note: '氷の上へ落として急冷', cum: null, isDraw: true },
-      ];
-    },
   },
 };
 
 const METHOD_ORDER = ['yon-roku', 'hybrid', 'neo', 'ice'];
+
+/* ── Recipe Engine ──────────────────────────────────────────────────────────── */
+/*
+ * RecipeEngine generates a recipe object from user inputs.
+ * The same object is used by Preview timeline, Active Brew timer,
+ * and the Brew Log handoff draft.
+ *
+ * step.type:
+ *   'pour'     — user pours water
+ *   'switch'   — user operates Hybrid switch (no water)
+ *   'drawdown' — waiting for water to drain
+ */
+const RecipeEngine = {
+
+  build(methodId, dose, ratio, flavor, strength) {
+    switch (methodId) {
+      case 'yon-roku': return this._buildYonRoku(dose, ratio, flavor, strength);
+      case 'hybrid':   return this._buildHybrid(dose, ratio);
+      case 'neo':      return this._buildNeo(dose, ratio);
+      case 'ice':      return this._buildIce(dose);
+      default:         return this._buildYonRoku(dose, ratio, 'balanced', 'standard');
+    }
+  },
+
+  _buildYonRoku(dose, ratio, flavor = 'balanced', strength = 'standard') {
+    const totalWater = Math.round(dose * ratio);
+    const frontWater = Math.round(totalWater * 0.4);
+    const backWater  = totalWater - frontWater;
+
+    // Front 2 pours — flavor affects split ratio
+    let p1, p2;
+    if (flavor === 'sweet') {
+      p1 = Math.round(frontWater * 0.6); p2 = frontWater - p1;
+    } else if (flavor === 'bright') {
+      p1 = Math.round(frontWater * 0.4); p2 = frontWater - p1;
+    } else {
+      p1 = Math.round(frontWater / 2);   p2 = frontWater - p1;
+    }
+
+    // Back 3 pours — strength reflected in instructions/descriptions
+    const p3 = Math.round(backWater / 3);
+    const p4 = Math.round(backWater / 3);
+    const p5 = backWater - p3 - p4;
+
+    const flavorNote = { sweet: '甘め寄り', balanced: 'バランス', bright: '明るめ寄り' };
+    const strengthNote = { light: '軽め', standard: '標準', strong: 'リッチ' };
+
+    let cum = 0;
+    return {
+      id: 'yon-roku', name: '4:6 Method',
+      dose, ratio, totalWater,
+      targetDrawdownSec: 210,
+      flavor, strength,
+      pourCount: 5,
+      summary: {
+        coffee: `${dose}g`, water: `${totalWater}ml`,
+        pours: '5回', interval: '0:45 間隔',
+        drawdown: `目安 3:30（${strengthNote[strength]}）`,
+      },
+      steps: [
+        { id: 's1', timeSec: 0,   label: '第1投', instruction: `蒸らし — ${flavorNote[flavor]}`,       pourAmount: p1, totalAmount: (cum += p1), type: 'pour' },
+        { id: 's2', timeSec: 45,  label: '第2投', instruction: '味の方向を定める',                       pourAmount: p2, totalAmount: (cum += p2), type: 'pour' },
+        { id: 's3', timeSec: 90,  label: '第3投', instruction: `濃度を整える（${strengthNote[strength]}）`, pourAmount: p3, totalAmount: (cum += p3), type: 'pour' },
+        { id: 's4', timeSec: 135, label: '第4投', instruction: '濃度を重ねる',                           pourAmount: p4, totalAmount: (cum += p4), type: 'pour' },
+        { id: 's5', timeSec: 180, label: '第5投', instruction: '最終注湯',                               pourAmount: p5, totalAmount: (cum += p5), type: 'pour' },
+        { id: 'draw', timeSec: 210, label: 'ドローダウン', instruction: '落ちるのを待つ（目安 3:30）',      pourAmount: 0,  totalAmount: cum,          type: 'drawdown' },
+      ],
+    };
+  },
+
+  _buildHybrid(dose, ratio) {
+    const totalWater = Math.round(dose * ratio);
+    const p1 = Math.round(totalWater * 0.6);
+    const p2 = totalWater - p1;
+    let cum = 0;
+    return {
+      id: 'hybrid', name: 'Hybrid',
+      dose, ratio, totalWater,
+      targetDrawdownSec: 210,
+      pourCount: 2,
+      summary: {
+        coffee: `${dose}g`, water: `${totalWater}ml`,
+        pours: '2回 + Switch操作',
+        interval: 'OPEN → CLOSED → OPEN',
+        drawdown: '目安 3:30',
+      },
+      steps: [
+        { id: 's1',  timeSec: 0,   label: '第1投',      instruction: '注湯（スイッチ OPEN）',          pourAmount: p1, totalAmount: (cum += p1), type: 'pour',   switchState: 'open'   },
+        { id: 'sw1', timeSec: 45,  label: 'CLOSE',      instruction: 'スイッチを閉じる — 浸漬開始',    pourAmount: 0,  totalAmount: cum,          type: 'switch', switchState: 'closed' },
+        { id: 's2',  timeSec: 90,  label: '第2投',      instruction: '追加注湯（スイッチ CLOSED）',    pourAmount: p2, totalAmount: (cum += p2), type: 'pour',   switchState: 'closed' },
+        { id: 'sw2', timeSec: 135, label: 'OPEN',       instruction: 'スイッチを開く — 透過開始',      pourAmount: 0,  totalAmount: cum,          type: 'switch', switchState: 'open'   },
+        { id: 'draw', timeSec: 210, label: 'ドローダウン', instruction: '落ちるのを待つ（目安 3:30）',  pourAmount: 0,  totalAmount: cum,          type: 'drawdown'                      },
+      ],
+    };
+  },
+
+  _buildNeo(dose, ratio) {
+    // 30s then 15s rhythm:
+    // 0:00, 0:30, 0:45, 1:00, 1:15, 1:30, 1:45, 2:00, 2:15, 2:30 → drawdown 3:30
+    const totalWater = Math.round(dose * ratio);
+    const each = Math.round(totalWater / 10);
+    const times = [0, 30, 45, 60, 75, 90, 105, 120, 135, 150];
+    let cum = 0;
+    const pourSteps = times.map((t, i) => {
+      const amt = (i === 9) ? totalWater - cum : each;
+      const waitNote = i === 0 ? '（次は30秒後）' : '（15秒リズム）';
+      return {
+        id: `s${i + 1}`, timeSec: t, label: `第${i + 1}投`,
+        instruction: `注湯${waitNote}`,
+        pourAmount: amt, totalAmount: (cum += amt), type: 'pour',
+      };
+    });
+    pourSteps.push({
+      id: 'draw', timeSec: 210, label: 'ドローダウン',
+      instruction: '落ちるのを待つ（目安 3:30）',
+      pourAmount: 0, totalAmount: cum, type: 'drawdown',
+    });
+    return {
+      id: 'neo', name: '10 Pour',
+      dose, ratio, totalWater,
+      targetDrawdownSec: 210,
+      pourCount: 10,
+      summary: {
+        coffee: `${dose}g`, water: `${totalWater}ml`,
+        pours: '10回', interval: '第1投30秒 / 以降15秒',
+        drawdown: '目安 3:30',
+      },
+      steps: pourSteps,
+    };
+  },
+
+  _buildIce(dose) {
+    // Ice Brew fixed formula:
+    // hotWater = dose × 7.5, ice = dose × 4
+    // Cumulative pour count uses hot water only — ice is pre-set in server
+    const hotWater = Math.round(dose * 7.5);
+    const ice      = Math.round(dose * 4);
+    const totalWater = hotWater + ice;
+    // 5 equal hot pours: 0:00, 0:30, 1:00, 1:30, 2:00 → chill 3:00
+    const perPour = Math.round(hotWater / 5);
+    const pours = [perPour, perPour, perPour, perPour, hotWater - perPour * 4];
+    const times = [0, 30, 60, 90, 120];
+    let cum = 0;
+    const pourSteps = times.map((t, i) => ({
+      id: `s${i + 1}`, timeSec: t, label: `第${i + 1}投`,
+      instruction: i === 0 ? '蒸らし（HOT）' : i === 4 ? '最終注湯（HOT）' : '注湯（HOT）',
+      pourAmount: pours[i], totalAmount: (cum += pours[i]), type: 'pour',
+    }));
+    pourSteps.push({
+      id: 'chill', timeSec: 180, label: '急冷・完成',
+      instruction: 'スワールして急冷。氷が溶けたら完成（目安 3:00）',
+      pourAmount: 0, totalAmount: cum, type: 'drawdown',
+    });
+    return {
+      id: 'ice', name: 'Ice Brew',
+      dose, ratio: null, totalWater, hotWater, ice,
+      targetDrawdownSec: 180,
+      pourCount: 5,
+      summary: {
+        coffee: `${dose}g`, water: `${hotWater}g HOT / ${ice}g ICE`,
+        pours: '5回', interval: '0:30 間隔',
+        drawdown: '急冷で完成（目安 3:00）',
+      },
+      steps: pourSteps,
+    };
+  },
+};
 
 /* ── Static sample history ──────────────────────────────────────────────────── */
 const SAMPLE_HISTORY = [
@@ -210,8 +333,31 @@ const state = {
   selectedMethodId: 'yon-roku',
   draft: { dose: 20, ratio: 15, flavor: 'balanced', strength: 'standard', customRatio: false },
   rebrewFrom: null,
-  brew: { stepIndex: 1, elapsed: 65, running: false },
+
+  // Active recipe — set by RecipeEngine.build() before brew starts
+  activeRecipe: null,
+
+  // Timer state
+  timer: {
+    startedAt: null,        // performance.now() at start
+    pausedAt: null,         // performance.now() when paused
+    pausedDurationMs: 0,    // cumulative paused time in ms
+    elapsedSec: 0,          // last computed elapsed seconds
+    currentStepIndex: 0,    // index into activeRecipe.steps
+    isRunning: false,
+    isFinished: false,
+    rafId: null,
+    intervalId: null,       // setInterval fallback id (background tab support)
+    startedAtWall: null,    // Date.now() at start (for log handoff)
+    finishedAtWall: null,   // Date.now() at finish (for log handoff)
+  },
+
   log: { rating: 0, tags: [] },
+
+  // PR-003 creates an in-memory brew result draft.
+  // Persistence will be implemented in PR-004.
+  brewResultDraft: null,
+
   history: [...SAMPLE_HISTORY],
   currentDetailId: null,
   settings: {
@@ -226,21 +372,56 @@ const state = {
 
 /* ── Taste tags ─────────────────────────────────────────────────────────────── */
 const TASTE_TAGS = ['甘い', 'フルーティ', '明るい', 'クリーン', 'ナッツ', 'チョコ', 'スパイシー', 'まろやか'];
-
-const RATING_LABELS = ['', '微妙', 'まあまあ', '良い', 'とても良い', '最高'];
-const FLAVOR_LABELS = { sweet: '甘め', balanced: 'バランス', bright: '明るめ' };
-const STRENGTH_LABELS = { light: 'ライト', standard: '標準', strong: 'リッチ' };
+const RATING_LABELS    = ['', '微妙', 'まあまあ', '良い', 'とても良い', '最高'];
+const FLAVOR_LABELS    = { sweet: '甘め', balanced: 'バランス', bright: '明るめ' };
+const STRENGTH_LABELS  = { light: 'ライト', standard: '標準', strong: 'リッチ' };
 const METHOD_DISPLAY_NAMES = {
   'yon-roku': '4:6 Method', 'hybrid': 'Hybrid', 'neo': '10 Pour', 'ice': 'Ice Brew',
 };
 
-/* ── SVG helpers ─────────────────────────────────────────────────────────────── */
-function iconSvgFor(methodId, size = 26) {
-  const s = size;
-  const m = METHODS[methodId];
-  return m ? m.icon.replace(/width="26" height="26"/, `width="${s}" height="${s}"`) : '';
+/* ── DOM cache (populated after DOMContentLoaded) ───────────────────────────── */
+let DOM = {};
+function cacheDOM() {
+  DOM.brewTimeDisplay = document.getElementById('brew-time-display');
+  DOM.brewArc         = document.getElementById('brew-arc');
+  DOM.brewStepBig     = document.getElementById('brew-step-big');
+  DOM.brewStepSmall   = document.getElementById('brew-step-small');
+  DOM.brewDotsRow     = document.getElementById('brew-dots-row');
+  DOM.brewPourCard    = document.getElementById('brew-pour-card');
+  DOM.brewPourAmt     = document.getElementById('brew-pour-amt');
+  DOM.brewCumAmt      = document.getElementById('brew-cum-amt');
+  DOM.brewPourNote    = document.getElementById('brew-pour-note');
+  DOM.brewDrawCard    = document.getElementById('brew-draw-card');
+  DOM.brewDrawTitle   = document.getElementById('brew-draw-title');
+  DOM.brewDrawSub     = document.getElementById('brew-draw-sub');
+  DOM.brewNextHint    = document.getElementById('brew-next-hint');
+  DOM.brewNextTime    = document.getElementById('brew-next-time');
+  DOM.brewNextAmt     = document.getElementById('brew-next-amt');
+  DOM.brewNextTip     = document.getElementById('brew-next-tip');
+  DOM.brewChipWrap    = document.getElementById('brew-chip-wrap');
+  DOM.brewChip        = document.getElementById('brew-chip');
+  DOM.brewPauseIcon   = document.getElementById('brew-pause-icon');
+  DOM.brewPlayIcon    = document.getElementById('brew-play-icon');
+  DOM.brewPauseLabel  = document.getElementById('brew-pause-label');
+  DOM.brewNextIcon    = document.getElementById('brew-next-icon');
+  DOM.brewFinishIcon  = document.getElementById('brew-finish-icon');
+  DOM.brewNextLabel   = document.getElementById('brew-next-label');
+  DOM.brewBtnNext     = document.getElementById('btn-brew-next');
+  DOM.brewSwitchRow   = document.getElementById('brew-switch-row');
+  DOM.brewSwitchChip  = document.getElementById('brew-switch-chip');
+  DOM.brewSwitchDesc  = document.getElementById('brew-switch-desc');
+  DOM.brewMethodIcon  = document.getElementById('brew-method-icon');
+  DOM.brewMethodName  = document.getElementById('brew-method-name');
+  DOM.brewMethodSub   = document.getElementById('brew-method-sub');
 }
 
+/* ── SVG helpers ─────────────────────────────────────────────────────────────── */
+function iconSvgFor(methodId, size = 26) {
+  const m = METHODS[methodId];
+  return m ? m.icon.replace(/width="26" height="26"/, `width="${size}" height="${size}"`) : '';
+}
+
+/* ── Summary columns ────────────────────────────────────────────────────────── */
 function summaryColHTML(iconSvg, label, value, unit) {
   return `<span class="summary-col">
     <span class="summary-col-icon">${iconSvg}</span>
@@ -251,46 +432,57 @@ function summaryColHTML(iconSvg, label, value, unit) {
   </span>`;
 }
 
-function buildSummaryCols(dose, ratio, method) {
-  const water = dose * ratio;
-  const steps = method.buildSteps(dose, ratio).filter(s => !s.isDraw);
-  const pours = steps.length;
-  const drawSecs = method.id === 'neo' ? 30 : (method.id === 'hybrid' ? 0 : 30);
-  const totalMin = method.id === 'neo' ? '3:30' : (method.id === 'hybrid' ? '3:00' : (method.id === 'ice' ? '3:00' : '3:30'));
+const _icons = {
+  bean:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>`,
+  water: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>`,
+  pour:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>`,
+  timer: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`,
+  ratio: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7.5h15"/><path d="M12 4.5v14.5"/></svg>`,
+  ice:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/></svg>`,
+};
 
-  const beanIcon  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>`;
-  const waterIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5h15"/></svg>`;
-  const pourIcon  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>`;
-  const timerIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`;
-  const ratioIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7.5h15"/><path d="M12 4.5v14.5"/></svg>`;
+function buildSummaryCols(recipe) {
+  const pourCount = recipe.steps.filter(s => s.type === 'pour').length;
+  const timeStr   = formatTime(recipe.targetDrawdownSec);
 
+  if (recipe.id === 'ice') {
+    return (
+      summaryColHTML(_icons.bean,  '豆',   recipe.dose,     'g')  +
+      summaryColHTML(_icons.water, 'HOT',  recipe.hotWater, 'g')  +
+      summaryColHTML(_icons.ice,   'ICE',  recipe.ice,      'g')  +
+      summaryColHTML(_icons.pour,  '投数', pourCount,       '回') +
+      summaryColHTML(_icons.timer, '目安', timeStr,         '')
+    );
+  }
   return (
-    summaryColHTML(beanIcon,  '豆',   dose,        'g')  +
-    summaryColHTML(waterIcon, 'お湯', water,       'ml') +
-    summaryColHTML(ratioIcon, '比率', `1:${ratio}`, '')  +
-    summaryColHTML(pourIcon,  '投数', pours,       '回') +
-    summaryColHTML(timerIcon, '目安', totalMin,    '')
+    summaryColHTML(_icons.bean,  '豆',   recipe.dose,          'g')  +
+    summaryColHTML(_icons.water, 'お湯', recipe.totalWater,    'ml') +
+    summaryColHTML(_icons.ratio, '比率', `1:${recipe.ratio}`,  '')   +
+    summaryColHTML(_icons.pour,  '投数', pourCount,            '回') +
+    summaryColHTML(_icons.timer, '目安', timeStr,              '')
   );
 }
 
+/* ── Step list HTML (Preview + Detail) ─────────────────────────────────────── */
 function buildStepsHTML(steps) {
-  return steps.map((st, i) => {
+  const visible = steps.filter(s => s.timeSec >= 0);
+  return visible.map((st, i) => {
     const isFirst = i === 0;
-    const isLast  = i === steps.length - 1;
-    const topBg   = isFirst ? 'transparent' : (i <= steps.findIndex(s => s.isDraw) ? 'var(--color-accent-soft)' : 'var(--color-border-card)');
-    const botBg   = isLast  ? 'transparent' : (st.isDraw ? 'transparent' : 'var(--color-border-card)');
-    const dotCls  = st.isDraw ? 'draw' : (i === 0 ? 'active' : 'upcoming');
+    const isLast  = i === visible.length - 1;
+    const isDraw  = st.type === 'drawdown';
+    const dotCls  = isDraw ? 'draw' : (i === 0 ? 'active' : 'upcoming');
 
     let switchChip = '';
-    if (st.sw === 'OPEN') {
+    if (st.switchState === 'open') {
       switchChip = `<span class="step-switch-chip step-switch-open">OPEN</span>`;
-    } else if (st.sw === 'CLOSED') {
+    } else if (st.switchState === 'closed') {
       switchChip = `<span class="step-switch-chip step-switch-closed">CLOSED</span>`;
     }
 
-    const cumHTML = st.cum !== null
-      ? `<span class="step-cum-label">→</span><span class="step-cum">${st.cum}g</span>`
-      : `<span class="step-cum" style="color:var(--color-text-faint);">完了</span>`;
+    const amtStr = st.pourAmount > 0 ? `${st.pourAmount}g` : (st.type === 'switch' ? '操作' : '—');
+    const cumHTML = isDraw
+      ? `<span class="step-cum" style="color:var(--color-text-faint);">完了</span>`
+      : `<span class="step-cum-label">→</span><span class="step-cum">${st.totalAmount}g</span>`;
 
     return `<div class="step-row">
       <span class="step-rail">
@@ -298,9 +490,9 @@ function buildStepsHTML(steps) {
         <span class="step-dot ${dotCls}"></span>
         <span class="step-rail-line ${isLast ? 'none' : 'empty'}"></span>
       </span>
-      <span class="step-time">${st.time}</span>
+      <span class="step-time">${formatTime(st.timeSec)}</span>
       <span class="step-divider"></span>
-      <span class="step-amt">${st.amt}</span>
+      <span class="step-amt">${amtStr}</span>
       <span style="flex:1;"></span>
       ${switchChip}
       ${cumHTML}
@@ -309,7 +501,7 @@ function buildStepsHTML(steps) {
 }
 
 function buildRatingStars(rating) {
-  return Array.from({length: 5}, (_, i) =>
+  return Array.from({ length: 5 }, (_, i) =>
     `<span class="rating-star ${i < rating ? 'filled' : ''}"></span>`
   ).join('');
 }
@@ -328,9 +520,10 @@ function showScreen(id) {
     tabBar.classList.add('hidden');
   } else {
     tabBar.classList.remove('hidden');
+    // Stop timer when leaving brew screen
+    if (state.timer.isRunning) stopTimer();
   }
 
-  // Tab active state
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.remove('active');
     b.setAttribute('aria-selected', 'false');
@@ -350,6 +543,263 @@ function showScreen(id) {
   }
 }
 
+/* ── Timer Engine ───────────────────────────────────────────────────────────── */
+
+// Shared display updater — called by both RAF loop and setInterval fallback.
+// Calculates elapsed time from performance.now() so it stays accurate
+// regardless of which scheduler fires the update.
+function _updateTimerDisplay() {
+  const t = state.timer;
+  if (!t.isRunning || t.startedAt === null) return;
+
+  const now        = performance.now();
+  const elapsedMs  = now - t.startedAt - t.pausedDurationMs;
+  const elapsedSec = Math.floor(elapsedMs / 1000);
+  t.elapsedSec     = elapsedSec;
+
+  const timeStr = formatTime(elapsedSec);
+  if (DOM.brewTimeDisplay.textContent !== timeStr) {
+    DOM.brewTimeDisplay.textContent = timeStr;
+  }
+
+  const recipe        = state.activeRecipe;
+  const progress      = Math.min(1, elapsedMs / 1000 / recipe.targetDrawdownSec);
+  const circumference = 2 * Math.PI * 112;
+  DOM.brewArc.setAttribute(
+    'stroke-dasharray',
+    `${(circumference * progress).toFixed(1)} ${circumference.toFixed(1)}`
+  );
+}
+
+// RAF loop — runs at up to 60 fps when the page is visible.
+function timerTick() {
+  const t = state.timer;
+  if (!t.isRunning) return;
+  _updateTimerDisplay();
+  t.rafId = requestAnimationFrame(timerTick);
+}
+
+function startTimer() {
+  const t = state.timer;
+  t.startedAt        = performance.now();
+  t.startedAtWall    = Date.now();
+  t.pausedAt         = null;
+  t.pausedDurationMs = 0;
+  t.elapsedSec       = 0;
+  t.isRunning        = true;
+  t.isFinished       = false;
+  // RAF for smooth visual updates; setInterval as 1 Hz fallback for background tabs
+  t.rafId            = requestAnimationFrame(timerTick);
+  t.intervalId       = setInterval(_updateTimerDisplay, 1000);
+}
+
+function pauseTimer() {
+  const t = state.timer;
+  if (!t.isRunning) return;
+  t.pausedAt  = performance.now();
+  t.isRunning = false;
+  cancelAnimationFrame(t.rafId);  t.rafId      = null;
+  clearInterval(t.intervalId);    t.intervalId = null;
+}
+
+function resumeTimer() {
+  const t = state.timer;
+  if (t.isRunning || t.isFinished) return;
+  if (t.startedAt === null) { startTimer(); return; }
+  if (t.pausedAt !== null) {
+    t.pausedDurationMs += performance.now() - t.pausedAt;
+    t.pausedAt = null;
+  }
+  t.isRunning  = true;
+  t.rafId      = requestAnimationFrame(timerTick);
+  t.intervalId = setInterval(_updateTimerDisplay, 1000);
+}
+
+function stopTimer() {
+  const t = state.timer;
+  t.isRunning = false;
+  if (t.rafId)      { cancelAnimationFrame(t.rafId);  t.rafId      = null; }
+  if (t.intervalId) { clearInterval(t.intervalId);    t.intervalId = null; }
+}
+
+/* ── Brew screen: step update (called on Next/Back/init) ────────────────────── */
+function updateBrewStep() {
+  const recipe = state.activeRecipe;
+  const t      = state.timer;
+  if (!recipe) return;
+
+  const steps     = recipe.steps;
+  const totalSteps = steps.length;
+  const idx       = t.currentStepIndex;
+  const step      = steps[idx];
+  if (!step) return;
+
+  // Step counter: show pour number / total pours
+  const pourSteps    = steps.filter(s => s.type === 'pour');
+  const donePours    = steps.slice(0, idx + 1).filter(s => s.type === 'pour').length;
+  const totalPours   = pourSteps.length;
+
+  if (step.type === 'drawdown') {
+    DOM.brewStepBig.textContent   = '✓';
+    DOM.brewStepSmall.textContent = '';
+  } else {
+    DOM.brewStepBig.textContent   = donePours || (step.type === 'switch' ? '→' : '1');
+    DOM.brewStepSmall.textContent = ` / ${totalPours}`;
+  }
+
+  // Progress dots (pour steps only)
+  _updateBrewDots(pourSteps, donePours);
+
+  // Cards
+  if (step.type === 'drawdown') {
+    DOM.brewPourCard.classList.add('hidden');
+    DOM.brewDrawCard.classList.remove('hidden');
+    DOM.brewDrawCard.style.display = '';
+    DOM.brewDrawTitle.textContent  = step.label;
+    DOM.brewDrawSub.textContent    = step.instruction;
+  } else {
+    DOM.brewPourCard.classList.remove('hidden');
+    DOM.brewDrawCard.classList.add('hidden');
+
+    if (step.type === 'pour') {
+      DOM.brewPourAmt.textContent  = step.pourAmount;
+      DOM.brewPourAmt.style.color  = 'var(--color-text)';
+    } else {
+      // switch step: no pour amount
+      DOM.brewPourAmt.textContent  = '—';
+      DOM.brewPourAmt.style.color  = 'var(--color-text-muted)';
+    }
+    DOM.brewCumAmt.textContent   = step.totalAmount;
+    DOM.brewPourNote.textContent = step.instruction;
+  }
+
+  // Hybrid switch badge
+  if (recipe.id === 'hybrid' && step.switchState) {
+    DOM.brewSwitchRow.classList.remove('hidden');
+    DOM.brewSwitchRow.style.display = 'flex';
+    if (step.switchState === 'open') {
+      DOM.brewSwitchChip.textContent  = 'OPEN';
+      DOM.brewSwitchChip.style.background = '#FBF4E5';
+      DOM.brewSwitchChip.style.border     = '1px solid #C9B88C';
+      DOM.brewSwitchChip.style.color      = '#8C5535';
+      DOM.brewSwitchDesc.textContent  = 'スイッチ開';
+    } else {
+      DOM.brewSwitchChip.textContent  = 'CLOSED';
+      DOM.brewSwitchChip.style.background = 'var(--color-surface-ice)';
+      DOM.brewSwitchChip.style.border     = '1px solid var(--color-border-ice)';
+      DOM.brewSwitchChip.style.color      = 'var(--color-text-ice)';
+      DOM.brewSwitchDesc.textContent  = 'スイッチ閉・浸漬中';
+    }
+  } else if (recipe.id !== 'hybrid') {
+    DOM.brewSwitchRow.classList.add('hidden');
+  }
+
+  // Next step hint
+  const nextStep = steps[idx + 1];
+  if (nextStep && nextStep.type !== 'drawdown') {
+    DOM.brewNextHint.classList.remove('hidden');
+    DOM.brewNextHint.style.display = 'flex';
+    DOM.brewNextTime.textContent   = formatTime(nextStep.timeSec);
+    DOM.brewNextAmt.textContent    = nextStep.pourAmount > 0 ? `${nextStep.pourAmount}g` : '';
+    DOM.brewNextTip.textContent    = nextStep.instruction;
+  } else if (nextStep && nextStep.type === 'drawdown') {
+    DOM.brewNextHint.classList.remove('hidden');
+    DOM.brewNextHint.style.display = 'flex';
+    DOM.brewNextTime.textContent   = formatTime(nextStep.timeSec);
+    DOM.brewNextAmt.textContent    = '';
+    DOM.brewNextTip.textContent    = 'ドローダウン待機';
+  } else {
+    DOM.brewNextHint.classList.add('hidden');
+  }
+
+  // Next / Finish button
+  const isLast = idx >= totalSteps - 1;
+  if (isLast) {
+    DOM.brewNextIcon.classList.add('hidden');
+    DOM.brewFinishIcon.classList.remove('hidden');
+    DOM.brewNextLabel.textContent    = '完了';
+    DOM.brewBtnNext.style.background = 'var(--color-accent)';
+    DOM.brewBtnNext.style.border     = '1px solid var(--color-accent)';
+  } else {
+    DOM.brewFinishIcon.classList.add('hidden');
+    DOM.brewNextIcon.classList.remove('hidden');
+    DOM.brewNextLabel.textContent    = '次へ';
+    DOM.brewBtnNext.style.background = 'var(--color-btn-light-bg)';
+    DOM.brewBtnNext.style.border     = '1px solid var(--color-border-input)';
+  }
+}
+
+function _updateBrewDots(pourSteps, donePours) {
+  const maxDots = Math.min(pourSteps.length, 10);
+  DOM.brewDotsRow.innerHTML = Array.from({ length: maxDots }, (_, i) => {
+    const num = i + 1;
+    const cls = num < donePours ? 'done' : (num === donePours ? 'active' : 'upcoming');
+    const lineBg = i > 0 && i < donePours
+      ? 'var(--color-accent-soft)' : 'var(--color-border-card)';
+    return `<span class="brew-dot-col">
+      <span class="brew-dot-line" style="background:${lineBg};"></span>
+      <span class="brew-dot-circle ${cls}"></span>
+      <span class="brew-dot-label">${num}</span>
+    </span>`;
+  }).join('');
+}
+
+function _updateBrewPauseUI(running) {
+  if (running) {
+    DOM.brewPauseIcon.classList.remove('hidden');
+    DOM.brewPlayIcon.classList.add('hidden');
+    DOM.brewPauseLabel.textContent = '一時停止';
+    DOM.brewChipWrap.classList.add('hidden');
+  } else {
+    DOM.brewPauseIcon.classList.add('hidden');
+    DOM.brewPlayIcon.classList.remove('hidden');
+    DOM.brewPauseLabel.textContent = '再開';
+    DOM.brewChipWrap.classList.remove('hidden');
+    DOM.brewChipWrap.style.display = 'flex';
+    DOM.brewChip.textContent = 'PAUSED';
+  }
+}
+
+/* ── Brew: initialize and start ─────────────────────────────────────────────── */
+function initBrew(recipe) {
+  state.activeRecipe = recipe;
+  const t = state.timer;
+  t.startedAt        = null;
+  t.pausedAt         = null;
+  t.pausedDurationMs = 0;
+  t.elapsedSec       = 0;
+  t.currentStepIndex = 0;
+  t.isRunning        = false;
+  t.isFinished       = false;
+  t.rafId            = null;
+  t.intervalId       = null;
+  t.startedAtWall    = null;
+  t.finishedAtWall   = null;
+
+  state.log = { rating: 0, tags: [] };
+
+  // Brew screen method header
+  const m = METHODS[recipe.id];
+  DOM.brewMethodIcon.innerHTML    = m.iconSm;
+  DOM.brewMethodName.textContent  = recipe.name;
+  DOM.brewMethodSub.textContent   = m.sub;
+
+  // Reset timer display
+  DOM.brewTimeDisplay.textContent = '0:00';
+  const circ = (2 * Math.PI * 112).toFixed(1);
+  DOM.brewArc.setAttribute('stroke-dasharray', `0 ${circ}`);
+
+  // Initial step and pause UI
+  updateBrewStep();
+  _updateBrewPauseUI(false);
+
+  showScreen('brew');
+
+  // Auto-start timer
+  startTimer();
+  _updateBrewPauseUI(true);
+}
+
 /* ── Home screen ────────────────────────────────────────────────────────────── */
 function renderHome() {
   const container = document.getElementById('method-list');
@@ -357,13 +807,11 @@ function renderHome() {
 
   const selId  = state.selectedMethodId;
   const selIdx = METHOD_ORDER.indexOf(selId);
-
   let html = '';
 
   METHOD_ORDER.forEach((id, idx) => {
     const m = METHODS[id];
     if (idx === selIdx) {
-      // Selected card
       const metersHTML = m.meters.map(mt =>
         `<span class="meter-chip">
           <span class="meter-chip-label">${mt.label}</span>
@@ -372,7 +820,6 @@ function renderHome() {
           </span>
         </span>`
       ).join('');
-
       html += `<div class="method-selected-card">
         <div style="display:flex;gap:14px;">
           <span style="display:inline-flex;color:var(--color-accent);flex-shrink:0;margin-top:4px;">${m.icon}</span>
@@ -395,7 +842,6 @@ function renderHome() {
         </button>
       </div>`;
     } else {
-      // Unselected row
       html += `<div class="method-row" data-method-id="${id}">
         <span class="method-row-icon">${m.iconSm}</span>
         <span class="method-row-num">${m.num}</span>
@@ -416,7 +862,6 @@ function renderHome() {
     renderSetup();
     showScreen('setup');
   });
-
   container.querySelectorAll('.method-row').forEach(row => {
     row.addEventListener('click', () => {
       state.selectedMethodId = row.dataset.methodId;
@@ -430,22 +875,20 @@ function renderSetup() {
   const m = METHODS[state.selectedMethodId];
   const d = state.draft;
 
-  document.getElementById('setup-method-icon').innerHTML = m.icon;
-  document.getElementById('setup-method-name').textContent = m.name;
-  document.getElementById('setup-method-sub').textContent  = m.sub;
-  document.getElementById('dose-display').textContent = d.dose;
+  document.getElementById('setup-method-icon').innerHTML    = m.icon;
+  document.getElementById('setup-method-name').textContent  = m.name;
+  document.getElementById('setup-method-sub').textContent   = m.sub;
+  document.getElementById('dose-display').textContent       = d.dose;
 
-  // Method-specific cards
   document.getElementById('flavor-card').style.display   = m.hasFlavorStrength ? '' : 'none';
   document.getElementById('strength-card').style.display = m.hasFlavorStrength ? '' : 'none';
   document.getElementById('hybrid-card').style.display   = m.id === 'hybrid'   ? '' : 'none';
   document.getElementById('neo-card').style.display      = m.id === 'neo'       ? '' : 'none';
   document.getElementById('ice-card').style.display      = m.id === 'ice'       ? '' : 'none';
 
-  // Ice amounts
   if (m.id === 'ice') {
-    const hot = Math.round(d.dose * d.ratio * 0.67);
-    const ice = Math.round(d.dose * d.ratio * 0.33);
+    const hot = Math.round(d.dose * 7.5);
+    const ice = Math.round(d.dose * 4);
     document.getElementById('ice-hot-display').textContent = hot;
     document.getElementById('ice-ice-display').textContent = ice;
   }
@@ -457,9 +900,9 @@ function renderSetup() {
 }
 
 function renderSetupSummary() {
-  const m = METHODS[state.selectedMethodId];
   const d = state.draft;
-  document.getElementById('setup-summary-grid').innerHTML = buildSummaryCols(d.dose, d.ratio, m);
+  const recipe = RecipeEngine.build(state.selectedMethodId, d.dose, d.ratio, d.flavor, d.strength);
+  document.getElementById('setup-summary-grid').innerHTML = buildSummaryCols(recipe);
 }
 
 function updateRatioChips() {
@@ -498,11 +941,14 @@ function renderPreview() {
   const m = METHODS[state.selectedMethodId];
   const d = state.draft;
 
-  document.getElementById('preview-method-icon').innerHTML = m.icon;
-  document.getElementById('preview-method-name').textContent = m.name;
-  document.getElementById('preview-method-sub').textContent  = m.sub;
+  // Build recipe once — same object will be passed to Active Brew
+  const recipe = RecipeEngine.build(m.id, d.dose, d.ratio, d.flavor, d.strength);
+  state._previewRecipe = recipe;  // stash for Start Brew button
 
-  // Rebrew banner
+  document.getElementById('preview-method-icon').innerHTML    = m.icon;
+  document.getElementById('preview-method-name').textContent  = recipe.name;
+  document.getElementById('preview-method-sub').textContent   = m.sub;
+
   const banner = document.getElementById('rebrew-banner');
   if (state.rebrewFrom) {
     banner.classList.remove('hidden');
@@ -512,7 +958,6 @@ function renderPreview() {
     banner.classList.add('hidden');
   }
 
-  // Flavor chips on preview
   const flavorContainer = document.getElementById('preview-flavor-chips');
   if (m.hasFlavorStrength) {
     flavorContainer.innerHTML =
@@ -522,10 +967,11 @@ function renderPreview() {
     flavorContainer.innerHTML = '';
   }
 
-  document.getElementById('preview-summary-grid').innerHTML = buildSummaryCols(d.dose, d.ratio, m);
+  document.getElementById('preview-summary-grid').innerHTML = buildSummaryCols(recipe);
+  document.getElementById('preview-steps-list').innerHTML   = buildStepsHTML(recipe.steps);
 
-  const steps = m.buildSteps(d.dose, d.ratio);
-  document.getElementById('preview-steps-list').innerHTML  = buildStepsHTML(steps);
+  const drawLabel = document.getElementById('preview-draw-label');
+  drawLabel.textContent = `ドローダウン目安 ${formatTime(recipe.targetDrawdownSec)}`;
 
   const checklist = document.getElementById('preview-checklist');
   checklist.innerHTML = m.checklist.map(item =>
@@ -533,116 +979,29 @@ function renderPreview() {
   ).join('');
 }
 
-/* ── Brew screen ────────────────────────────────────────────────────────────── */
-function renderBrew() {
-  const m = METHODS[state.selectedMethodId];
-  const d = state.draft;
-  const b = state.brew;
-
-  document.getElementById('brew-method-icon').innerHTML      = m.iconSm;
-  document.getElementById('brew-method-name').textContent    = m.name;
-  document.getElementById('brew-method-sub').textContent     = m.sub;
-
-  const steps = m.buildSteps(d.dose, d.ratio).filter(s => !s.isDraw);
-  const total = steps.length;
-  const cur   = Math.min(b.stepIndex, total);
-
-  document.getElementById('brew-step-big').textContent   = cur;
-  document.getElementById('brew-step-small').textContent = ` / ${total}`;
-
-  // Timer display (static sample: 1:05)
-  document.getElementById('brew-time-display').textContent = '1:05';
-
-  // Arc (static: ~30% progress)
-  const circumference = 2 * Math.PI * 112;
-  const progress = 0.3;
-  document.getElementById('brew-arc').setAttribute(
-    'stroke-dasharray',
-    `${circumference * progress} ${circumference}`
-  );
-
-  // Step dots
-  const dotsRow = document.getElementById('brew-dots-row');
-  const dotCount = Math.min(total, 8);
-  dotsRow.innerHTML = Array.from({length: dotCount}, (_, i) => {
-    const stepNum = i + 1;
-    const cls = stepNum < cur ? 'done' : (stepNum === cur ? 'active' : 'upcoming');
-    const lineBg = i > 0 && i <= cur - 1
-      ? 'var(--color-accent-soft)'
-      : 'var(--color-border-card)';
-    return `<span class="brew-dot-col">
-      <span class="brew-dot-line" style="background:${lineBg};"></span>
-      <span class="brew-dot-circle ${cls}"></span>
-      <span class="brew-dot-label">${stepNum}</span>
-    </span>`;
-  }).join('');
-
-  // Pour card
-  const curStep = steps[cur - 1];
-  if (curStep) {
-    document.getElementById('brew-pour-amt').textContent = parseInt(curStep.amt) || '—';
-    document.getElementById('brew-pour-note').textContent = curStep.note;
-    document.getElementById('brew-cum-amt').textContent  = curStep.cum;
-  }
-
-  // Next hint
-  const nextStep = steps[cur];
-  const nextHint = document.getElementById('brew-next-hint');
-  if (nextStep) {
-    nextHint.classList.remove('hidden');
-    nextHint.style.display = 'flex';
-    document.getElementById('brew-next-time').textContent = nextStep.time;
-    document.getElementById('brew-next-amt').textContent  = nextStep.amt;
-    document.getElementById('brew-next-tip').textContent  = nextStep.note;
-  } else {
-    nextHint.classList.add('hidden');
-  }
-
-  // Finish button state
-  const isLast = cur >= total;
-  const nextIcon   = document.getElementById('brew-next-icon');
-  const finishIcon = document.getElementById('brew-finish-icon');
-  const nextLabel  = document.getElementById('brew-next-label');
-  const nextBtn    = document.getElementById('btn-brew-next');
-
-  if (isLast) {
-    nextIcon.classList.add('hidden');
-    finishIcon.classList.remove('hidden');
-    nextLabel.textContent = '完了';
-    nextBtn.style.background  = 'var(--color-accent)';
-    nextBtn.style.border = '1px solid var(--color-accent)';
-  } else {
-    finishIcon.classList.add('hidden');
-    nextIcon.classList.remove('hidden');
-    nextLabel.textContent = '次へ';
-    nextBtn.style.background = 'var(--color-btn-light-bg)';
-    nextBtn.style.border = '1px solid var(--color-border-input)';
-  }
-}
-
 /* ── Brew Log screen ────────────────────────────────────────────────────────── */
 function renderLog() {
-  const m = METHODS[state.selectedMethodId];
-  const d = state.draft;
+  const recipe = state.activeRecipe || RecipeEngine.build(
+    state.selectedMethodId, state.draft.dose, state.draft.ratio,
+    state.draft.flavor, state.draft.strength
+  );
+  const m = METHODS[recipe.id];
 
-  document.getElementById('log-method-label').textContent = m.name;
+  document.getElementById('log-method-label').textContent = recipe.name;
   document.getElementById('log-method-icon').innerHTML    = m.icon;
-  document.getElementById('log-method-name').textContent  = m.name;
+  document.getElementById('log-method-name').textContent  = recipe.name;
   document.getElementById('log-method-sub').textContent   = m.sub;
-  document.getElementById('log-summary-grid').innerHTML   = buildSummaryCols(d.dose, d.ratio, m);
+  document.getElementById('log-summary-grid').innerHTML   = buildSummaryCols(recipe);
 
-  // Rating dots
   const ratingContainer = document.getElementById('log-rating-dots');
-  ratingContainer.innerHTML = Array.from({length: 5}, (_, i) => {
+  ratingContainer.innerHTML = Array.from({ length: 5 }, (_, i) => {
     const selected = i < state.log.rating;
-    return `<button class="rating-dot-btn" data-rating="${i+1}">
+    return `<button class="rating-dot-btn" data-rating="${i + 1}">
       <span class="rating-dot ${selected ? 'selected' : ''}"></span>
     </button>`;
   }).join('');
-
   document.getElementById('log-rate-label').textContent =
     state.log.rating ? RATING_LABELS[state.log.rating] : '—';
-
   ratingContainer.querySelectorAll('.rating-dot-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       state.log.rating = parseInt(btn.dataset.rating);
@@ -650,13 +1009,11 @@ function renderLog() {
     });
   });
 
-  // Taste tags
   const tagContainer = document.getElementById('log-taste-tags');
   tagContainer.innerHTML = TASTE_TAGS.map(tag => {
     const active = state.log.tags.includes(tag);
     return `<button class="chip-btn ${active ? 'active' : 'inactive'}" style="height:38px;padding:0 15px;font-size:12.5px;" data-tag="${tag}">${tag}</button>`;
   }).join('');
-
   tagContainer.querySelectorAll('.chip-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tag = btn.dataset.tag;
@@ -683,12 +1040,14 @@ function renderHistory() {
 
   const feat = history[0];
   const fm   = METHODS[feat.methodId];
+  const featRecipe = RecipeEngine.build(feat.methodId, feat.dose, feat.ratio,
+    feat.flavor || 'balanced', feat.strength || 'standard');
 
   document.getElementById('hist-feat-icon').innerHTML      = fm.icon;
   document.getElementById('hist-feat-name').textContent    = fm.name;
   document.getElementById('hist-feat-sub').textContent     = fm.sub;
   document.getElementById('hist-feat-date').textContent    = feat.date;
-  document.getElementById('hist-feat-summary').innerHTML   = buildSummaryCols(feat.dose, feat.ratio, fm);
+  document.getElementById('hist-feat-summary').innerHTML   = buildSummaryCols(featRecipe);
 
   const tagsRow = document.getElementById('hist-feat-tags-row');
   const tagsEl  = document.getElementById('hist-feat-tags');
@@ -708,18 +1067,16 @@ function renderHistory() {
     noteRow.classList.add('hidden');
   }
 
-  // History list (entries after first)
   const listEl = document.getElementById('history-list');
   listEl.innerHTML = history.slice(1).map(h => {
-    const hm = METHODS[h.methodId];
-    const meta = `${h.dose}g · 1:${h.ratio}`;
-    const stars = Array.from({length: 5}, (_, i) =>
+    const hm    = METHODS[h.methodId];
+    const meta  = `${h.dose}g · 1:${h.ratio}`;
+    const stars = Array.from({ length: 5 }, (_, i) =>
       `<span class="rating-star ${i < h.rating ? 'filled' : ''}"></span>`
     ).join('');
     const tags = (h.tags || []).slice(0, 2).map(t =>
       `<span class="tag-chip">${t}</span>`
     ).join('');
-
     return `<div class="history-row" data-history-id="${h.id}">
       <span style="display:inline-flex;color:var(--color-accent);flex-shrink:0;">${hm.iconSm}</span>
       <span style="flex:1;min-width:0;">
@@ -751,16 +1108,18 @@ function renderDetail() {
   const entry = state.history.find(h => h.id === state.currentDetailId) || state.history[0];
   if (!entry) return;
 
-  const m = METHODS[entry.methodId];
+  const m      = METHODS[entry.methodId];
+  const recipe = RecipeEngine.build(entry.methodId, entry.dose, entry.ratio,
+    entry.flavor || 'balanced', entry.strength || 'standard');
 
   document.getElementById('detail-date-label').textContent  = entry.date;
   document.getElementById('detail-icon').innerHTML           = m.icon;
   document.getElementById('detail-name').textContent         = m.name;
   document.getElementById('detail-sub').textContent          = m.sub;
   document.getElementById('detail-rating').innerHTML         = buildRatingStars(entry.rating);
-  document.getElementById('detail-summary-grid').innerHTML   = buildSummaryCols(entry.dose, entry.ratio, m);
+  document.getElementById('detail-summary-grid').innerHTML   = buildSummaryCols(recipe);
+  document.getElementById('detail-steps-list').innerHTML     = buildStepsHTML(recipe.steps);
 
-  // Next note
   const nextCard = document.getElementById('detail-next-note-card');
   if (entry.nextNote) {
     nextCard.classList.remove('hidden');
@@ -769,7 +1128,6 @@ function renderDetail() {
     nextCard.classList.add('hidden');
   }
 
-  // Flavor chips
   const flavorChips = document.getElementById('detail-flavor-chips');
   if (m.hasFlavorStrength && entry.flavor && entry.strength) {
     flavorChips.innerHTML =
@@ -779,10 +1137,6 @@ function renderDetail() {
     flavorChips.innerHTML = '';
   }
 
-  // Steps
-  document.getElementById('detail-steps-list').innerHTML = buildStepsHTML(m.buildSteps(entry.dose, entry.ratio));
-
-  // Tags
   const tagsCard = document.getElementById('detail-tags-card');
   const tagsList = document.getElementById('detail-tags-list');
   if (entry.tags && entry.tags.length) {
@@ -792,7 +1146,6 @@ function renderDetail() {
     tagsCard.classList.add('hidden');
   }
 
-  // Memo
   const memoCard = document.getElementById('detail-memo-card');
   if (entry.note) {
     memoCard.classList.remove('hidden');
@@ -801,7 +1154,6 @@ function renderDetail() {
     memoCard.classList.add('hidden');
   }
 
-  // Equipment
   const eq = entry.equip || {};
   document.getElementById('detail-equip-bean').textContent    = eq.bean    || '—';
   document.getElementById('detail-equip-grind').textContent   = eq.grind   || '—';
@@ -826,16 +1178,16 @@ function renderSettings() {
 }
 
 /* ── Toast ──────────────────────────────────────────────────────────────────── */
-let toastTimer = null;
+let _toastTimer = null;
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.remove('hidden');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
 }
 
-/* ── Public API (used by inline event handlers) ─────────────────────────────── */
+/* ── Public API ─────────────────────────────────────────────────────────────── */
 window.App = {
   toggleSetting(key) {
     state.settings[key] = !state.settings[key];
@@ -862,12 +1214,12 @@ function wireEvents() {
     });
   });
 
-  // Setup → back
+  // Setup ← back
   document.getElementById('btn-setup-back').addEventListener('click', () => {
     showScreen('home');
   });
 
-  // Setup → dose spinner
+  // Setup — dose spinner
   document.getElementById('btn-dose-dec').addEventListener('click', () => {
     if (state.draft.dose > 10) { state.draft.dose--; renderSetup(); }
   });
@@ -875,7 +1227,7 @@ function wireEvents() {
     if (state.draft.dose < 40) { state.draft.dose++; renderSetup(); }
   });
 
-  // Setup → ratio chips
+  // Setup — ratio chips
   document.getElementById('ratio-chips').addEventListener('click', e => {
     const btn = e.target.closest('.chip-btn');
     if (!btn) return;
@@ -884,12 +1236,10 @@ function wireEvents() {
     renderSetup();
   });
 
-  // Setup → custom ratio toggle
   document.getElementById('btn-custom-ratio').addEventListener('click', () => {
     state.draft.customRatio = !state.draft.customRatio;
     updateRatioChips();
   });
-
   document.getElementById('btn-ratio-dec').addEventListener('click', () => {
     if (state.draft.ratio > 10) { state.draft.ratio--; renderSetup(); }
   });
@@ -897,97 +1247,131 @@ function wireEvents() {
     if (state.draft.ratio < 20) { state.draft.ratio++; renderSetup(); }
   });
 
-  // Setup → flavor chips
+  // Setup — flavor / strength chips
   document.getElementById('flavor-chips').addEventListener('click', e => {
     const btn = e.target.closest('.chip-btn');
-    if (btn) { state.draft.flavor = btn.dataset.flavor; updateFlavorChips(); }
+    if (btn) { state.draft.flavor = btn.dataset.flavor; updateFlavorChips(); renderSetupSummary(); }
   });
-
-  // Setup → strength chips
   document.getElementById('strength-chips').addEventListener('click', e => {
     const btn = e.target.closest('.chip-btn');
-    if (btn) { state.draft.strength = btn.dataset.strength; updateStrengthChips(); }
+    if (btn) { state.draft.strength = btn.dataset.strength; updateStrengthChips(); renderSetupSummary(); }
   });
 
-  // Setup → go to preview
+  // Setup → Preview
   document.getElementById('btn-go-preview').addEventListener('click', () => {
     renderPreview();
     showScreen('preview');
   });
 
-  // Preview → back
+  // Preview ← back
   document.getElementById('btn-preview-back').addEventListener('click', () => {
     showScreen('setup');
   });
 
-  // Preview → start brew
+  // Preview → Start brew
+  // Passes the already-built recipe from renderPreview() to initBrew
   document.getElementById('btn-start-brew').addEventListener('click', () => {
-    state.brew = { stepIndex: 1, elapsed: 65, running: false };
-    state.log  = { rating: 0, tags: [] };
-    renderBrew();
-    showScreen('brew');
+    const recipe = state._previewRecipe ||
+      RecipeEngine.build(state.selectedMethodId, state.draft.dose, state.draft.ratio,
+        state.draft.flavor, state.draft.strength);
+    initBrew(recipe);
   });
 
-  // Brew → back
-  document.getElementById('btn-brew-back').addEventListener('click', () => {
-    showScreen('preview');
-  });
-
-  // Brew → pause / play (static toggle)
+  // Brew — Pause / Resume
   document.getElementById('btn-brew-pause').addEventListener('click', () => {
-    const pauseIcon  = document.getElementById('brew-pause-icon');
-    const playIcon   = document.getElementById('brew-play-icon');
-    const chip       = document.getElementById('brew-chip');
-    const chipWrap   = document.getElementById('brew-chip-wrap');
-    const label      = document.getElementById('brew-pause-label');
-
-    state.brew.running = !state.brew.running;
-    if (state.brew.running) {
-      pauseIcon.classList.remove('hidden');
-      playIcon.classList.add('hidden');
-      label.textContent = '一時停止';
-      chipWrap.classList.add('hidden');
+    const t = state.timer;
+    if (t.isRunning) {
+      pauseTimer();
+      _updateBrewPauseUI(false);
     } else {
-      pauseIcon.classList.add('hidden');
-      playIcon.classList.remove('hidden');
-      label.textContent = '再開';
-      chipWrap.classList.remove('hidden');
-      chipWrap.style.display = 'flex';
-      chip.textContent = 'PAUSED';
+      resumeTimer();
+      _updateBrewPauseUI(true);
     }
   });
 
-  // Brew → next step / finish
+  // Brew — Back (previous step or abandon)
+  document.getElementById('btn-brew-back').addEventListener('click', () => {
+    const t = state.timer;
+    if (t.currentStepIndex === 0) {
+      // At first step — abandon brew, return to preview
+      stopTimer();
+      state.activeRecipe = null;
+      showScreen('preview');
+      return;
+    }
+    // Go to previous step
+    t.currentStepIndex = Math.max(0, t.currentStepIndex - 1);
+    const prevStep = state.activeRecipe.steps[t.currentStepIndex];
+
+    // PR-003: snap elapsed time to the target step's timeSec on Back.
+    // This is a simplification — a more precise rewind implementation is deferred to PR-004.
+    if (t.startedAt !== null && prevStep.timeSec >= 0) {
+      const now = performance.now();
+      t.startedAt = now - prevStep.timeSec * 1000 - t.pausedDurationMs;
+      t.elapsedSec = prevStep.timeSec;
+    }
+    updateBrewStep();
+  });
+
+  // Brew — Next step / Finish
   document.getElementById('btn-brew-next').addEventListener('click', () => {
-    const m     = METHODS[state.selectedMethodId];
-    const steps = m.buildSteps(state.draft.dose, state.draft.ratio).filter(s => !s.isDraw);
-    if (state.brew.stepIndex < steps.length) {
-      state.brew.stepIndex++;
-      renderBrew();
+    const t      = state.timer;
+    const recipe = state.activeRecipe;
+    if (!recipe) return;
+
+    const steps = recipe.steps;
+    if (t.currentStepIndex < steps.length - 1) {
+      t.currentStepIndex++;
+      updateBrewStep();
     } else {
-      // Finished — go to log
+      // Final step — finish brew
+      stopTimer();
+      t.isFinished      = true;
+      t.finishedAtWall  = Date.now();
+
+      // Create in-memory brew result draft.
+      // PR-003 creates an in-memory brew result draft.
+      // Persistence will be implemented in PR-004.
+      state.brewResultDraft = {
+        methodId:     recipe.id,
+        method:       recipe.name,
+        dose:         recipe.dose,
+        ratio:        recipe.ratio,
+        totalWater:   recipe.totalWater,
+        hotWater:     recipe.hotWater  || null,
+        ice:          recipe.ice       || null,
+        steps:        recipe.steps,
+        elapsedSec:   t.elapsedSec,
+        startedAt:    t.startedAtWall,
+        finishedAt:   t.finishedAtWall,
+        completedAt:  new Date(t.finishedAtWall || Date.now()).toISOString(),
+      };
+
       renderLog();
       showScreen('log');
     }
   });
 
-  // Log → back
+  // Log ← back
   document.getElementById('btn-log-back').addEventListener('click', () => {
     showScreen('brew');
+    if (state.timer.isFinished) {
+      // Brew already finished — do nothing, just show brew screen in final state
+    }
   });
 
-  // Log → save  [PR-002 STUB: in-memory only, no localStorage persistence — real persistence in PR-004]
+  // Log — Save  [PR-003 STUB: in-memory only, no localStorage persistence — real persistence in PR-004]
   document.getElementById('btn-save-log').addEventListener('click', () => {
-    const m = METHODS[state.selectedMethodId];
-    const d = state.draft;
+    const recipe = state.activeRecipe || {};
+    const draft  = state.brewResultDraft || {};
     const entry = {
       id:       `h${Date.now()}`,
-      methodId: m.id,
+      methodId: recipe.id || state.selectedMethodId,
       date:     new Date().toISOString().slice(0, 10),
-      dose:     d.dose,
-      ratio:    d.ratio,
-      flavor:   d.flavor,
-      strength: d.strength,
+      dose:     recipe.dose     || state.draft.dose,
+      ratio:    recipe.ratio    || state.draft.ratio,
+      flavor:   recipe.flavor   || state.draft.flavor,
+      strength: recipe.strength || state.draft.strength,
       rating:   state.log.rating,
       tags:     [...state.log.tags],
       note:     document.getElementById('log-memo').value,
@@ -1002,62 +1386,60 @@ function wireEvents() {
     }, 600);
   });
 
-  // History → featured detail
+  // History — featured detail
   document.getElementById('btn-hist-detail').addEventListener('click', () => {
     state.currentDetailId = state.history[0]?.id;
     renderDetail();
     showScreen('detail');
   });
 
-  // History → featured rebrew (→ Preview with rebrewFrom)
+  // History — featured rebrew
   document.getElementById('btn-hist-rebrew').addEventListener('click', () => {
     const entry = state.history[0];
     if (!entry) return;
-    state.selectedMethodId   = entry.methodId;
-    state.draft.dose         = entry.dose;
-    state.draft.ratio        = entry.ratio;
-    state.draft.flavor       = entry.flavor   || 'balanced';
-    state.draft.strength     = entry.strength || 'standard';
-    state.rebrewFrom         = { id: entry.id, date: entry.date };
+    state.selectedMethodId = entry.methodId;
+    state.draft.dose       = entry.dose;
+    state.draft.ratio      = entry.ratio;
+    state.draft.flavor     = entry.flavor   || 'balanced';
+    state.draft.strength   = entry.strength || 'standard';
+    state.rebrewFrom       = { id: entry.id, date: entry.date };
     renderPreview();
     showScreen('preview');
   });
 
-  // Detail → back
+  // Detail ← back
   document.getElementById('btn-detail-back').addEventListener('click', () => {
     showScreen('history');
   });
 
-  // Detail → rebrew
+  // Detail — rebrew
   document.getElementById('btn-detail-rebrew').addEventListener('click', () => {
     const entry = state.history.find(h => h.id === state.currentDetailId);
     if (!entry) return;
-    state.selectedMethodId   = entry.methodId;
-    state.draft.dose         = entry.dose;
-    state.draft.ratio        = entry.ratio;
-    state.draft.flavor       = entry.flavor   || 'balanced';
-    state.draft.strength     = entry.strength || 'standard';
-    state.rebrewFrom         = { id: entry.id, date: entry.date };
+    state.selectedMethodId = entry.methodId;
+    state.draft.dose       = entry.dose;
+    state.draft.ratio      = entry.ratio;
+    state.draft.flavor     = entry.flavor   || 'balanced';
+    state.draft.strength   = entry.strength || 'standard';
+    state.rebrewFrom       = { id: entry.id, date: entry.date };
     renderPreview();
     showScreen('preview');
   });
 
-  // Settings → method cycle
+  // Settings — method cycle
   document.getElementById('sett-method-row').addEventListener('click', () => {
     const idx = METHOD_ORDER.indexOf(state.settings.defMethodId);
     state.settings.defMethodId = METHOD_ORDER[(idx + 1) % METHOD_ORDER.length];
     renderSettings();
   });
 
-  // Settings → dose
+  // Settings — dose / ratio
   document.getElementById('sett-dose-dec').addEventListener('click', () => {
     if (state.settings.defDose > 10) { state.settings.defDose--; renderSettings(); }
   });
   document.getElementById('sett-dose-inc').addEventListener('click', () => {
     if (state.settings.defDose < 40) { state.settings.defDose++; renderSettings(); }
   });
-
-  // Settings → ratio
   document.getElementById('sett-ratio-dec').addEventListener('click', () => {
     if (state.settings.defRatio > 10) { state.settings.defRatio--; renderSettings(); }
   });
@@ -1065,12 +1447,11 @@ function wireEvents() {
     if (state.settings.defRatio < 20) { state.settings.defRatio++; renderSettings(); }
   });
 
-  // Settings → export  [PR-002 STUB: toast placeholder only, no real export — real export in PR-005]
+  // Settings — export  [PR-003 STUB: toast only — real export in PR-005]
   document.getElementById('btn-export-json').addEventListener('click', () => showToast('JSON エクスポートは PR-005 で実装予定'));
   document.getElementById('btn-export-csv').addEventListener('click',  () => showToast('CSV エクスポートは PR-005 で実装予定'));
 
-  // Settings → clear history
-  // Clear history  [PR-002 STUB: clears in-memory array only, no real persistence — real clear in PR-005]
+  // Settings — clear history  [PR-003 STUB: in-memory only — real persistence in PR-005]
   document.getElementById('btn-clear-history').addEventListener('click', () => {
     document.getElementById('confirm-overlay').classList.remove('hidden');
   });
@@ -1081,11 +1462,13 @@ function wireEvents() {
     state.history = [];
     document.getElementById('confirm-overlay').classList.add('hidden');
     showToast('履歴を削除しました');
+    renderHistory();
   });
 }
 
 /* ── Boot ───────────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  cacheDOM();
   renderHome();
   renderHistory();
   renderSettings();
