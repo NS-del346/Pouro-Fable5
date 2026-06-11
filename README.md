@@ -43,12 +43,14 @@ npx serve .
 |----|-------|
 | PR-001 | Design artifact intake |
 | PR-002 | App shell + design token system |
-| **PR-003** | **Recipe engine + real timer** ← current |
-| PR-004 | History + localStorage persistence |
-| PR-005 | Settings + export / reset |
+| PR-003 | Recipe engine + real timer |
+| **PR-004** | **History + localStorage persistence + Rebrew** ← current |
+| PR-005 | Settings + export / clear history |
 | PR-006 | PWA manifest + service worker + offline |
 
-> **PR-003 note:** Brew results are held in memory (`state.brewResultDraft`) and are not persisted.
-> localStorage persistence is implemented in PR-004.
+> **PR-004:** Brew history is persisted to `localStorage` (`pouroFable5.history.v1`).
+> Rebrew restores method/dose/ratio/options from persisted entry into Preview.
+> Export and full Clear History are implemented in PR-005.
+> PWA manifest and service worker remain PR-006.
 
-See [`docs/design/FABLE5_ARTIFACT_REPORT.md`](docs/design/FABLE5_ARTIFACT_REPORT.md), [`docs/design/PR-002_APP_SHELL_PLAN.md`](docs/design/PR-002_APP_SHELL_PLAN.md), and [`docs/design/PR-003_RECIPE_TIMER_ENGINE.md`](docs/design/PR-003_RECIPE_TIMER_ENGINE.md) for full details.
+See [`docs/design/PR-004_HISTORY_REBREW_PERSISTENCE.md`](docs/design/PR-004_HISTORY_REBREW_PERSISTENCE.md) for full details on the storage key, entry schema, rating null handling, and Rebrew flow.
