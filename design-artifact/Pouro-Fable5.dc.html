@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&amp;family=Shippori+Mincho:wght@500;600;700&amp;family=Zen+Kaku+Gothic+New:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #E7DECC; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [data-scroll] { scrollbar-width: none; }
+    [data-scroll]::-webkit-scrollbar { display: none; }
+    button { font-family: inherit; }
+    textarea { font-family: inherit; }
+    textarea:focus { outline: none; }
+    @keyframes pfToast { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    @keyframes pfSheet { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes pfFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pfRise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</helmet>
+
+<div style="min-height: 100dvh; background: #E7DECC; display: flex; justify-content: center; font-family: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif; color: #2C241B;">
+  <div style="width: 100%; max-width: 430px; height: 100dvh; display: flex; flex-direction: column; background: #F4EDE1; position: relative; overflow: hidden; box-shadow: 0 0 48px rgba(70, 52, 34, 0.18);">
+
+    <!-- ============================== 01 BREW HOME ============================== -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="01 Brew Home" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; padding: 26px 18px 24px;">
+          <div style="text-align: center;">
+            <img src="assets/wordmark-ink.png" alt="pourō" style="height: 32px; display: block; margin: 0 auto;">
+            <div style="margin-top: 8px; font-size: 12px; letter-spacing: 0.04em; color: #8D7C69;">Pour slowly. Brew deeply.</div>
+            <div style="margin-top: 18px; font-family: 'Shippori Mincho', serif; font-weight: 700; font-size: 22px; color: #2C241B;">今日の抽出を整える</div>
+          </div>
+
+          <div style="margin-top: 26px; display: flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"></path></svg>
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: #2C241B;">抽出方法</div>
+            <div style="flex: 1; height: 1px; background: #E0D5C0;"></div>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; flex-direction: column;">
+            <sc-for list="{{ beforeMethods }}" as="m" hint-placeholder-count="0">
+              <div onClick="{{ m.select }}" style="display: flex; align-items: center; gap: 14px; padding: 16px 6px; border-bottom: 1px solid #E5DAC5; cursor: pointer; min-height: 44px;">
+                <span style="display: inline-flex; color: #A2674E; flex-shrink: 0;">{{ m.iconEl }}</span>
+                <span style="font-family: 'Lora', serif; font-size: 13px; color: #B3A38C; flex-shrink: 0;">{{ m.num }}</span>
+                <span style="flex: 1; min-width: 0;">
+                  <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 17px; color: #2C241B;">{{ m.name }}</span>
+                  <span style="display: block; font-size: 12.5px; color: #8D7C69; margin-top: 1px;">{{ m.sub }}</span>
+                </span>
+                <span style="font-size: 11px; color: #B3A38C; flex-shrink: 0;">{{ m.time }}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B3A38C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+            </sc-for>
+
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 22px; padding: 18px 18px 16px; margin: 10px 0; box-shadow: 0 12px 28px rgba(70, 52, 34, 0.10);">
+              <div style="display: flex; gap: 14px;">
+                <span style="display: inline-flex; color: #A2674E; flex-shrink: 0; margin-top: 4px;">{{ selIconEl }}</span>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="display: flex; align-items: center;">
+                    <span style="font-family: 'Lora', serif; font-size: 13px; color: #B3A38C;">{{ selNum }}</span>
+                    <span style="font-size: 11px; color: #B3A38C; margin-left: 10px; white-space: nowrap;">目安 {{ selTime }}</span>
+                    <span style="flex: 1;"></span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"></path></svg>
+                  </div>
+                  <div style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 26px; color: #2C241B; line-height: 1.2; margin-top: 2px;">{{ selName }}</div>
+                  <div style="font-size: 13px; color: #6E5F4F; margin-top: 2px;">{{ selSub }}</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px;">
+                <sc-for list="{{ selMeters }}" as="mt" hint-placeholder-count="3">
+                  <span style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid #E0D2BC; border-radius: 999px; padding: 5px 11px; background: #FBF7EF;">
+                    <span style="font-size: 11.5px; color: #6E5F4F; white-space: nowrap;">{{ mt.label }}</span>
+                    <span style="display: inline-flex; gap: 3px;">
+                      <sc-for list="{{ mt.dots }}" as="d" hint-placeholder-count="6">
+                        <span style="width: 5.5px; height: 5.5px; border-radius: 50%; background: {{ d.bg }};"></span>
+                      </sc-for>
+                    </span>
+                  </span>
+                </sc-for>
+              </div>
+              <div style="font-size: 13px; color: #6E5F4F; margin-top: 13px;">{{ selDesc }}</div>
+              <button onClick="{{ goSetup }}" style="margin-top: 14px; width: 100%; height: 50px; border: none; border-radius: 14px; background: #2A221B; color: #F6EFE3; font-size: 15px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                レシピ設定へ
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8C7A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13 6l6 6-6 6"></path></svg>
+              </button>
+            </div>
+
+            <sc-for list="{{ afterMethods }}" as="m" hint-placeholder-count="3">
+              <div onClick="{{ m.select }}" style="display: flex; align-items: center; gap: 14px; padding: 16px 6px; border-bottom: 1px solid #E5DAC5; cursor: pointer; min-height: 44px;">
+                <span style="display: inline-flex; color: #A2674E; flex-shrink: 0;">{{ m.iconEl }}</span>
+                <span style="font-family: 'Lora', serif; font-size: 13px; color: #B3A38C; flex-shrink: 0;">{{ m.num }}</span>
+                <span style="flex: 1; min-width: 0;">
+                  <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 17px; color: #2C241B;">{{ m.name }}</span>
+                  <span style="display: block; font-size: 12.5px; color: #8D7C69; margin-top: 1px;">{{ m.sub }}</span>
+                </span>
+                <span style="font-size: 11px; color: #B3A38C; flex-shrink: 0;">{{ m.time }}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B3A38C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== 02 RECIPE SETUP ============================== -->
+    <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="02 Recipe Setup" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div style="display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; padding: 14px 16px 4px;">
+          <button onClick="{{ backToHome }}" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FCFAF5; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2C241B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+          </button>
+          <div style="text-align: center; font-family: 'Shippori Mincho', serif; font-weight: 600; font-size: 17px; color: #2C241B;">レシピ設定</div>
+          <span></span>
+        </div>
+
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; padding: 8px 18px 8px;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 0 14px;">
+            <span style="display: inline-flex; color: #A2674E;">{{ mIconEl }}</span>
+            <span>
+              <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 24px; color: #2C241B; line-height: 1.15;">{{ mName }}</span>
+              <span style="display: block; font-size: 12.5px; color: #8D7C69; margin-top: 1px; white-space: nowrap;">{{ mSub }}</span>
+            </span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- dose -->
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 16px;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"></circle><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"></path></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #2C241B;">コーヒー量</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 4px;">
+                <button onClick="{{ decDose }}" style="width: 46px; height: 46px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+                </button>
+                <span style="min-width: 110px; text-align: center;"><span style="font-family: 'Lora', serif; font-weight: 600; font-size: 46px; color: #2C241B;">{{ doseVal }}</span><span style="font-family: 'Lora', serif; font-size: 17px; color: #8D7C69; margin-left: 3px;">g</span></span>
+                <button onClick="{{ incDose }}" style="width: 46px; height: 46px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- ratio -->
+            <sc-if value="{{ ratioCardVisible }}" hint-placeholder-val="{{ true }}">
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 16px;">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v14.5"></path><path d="M8 19h8"></path><path d="M4.5 7.5h15"></path><path d="M4.5 7.5l-2 5a2.7 2.7 0 0 0 4 0Z"></path><path d="M19.5 7.5l-2 5a2.7 2.7 0 0 0 4 0Z"></path></svg>
+                  <span style="font-size: 13px; font-weight: 700; color: #2C241B;">比率</span>
+                  <span style="flex: 1;"></span>
+                  <button onClick="{{ toggleCustom }}" style="border: none; background: none; cursor: pointer; font-size: 12px; padding: 4px 2px; color: {{ customColor }};">カスタム</button>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; margin-top: 11px;">
+                  <sc-for list="{{ ratioChips }}" as="c" hint-placeholder-count="3">
+                    <button onClick="{{ c.tap }}" style="height: 44px; border-radius: 999px; cursor: pointer; font-family: 'Lora', serif; font-size: 16px; border: 1px solid {{ c.border }}; background: {{ c.bg }}; color: {{ c.color }}; font-weight: {{ c.fw }};">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ customVisible }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 12px; border-top: 1px dashed #E0D2BC; padding-top: 12px;">
+                    <button onClick="{{ decRatio }}" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+                    </button>
+                    <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 24px; color: #8C5535; min-width: 76px; text-align: center;">{{ ratioText }}</span>
+                    <button onClick="{{ incRatio }}" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                    </button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <!-- 4:6 flavor -->
+            <sc-if value="{{ is46 }}" hint-placeholder-val="{{ true }}">
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 16px;">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8.5h12v5.5a6 6 0 0 1-12 0Z"></path><path d="M16.5 9.5h2.2a2.6 2.6 0 0 1 0 5.2h-2.4"></path></svg>
+                  <span style="font-size: 13px; font-weight: 700; color: #2C241B;">味の方向</span>
+                  <span style="flex: 1;"></span>
+                  <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">前半の2投に反映</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; margin-top: 11px;">
+                  <sc-for list="{{ flavorChips }}" as="c" hint-placeholder-count="3">
+                    <button onClick="{{ c.tap }}" style="height: 44px; border-radius: 999px; cursor: pointer; font-size: 13.5px; border: 1px solid {{ c.border }}; background: {{ c.bg }}; color: {{ c.color }}; font-weight: {{ c.fw }};">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 16px;">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8" stroke-dasharray="2.4 3.4"></circle><circle cx="12" cy="12" r="2.4" fill="#A2674E" stroke="none"></circle></svg>
+                  <span style="font-size: 13px; font-weight: 700; color: #2C241B;">濃度</span>
+                  <span style="flex: 1;"></span>
+                  <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">後半の投数に反映</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; margin-top: 11px;">
+                  <sc-for list="{{ strengthChips }}" as="c" hint-placeholder-count="3">
+                    <button onClick="{{ c.tap }}" style="height: 44px; border-radius: 999px; cursor: pointer; font-size: 13.5px; border: 1px solid {{ c.border }}; background: {{ c.bg }}; color: {{ c.color }}; font-weight: {{ c.fw }};">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- hybrid switch card -->
+            <sc-if value="{{ isHy }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 14px;">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5h15l-3.8 8h-7.4Z"></path><path d="M12 12.5v2.5"></path><circle cx="12" cy="17.5" r="1.8"></circle><path d="M12 19.3V21"></path></svg>
+                  <span style="font-size: 13px; font-weight: 700; color: #2C241B;">Switch の開閉</span>
+                  <span style="flex: 1;"></span>
+                  <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">HARIO Switch 系を想定</span>
+                </div>
+                <div style="margin-top: 10px; display: flex; flex-direction: column;">
+                  <sc-for list="{{ hybridRows }}" as="r" hint-placeholder-count="3">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F0E8D8;">
+                      <span style="font-family: 'Lora', serif; font-size: 14px; color: #8D7C69; width: 38px;">{{ r.time }}</span>
+                      <span style="font-size: 13px; color: #2C241B; flex: 1;">{{ r.name }}</span>
+                      <span style="font-family: 'Lora', serif; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; padding: 3.5px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; border: 1px solid {{ r.chipBorder }}; background: {{ r.chipBg }}; color: {{ r.chipColor }};">{{ r.chip }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="margin-top: 10px; font-size: 12px; color: #8D7C69; line-height: 1.7;">浸漬と透過を組み合わせる方式の目安です。2投目のあとに湯温を約70℃へ下げます。</div>
+              </div>
+            </sc-if>
+
+            <!-- 10 pour rhythm card -->
+            <sc-if value="{{ isNeo }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 14px;">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+                  <span style="font-size: 13px; font-weight: 700; color: #2C241B;">注湯リズム</span>
+                  <span style="flex: 1;"></span>
+                  <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">{{ neoPer }}g × 10投</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px; margin-top: 13px;">
+                  <span style="flex: 2; height: 32px; border-radius: 8px; background: #EADDC8; border: 1px solid #DCCCB0; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 12px; font-weight: 600; color: #6E5F4F;">30s</span>
+                  <span style="flex: 1; height: 32px; border-radius: 8px; background: #F7F1E4; border: 1px solid #E6DCC8; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 11px; color: #8D7C69;">15s</span>
+                  <span style="flex: 1; height: 32px; border-radius: 8px; background: #F7F1E4; border: 1px solid #E6DCC8; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 11px; color: #8D7C69;">15s</span>
+                  <span style="flex: 1; height: 32px; border-radius: 8px; background: #F7F1E4; border: 1px solid #E6DCC8; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 11px; color: #8D7C69;">15s</span>
+                  <span style="font-size: 12px; color: #B3A38C; padding: 0 2px;">…</span>
+                </div>
+                <div style="margin-top: 11px; font-size: 12px; color: #8D7C69; line-height: 1.7;">1投目のあとは30秒待ち、2投目からは15秒ごとのリズムで注ぎ続けます。テンポと注湯量の正確さを優先します。</div>
+              </div>
+            </sc-if>
+
+            <!-- ice hot/ice card -->
+            <sc-if value="{{ isIce }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 15px;">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h11l-1.5 17h-8Z"></path><path d="M9 9.5h6.8"></path></svg>
+                  <span style="font-size: 13px; font-weight: 700; color: #2C241B;">湯と氷</span>
+                  <span style="flex: 1;"></span>
+                  <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">分けて管理</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+                  <span style="border: 1px solid #E6DCC8; background: #FBF7EF; border-radius: 14px; padding: 12px 8px; text-align: center;">
+                    <span style="display: block; font-size: 11px; letter-spacing: 0.08em; color: #8D7C69;">HOT（注湯）</span>
+                    <span style="display: block; margin-top: 3px;"><span style="font-family: 'Lora', serif; font-weight: 600; font-size: 26px; color: #2C241B;">{{ iceHot }}</span><span style="font-family: 'Lora', serif; font-size: 13px; color: #8D7C69;">g</span></span>
+                  </span>
+                  <span style="border: 1px solid #D9DEDC; background: #F4F6F4; border-radius: 14px; padding: 12px 8px; text-align: center;">
+                    <span style="display: block; font-size: 11px; letter-spacing: 0.08em; color: #7C8783;">ICE（サーバー）</span>
+                    <span style="display: block; margin-top: 3px;"><span style="font-family: 'Lora', serif; font-weight: 600; font-size: 26px; color: #2C241B;">{{ iceIce }}</span><span style="font-family: 'Lora', serif; font-size: 13px; color: #7C8783;">g</span></span>
+                  </span>
+                </div>
+                <div style="margin-top: 11px; font-size: 12px; color: #8D7C69; line-height: 1.7;">氷はサーバーに先に入れます。タイマーの累計は注いだ湯量のみを表示し、氷は含めません。</div>
+              </div>
+            </sc-if>
+
+            <!-- summary -->
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 12px 15px;">
+              <div style="display: flex; align-items: center; gap: 7px; padding: 0 4px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 8.5h6"></path><path d="M9 12.5h6"></path><path d="M9 16.5h3.5"></path></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #2C241B;">レシピ概要</span>
+              </div>
+              <div style="display: flex; margin-top: 12px;">
+                <sc-for list="{{ sumCols }}" as="s" hint-placeholder-count="4">
+                  <span style="flex: 1; text-align: center; border-left: 1px solid #EDE4D2; padding: 0 2px;">
+                    <span style="display: inline-flex; color: #A2674E;">{{ s.iconEl }}</span>
+                    <span style="display: block; font-size: 10.5px; color: #8D7C69; margin-top: 3px;">{{ s.label }}</span>
+                    <span style="display: block; margin-top: 2px;"><span style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 19px; color: #2C241B;">{{ s.value }}</span><span style="font-family: 'Lora', serif; font-size: 11px; color: #8D7C69;">{{ s.unit }}</span></span>
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 10px 18px calc(14px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(244, 237, 225, 0) 0%, #F4EDE1 40%);">
+          <button onClick="{{ goPreview }}" style="width: 100%; height: 54px; border: none; border-radius: 16px; background: #A2674E; color: #FBF4EA; font-size: 15.5px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(162, 103, 78, 0.28);">
+            レシピを確認
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FBF4EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13 6l6 6-6 6"></path></svg>
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== 03 PREVIEW ============================== -->
+    <sc-if value="{{ isPreview }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="03 Preview" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div style="display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; padding: 14px 16px 4px;">
+          <button onClick="{{ backToSetup }}" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FCFAF5; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2C241B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+          </button>
+          <div style="text-align: center; font-family: 'Shippori Mincho', serif; font-weight: 600; font-size: 17px; color: #2C241B;">プレビュー</div>
+          <span></span>
+        </div>
+
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; padding: 8px 18px 8px;">
+          <sc-if value="{{ rebrewVisible }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; justify-content: center; padding-bottom: 10px;">
+              <span style="display: inline-flex; align-items: center; gap: 7px; border: 1px solid #C9A77F; background: #F4E6D3; color: #8C5535; border-radius: 999px; padding: 6px 14px; font-size: 12px; font-weight: 500; white-space: nowrap;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8C5535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 6.3"></path><path d="M20 5v6h-6"></path></svg>
+                {{ rebrewLabel }}
+              </span>
+            </div>
+          </sc-if>
+
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; padding: 4px 0 14px;">
+            <span style="display: inline-flex; color: #A2674E;">{{ mIconEl }}</span>
+            <span>
+              <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 24px; color: #2C241B; line-height: 1.15;">{{ mName }}</span>
+              <span style="display: block; font-size: 12.5px; color: #8D7C69; margin-top: 1px; white-space: nowrap;">{{ mSub }}</span>
+            </span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 10px 15px;">
+              <div style="display: flex; align-items: center; gap: 7px; padding: 0 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 8.5h6"></path><path d="M9 12.5h6"></path><path d="M9 16.5h3.5"></path></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #2C241B;">レシピ概要</span>
+              </div>
+              <div style="display: flex; margin-top: 12px;">
+                <sc-for list="{{ pvCols }}" as="s" hint-placeholder-count="5">
+                  <span style="flex: 1; text-align: center; border-left: 1px solid #EDE4D2; padding: 0 1px;">
+                    <span style="display: inline-flex; color: #A2674E;">{{ s.iconEl }}</span>
+                    <span style="display: block; font-size: 10px; color: #8D7C69; margin-top: 3px;">{{ s.label }}</span>
+                    <span style="display: block; margin-top: 2px;"><span style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 17.5px; color: #2C241B;">{{ s.value }}</span><span style="font-family: 'Lora', serif; font-size: 10.5px; color: #8D7C69;">{{ s.unit }}</span></span>
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 13px;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"></path></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #2C241B;">抽出ステップ</span>
+                <span style="flex: 1;"></span>
+                <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">{{ pvStepCount }}</span>
+              </div>
+              <div style="margin-top: 8px;">
+                <sc-for list="{{ pvSteps }}" as="st" hint-placeholder-count="5">
+                  <div style="display: flex; align-items: center; gap: 0; min-height: 40px; position: relative;">
+                    <span style="width: 18px; align-self: stretch; display: flex; flex-direction: column; align-items: center;">
+                      <span style="flex: 1; width: 1.5px; background: {{ st.railTop }};"></span>
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ st.dotBg }}; flex-shrink: 0;"></span>
+                      <span style="flex: 1; width: 1.5px; background: {{ st.railBottom }};"></span>
+                    </span>
+                    <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 18px; color: #2C241B; width: 62px; padding-left: 10px;">{{ st.time }}</span>
+                    <span style="width: 1px; height: 20px; background: #E6DCC8;"></span>
+                    <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 17px; color: #2C241B; width: 66px; text-align: center;">{{ st.amt }}</span>
+                    <span style="flex: 1;"></span>
+                    <sc-if value="{{ st.hasSw }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-family: 'Lora', serif; font-size: 9.5px; font-weight: 600; letter-spacing: 0.07em; padding: 3px 8px; border-radius: 999px; margin-right: 8px; white-space: nowrap; flex-shrink: 0; border: 1px solid {{ st.swBorder }}; background: {{ st.swBg }}; color: {{ st.swColor }};">{{ st.swLabel }}</span>
+                    </sc-if>
+                    <span style="font-size: 11.5px; color: #B3A38C;">{{ st.cumLabel }}</span>
+                    <span style="font-family: 'Lora', serif; font-size: 13.5px; color: #8D7C69; width: 48px; text-align: right;">{{ st.cum }}</span>
+                  </div>
+                </sc-for>
+                <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #DCCCB0; background: #FBF6EC; border-radius: 999px; white-space: nowrap; padding: 8px 16px; margin-top: 8px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #C9A77F;"></span>
+                  <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 17px; color: #8C5535;">{{ pvDrawLabel }}</span>
+                  <span style="font-size: 12.5px; color: #8C5535;">落ち切り目安</span>
+                  <span style="flex: 1;"></span>
+                  <span style="font-size: 12px; color: #C9A77F;">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 14px;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8.5 12l2.5 2.5 5-5.5"></path></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #2C241B;">抽出前の確認</span>
+              </div>
+              <div style="margin-top: 9px; display: flex; flex-direction: column; gap: 8px;">
+                <sc-for list="{{ pvChecks }}" as="ck" hint-placeholder-count="3">
+                  <span style="display: flex; align-items: center; gap: 9px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B98A63" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M8.5 12.2l2.4 2.4 4.6-5"></path></svg>
+                    <span style="font-size: 13px; color: #6E5F4F;">{{ ck.text }}</span>
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 10px 18px calc(14px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(244, 237, 225, 0) 0%, #F4EDE1 40%);">
+          <button onClick="{{ startBrew }}" style="width: 100%; height: 54px; border: none; border-radius: 16px; background: #A2674E; color: #FBF4EA; font-size: 15.5px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(162, 103, 78, 0.28);">
+            抽出を開始
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FBF4EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13 6l6 6-6 6"></path></svg>
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== 04 ACTIVE BREW ============================== -->
+    <sc-if value="{{ isBrew }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="04 Active Brew" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; padding: 16px 18px calc(12px + env(safe-area-inset-bottom));">
+          <div style="display: flex; align-items: center; gap: 11px;">
+            <span style="display: inline-flex; color: #A2674E;">{{ bIconEl }}</span>
+            <span style="flex: 1; min-width: 0;">
+              <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 18px; color: #2C241B; line-height: 1.15;">{{ bName }}</span>
+              <span style="display: block; font-size: 11.5px; color: #8D7C69;">{{ bSub }}</span>
+            </span>
+            <span style="text-align: right; white-space: nowrap;">
+              <span style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 21px; color: #A2674E;">{{ bStepBig }}</span>
+              <span style="font-size: 12.5px; color: #8D7C69;">{{ bStepSmall }}</span>
+            </span>
+          </div>
+
+          <sc-if value="{{ chipVisible }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; justify-content: center; margin-top: 12px;">
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-family: 'Lora', serif; font-weight: 600; font-size: 13px; letter-spacing: 0.06em; padding: 7px 16px; border-radius: 999px; white-space: nowrap; border: 1px solid {{ chipBorder }}; background: {{ chipBg }}; color: {{ chipColor }};">{{ chipText }}</span>
+            </div>
+          </sc-if>
+
+          <div style="position: relative; display: flex; align-items: center; justify-content: center; flex: 1; min-height: 200px; margin: 4px 0;">
+            <svg width="252" height="252" viewBox="0 0 252 252" style="position: absolute; max-width: 70vw;">
+              <circle cx="126" cy="126" r="112" fill="none" stroke="#E2D5BE" stroke-width="1.5" stroke-dasharray="1.5 7.5"></circle>
+              <circle cx="126" cy="126" r="112" fill="none" stroke="#B98A63" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="{{ arcDash }}" transform="rotate(-90 126 126)"></circle>
+            </svg>
+            <span style="font-family: 'Lora', serif; font-weight: 500; font-size: 78px; color: #2C241B; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; position: relative;">{{ timeText }}</span>
+          </div>
+
+          <div style="display: flex; justify-content: center; gap: 0; padding: 0 4px 14px;">
+            <sc-for list="{{ brewDots }}" as="d" hint-placeholder-count="5">
+              <span style="flex: 1; max-width: 64px; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative;">
+                <span style="position: absolute; top: 5.5px; left: -50%; right: 50%; height: 1.5px; background: {{ d.lineBg }};"></span>
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: {{ d.bg }}; border: 1.5px solid {{ d.border }}; position: relative; z-index: 1;"></span>
+                <span style="font-family: 'Lora', serif; font-size: 11px; color: {{ d.labelColor }};">{{ d.label }}</span>
+              </span>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ isPour }}" hint-placeholder-val="{{ false }}">
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 13px 18px 13px; box-shadow: 0 8px 22px rgba(70, 52, 34, 0.07);">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"></path></svg>
+                <span style="font-size: 12.5px; font-weight: 700; color: #2C241B; white-space: nowrap;">今回の注湯</span>
+              </div>
+              <div style="display: flex; align-items: center; margin-top: 2px;">
+                <span style="flex: 1;"><span style="font-family: 'Lora', serif; font-weight: 600; font-size: 54px; color: #2C241B; line-height: 1.1;">{{ curAmt }}</span><span style="font-family: 'Lora', serif; font-size: 20px; color: #8D7C69; margin-left: 3px;">g</span></span>
+                <span style="width: 1px; align-self: stretch; background: #EDE4D2; margin: 6px 16px;"></span>
+                <span style="text-align: center; padding-right: 4px;">
+                  <span style="display: block; font-size: 11px; color: #8D7C69;">{{ cumHeader }}</span>
+                  <span style="display: block; margin-top: 1px;"><span style="font-family: 'Lora', serif; font-weight: 600; font-size: 24px; color: #2C241B;">{{ curCum }}</span><span style="font-family: 'Lora', serif; font-size: 13px; color: #8D7C69;">g</span></span>
+                </span>
+              </div>
+              <div style="border-top: 1px solid #F0E8D8; margin-top: 9px; padding-top: 9px; font-size: 13px; color: #6E5F4F;">{{ curNote }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isDraw }}" hint-placeholder-val="{{ false }}">
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 18px 18px; text-align: center; box-shadow: 0 8px 22px rgba(70, 52, 34, 0.07);">
+              <div style="font-family: 'Shippori Mincho', serif; font-weight: 600; font-size: 26px; color: #2C241B;">{{ drawTitle }}</div>
+              <div style="font-size: 13px; color: #8D7C69; margin-top: 6px;">{{ drawSub }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ nextVisible }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: 10px; background: #F1E9D9; border: 1px solid #E3D7BE; border-radius: 16px; padding: 11px 16px; margin-top: 10px;">
+              <span style="font-size: 11px; font-weight: 700; color: #8D7C69; display: flex; flex-direction: column; align-items: center; gap: 1px;">次
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10"></path><path d="M7 20.5h10"></path><path d="M8 3.5c0 7 8 7 8 17"></path><path d="M16 3.5c0 7-8 7-8 17"></path></svg>
+              </span>
+              <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 21px; color: #2C241B;">{{ nextTime }}</span>
+              <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 19px; color: #2C241B;">{{ nextAmtLabel }}</span>
+              <span style="width: 1px; height: 22px; background: #DCCFB4;"></span>
+              <span style="font-size: 12px; color: #6E5F4F; flex: 1; line-height: 1.45;">{{ nextTip }}</span>
+            </div>
+          </sc-if>
+
+          <div style="display: flex; align-items: flex-start; justify-content: space-around; padding: 16px 8px 2px; margin-top: auto;">
+            <span style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <button onClick="{{ brewBackTap }}" style="width: 54px; height: 54px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+              </button>
+              <span style="font-size: 11px; color: #8D7C69;">戻る</span>
+            </span>
+            <span style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <button onClick="{{ pauseTap }}" style="width: 68px; height: 68px; border-radius: 50%; border: none; background: #C49A7E; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(162, 103, 78, 0.3);">
+                <sc-if value="{{ isRunning }}" hint-placeholder-val="{{ true }}">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#FBF4EA"><rect x="6.5" y="5" width="3.6" height="14" rx="1.4"></rect><rect x="13.9" y="5" width="3.6" height="14" rx="1.4"></rect></svg>
+                </sc-if>
+                <sc-if value="{{ isPaused }}" hint-placeholder-val="{{ false }}">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="#FBF4EA"><path d="M8 5.5v13l11-6.5Z"></path></svg>
+                </sc-if>
+              </button>
+              <span style="font-size: 11px; color: #8D7C69;">{{ pauseLabel }}</span>
+            </span>
+            <span style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <button onClick="{{ nextTap }}" style="width: 54px; height: 54px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1px solid {{ nextCircleBorder }}; background: {{ nextCircleBg }};">
+                <sc-if value="{{ nextIsFinish }}" hint-placeholder-val="{{ false }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBF4EA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"></path></svg>
+                </sc-if>
+                <sc-if value="{{ nextIsArrow }}" hint-placeholder-val="{{ true }}">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+                </sc-if>
+              </button>
+              <span style="font-size: 11px; color: {{ nextLabelColor }};">{{ nextLabel }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== 05 BREW LOG ============================== -->
+    <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="05 Brew Log" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div style="display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; padding: 14px 16px 4px;">
+          <button onClick="{{ logBack }}" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FCFAF5; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2C241B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+          </button>
+          <span style="text-align: center;">
+            <span style="display: block; font-family: 'Shippori Mincho', serif; font-weight: 600; font-size: 17px; color: #2C241B;">抽出記録</span>
+            <span style="display: block; font-family: 'Lora', serif; font-size: 12px; color: #A2674E;">{{ mName }}</span>
+          </span>
+          <span></span>
+        </div>
+
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; padding: 10px 18px 8px;">
+          <div style="background: #FAF6EE; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 10px 15px;">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 0 8px;">
+              <span style="display: inline-flex; color: #A2674E;">{{ mIconEl }}</span>
+              <span>
+                <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 21px; color: #2C241B; line-height: 1.15;">{{ mName }}</span>
+                <span style="display: block; font-size: 12px; color: #8D7C69;">{{ mSub }}</span>
+              </span>
+            </div>
+            <div style="display: flex; margin-top: 12px; border-top: 1px solid #EDE4D2; padding-top: 12px;">
+              <sc-for list="{{ pvCols }}" as="s" hint-placeholder-count="5">
+                <span style="flex: 1; text-align: center; border-left: 1px solid #EDE4D2; padding: 0 1px;">
+                  <span style="display: inline-flex; color: #A2674E;">{{ s.iconEl }}</span>
+                  <span style="display: block; font-size: 10px; color: #8D7C69; margin-top: 3px;">{{ s.label }}</span>
+                  <span style="display: block; margin-top: 2px;"><span style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 17px; color: #2C241B;">{{ s.value }}</span><span style="font-family: 'Lora', serif; font-size: 10.5px; color: #8D7C69;">{{ s.unit }}</span></span>
+                </span>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 7px; margin-top: 18px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2.2 4.8 5.3.6-3.9 3.6 1 5.2-4.6-2.6-4.6 2.6 1-5.2L4.5 9.4l5.3-.6Z"></path></svg>
+            <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">評価</span>
+            <span style="flex: 1;"></span>
+            <span style="font-size: 11.5px; color: #B3A38C;">{{ rateLabel }}</span>
+          </div>
+          <div style="display: flex; justify-content: center; gap: 18px; padding: 12px 0 4px;">
+            <sc-for list="{{ rateDots }}" as="r" hint-placeholder-count="5">
+              <button onClick="{{ r.tap }}" style="width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                <span style="width: 26px; height: 26px; border-radius: 50%; background: {{ r.bg }}; border: 1.5px solid {{ r.border }}; transition: background 0.15s;"></span>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 7px; margin-top: 12px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M8.5 13.5c1 1.4 2.2 2.1 3.5 2.1s2.5-0.7 3.5-2.1"></path></svg>
+            <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">テイスト</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+            <sc-for list="{{ tagPills }}" as="t" hint-placeholder-count="8">
+              <button onClick="{{ t.tap }}" style="height: 38px; padding: 0 15px; border-radius: 999px; cursor: pointer; font-size: 12.5px; white-space: nowrap; border: 1px solid {{ t.border }}; background: {{ t.bg }}; color: {{ t.color }}; font-weight: {{ t.fw }};">{{ t.label }}</button>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 7px; margin-top: 20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 8.5h6"></path><path d="M9 12.5h6"></path><path d="M9 16.5h3.5"></path></svg>
+            <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">抽出の詳細</span>
+          </div>
+          <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 16px; margin-top: 10px; padding: 0 14px;">
+            <sc-for list="{{ equipRows }}" as="e" hint-placeholder-count="4">
+              <div onClick="{{ e.tap }}" style="display: flex; align-items: center; gap: 11px; min-height: 50px; border-bottom: 1px solid #F0E8D8; cursor: pointer;">
+                <span style="font-size: 12.5px; color: #8D7C69; width: 58px; flex-shrink: 0;">{{ e.label }}</span>
+                <span style="display: inline-flex; color: #A2674E; flex-shrink: 0;">{{ e.iconEl }}</span>
+                <span style="flex: 1; font-size: 13.5px; color: #2C241B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ e.value }}</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8BBA3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 7px; margin-top: 20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v12l-4 4H5Z"></path><path d="M15 20.5v-4h4"></path></svg>
+            <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">メモ</span>
+            <span style="font-size: 11.5px; color: #B3A38C; margin-left: 4px;">今回の味・気づき</span>
+          </div>
+          <textarea value="{{ noteVal }}" onChange="{{ noteChange }}" placeholder="例：余韻にピーチのような甘さ" rows="3" style="width: 100%; margin-top: 10px; border: 1px dashed #CDBFA6; border-radius: 12px; background: #FCFAF5; padding: 12px 14px; font-size: 13.5px; color: #2C241B; line-height: 1.8; resize: none;"></textarea>
+
+          <div style="display: flex; align-items: center; gap: 7px; margin-top: 16px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 3.5v5"></path><path d="M12 12l4.5 2.5"></path></svg>
+            <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">次回の調整</span>
+            <span style="font-size: 11.5px; color: #B3A38C; margin-left: 4px;">次回変える条件</span>
+          </div>
+          <textarea value="{{ nextNoteVal }}" onChange="{{ nextNoteChange }}" placeholder="例：湯温を92℃に下げる" rows="2" style="width: 100%; margin-top: 10px; border: 1px dashed #CDBFA6; border-radius: 12px; background: #FCFAF5; padding: 12px 14px; font-size: 13.5px; color: #2C241B; line-height: 1.8; resize: none;"></textarea>
+        </div>
+
+        <div style="padding: 10px 18px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(244, 237, 225, 0) 0%, #F4EDE1 40%);">
+          <button onClick="{{ saveLog }}" style="width: 100%; height: 54px; border: none; border-radius: 16px; background: #A2674E; color: #FBF4EA; font-size: 15.5px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(162, 103, 78, 0.28);">
+            記録を保存
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FBF4EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13 6l6 6-6 6"></path></svg>
+          </button>
+          <div style="text-align: center; font-size: 11px; color: #B3A38C; margin-top: 7px;">保存すると履歴に追加されます</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== 06 HISTORY ============================== -->
+    <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="06 History" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; padding: 24px 18px 20px;">
+          <div style="display: flex; align-items: flex-start;">
+            <span>
+              <span style="display: block; font-family: 'Shippori Mincho', serif; font-weight: 700; font-size: 34px; color: #2C241B; line-height: 1.1;">履歴</span>
+              <span style="display: block; font-size: 13px; color: #8D7C69; margin-top: 5px;">抽出の記録</span>
+            </span>
+            <span style="flex: 1;"></span>
+            <span style="display: inline-flex; color: #D8C5A8; margin-top: 4px;">{{ histDecoIcon }}</span>
+          </div>
+
+          <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 22px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+              <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: #2C241B;">最近の抽出</span>
+              <span style="flex: 1; height: 1px; background: #E0D5C0;"></span>
+            </div>
+
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 20px; padding: 16px 16px 6px; margin-top: 13px; box-shadow: 0 10px 26px rgba(70, 52, 34, 0.08);">
+              <div style="display: flex; align-items: center; gap: 13px;">
+                <span style="display: inline-flex; color: #A2674E;">{{ featIconEl }}</span>
+                <span style="flex: 1; min-width: 0;">
+                  <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 23px; color: #2C241B; line-height: 1.15;">{{ featName }}</span>
+                  <span style="display: block; font-size: 12.5px; color: #8D7C69; margin-top: 1px;">{{ featSub }}</span>
+                </span>
+                <span style="font-size: 11px; color: #B3A38C; align-self: flex-start;">{{ featDate }}</span>
+              </div>
+              <div style="display: flex; margin-top: 13px; border-top: 1px solid #EDE4D2; padding-top: 12px;">
+                <sc-for list="{{ featCols }}" as="s" hint-placeholder-count="4">
+                  <span style="flex: 1; text-align: center; border-left: 1px solid #EDE4D2; padding: 0 1px;">
+                    <span style="display: inline-flex; color: #A2674E;">{{ s.iconEl }}</span>
+                    <span style="display: block; font-size: 10px; color: #8D7C69; margin-top: 3px;">{{ s.label }}</span>
+                    <span style="display: block; margin-top: 2px;"><span style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 17.5px; color: #2C241B;">{{ s.value }}</span><span style="font-family: 'Lora', serif; font-size: 10.5px; color: #8D7C69;">{{ s.unit }}</span></span>
+                  </span>
+                </sc-for>
+              </div>
+              <sc-if value="{{ featTagsVisible }}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                  <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #8D7C69;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7l9 9-7 7-9-9Z"></path><circle cx="8.5" cy="8.5" r="1.3"></circle></svg>
+                    テイスト
+                  </span>
+                  <sc-for list="{{ featTags }}" as="t" hint-placeholder-count="3">
+                    <span style="font-size: 11.5px; color: #8C5535; border: 1px solid #D9C3A6; background: #FBF6EC; border-radius: 999px; white-space: nowrap; padding: 4px 11px;">{{ t.label }}</span>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ featNoteVisible }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top: 12px;">
+                  <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #8D7C69;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v12l-4 4H5Z"></path><path d="M15 20.5v-4h4"></path></svg>
+                    前回のメモ
+                  </span>
+                  <div style="font-size: 13px; color: #6E5F4F; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ featNote }}</div>
+                </div>
+              </sc-if>
+              <div style="display: flex; border-top: 1px solid #EDE4D2; margin-top: 13px;">
+                <button onClick="{{ featDetailTap }}" style="flex: 1; min-height: 48px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13.5px; font-weight: 700; color: #8C5535;">
+                  詳細を見る
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8C5535" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <span style="width: 1px; background: #EDE4D2; margin: 8px 0;"></span>
+                <button onClick="{{ featRebrewTap }}" style="flex: 1; min-height: 48px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 13.5px; font-weight: 700; color: #8C5535;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C5535" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 6.3"></path><path d="M20 5v6h-6"></path></svg>
+                  もう一度淹れる
+                </button>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 24px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M18 2.5v4h-4"></path><path d="M12 8v4l2.6 1.7"></path></svg>
+              <span style="font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: #2C241B;">抽出履歴</span>
+              <span style="flex: 1; height: 1px; background: #E0D5C0;"></span>
+            </div>
+
+            <div style="margin-top: 4px;">
+              <sc-for list="{{ histRows }}" as="h" hint-placeholder-count="3">
+                <div onClick="{{ h.tap }}" style="display: flex; align-items: center; gap: 13px; padding: 15px 4px; border-bottom: 1px solid #E5DAC5; cursor: pointer; min-height: 44px;">
+                  <span style="display: inline-flex; color: #A2674E; flex-shrink: 0;">{{ h.iconEl }}</span>
+                  <span style="flex: 1; min-width: 0;">
+                    <span style="display: flex; align-items: baseline; gap: 8px;">
+                      <span style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 16px; color: #2C241B;">{{ h.name }}</span>
+                      <span style="font-size: 10.5px; color: #B3A38C; white-space: nowrap;">{{ h.date }}</span>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                      <span style="font-family: 'Lora', serif; font-size: 12.5px; color: #8D7C69; white-space: nowrap;">{{ h.meta }}</span>
+                      <span style="display: inline-flex;">{{ h.ratingEl }}</span>
+                    </span>
+                  </span>
+                  <span style="display: inline-flex; gap: 5px; flex-shrink: 0;">
+                    <sc-for list="{{ h.tags }}" as="t" hint-placeholder-count="2">
+                      <span style="font-size: 10.5px; color: #8C5535; border: 1px solid #D9C3A6; background: #FBF6EC; border-radius: 999px; white-space: nowrap; padding: 3px 9px;">{{ t.label }}</span>
+                    </sc-for>
+                  </span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B3A38C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ emptyVisible }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align: center; padding: 70px 20px 40px; color: #B3A38C;">
+              <span style="display: inline-flex; color: #D8C5A8;">{{ histDecoIcon2 }}</span>
+              <div style="font-family: 'Shippori Mincho', serif; font-size: 16px; color: #8D7C69; margin-top: 14px;">記録はまだありません</div>
+              <div style="font-size: 12.5px; margin-top: 6px;">一杯淹れて、最初の記録を残しましょう</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== HISTORY DETAIL (derived) ============================== -->
+    <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="History Detail" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div style="display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; padding: 14px 16px 4px;">
+          <button onClick="{{ dBack }}" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FCFAF5; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2C241B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M11 6l-6 6 6 6"></path></svg>
+          </button>
+          <span style="text-align: center;">
+            <span style="display: block; font-family: 'Shippori Mincho', serif; font-weight: 600; font-size: 17px; color: #2C241B;">記録の詳細</span>
+            <span style="display: block; font-size: 11.5px; color: #8D7C69;">{{ dDate }}</span>
+          </span>
+          <span></span>
+        </div>
+
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; padding: 10px 18px 8px;">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 15px 16px;">
+              <div style="display: flex; align-items: center; gap: 13px;">
+                <span style="display: inline-flex; color: #A2674E;">{{ dIconEl }}</span>
+                <span style="flex: 1; min-width: 0;">
+                  <span style="display: block; font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 22px; color: #2C241B; line-height: 1.15;">{{ dName }}</span>
+                  <span style="display: block; font-size: 12px; color: #8D7C69; margin-top: 1px;">{{ dSub }}</span>
+                </span>
+                <span style="text-align: right; flex-shrink: 0; white-space: nowrap;">
+                  <span style="display: block; font-size: 10.5px; color: #B3A38C;">評価</span>
+                  <span style="display: inline-flex; margin-top: 4px;">{{ dRateEl }}</span>
+                </span>
+              </div>
+            </div>
+
+            <sc-if value="{{ dNextVisible }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #F4E6D3; border: 1px solid #D9BE9C; border-radius: 18px; padding: 13px 16px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #8C5535;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8C5535" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 3.5v5"></path><path d="M12 12l4.5 2.5"></path></svg>
+                  次回の調整
+                </span>
+                <div style="font-size: 13.5px; color: #5E4630; margin-top: 6px; line-height: 1.7;">{{ dNextNote }}</div>
+              </div>
+            </sc-if>
+
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 10px 15px;">
+              <div style="display: flex; align-items: center; gap: 7px; padding: 0 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"></rect><path d="M9 8.5h6"></path><path d="M9 12.5h6"></path><path d="M9 16.5h3.5"></path></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #2C241B;">レシピ</span>
+                <span style="flex: 1;"></span>
+                <sc-if value="{{ dChipsVisible }}" hint-placeholder-val="{{ false }}">
+                  <span style="display: inline-flex; gap: 5px; padding-right: 4px;">
+                    <span style="font-size: 10.5px; color: #8C5535; border: 1px solid #D9C3A6; background: #FBF6EC; border-radius: 999px; white-space: nowrap; padding: 3px 9px;">{{ dFlavorLabel }}</span>
+                    <span style="font-size: 10.5px; color: #8C5535; border: 1px solid #D9C3A6; background: #FBF6EC; border-radius: 999px; white-space: nowrap; padding: 3px 9px;">{{ dStrengthLabel }}</span>
+                  </span>
+                </sc-if>
+              </div>
+              <div style="display: flex; margin-top: 12px;">
+                <sc-for list="{{ dCols }}" as="s" hint-placeholder-count="5">
+                  <span style="flex: 1; text-align: center; border-left: 1px solid #EDE4D2; padding: 0 1px;">
+                    <span style="display: inline-flex; color: #A2674E;">{{ s.iconEl }}</span>
+                    <span style="display: block; font-size: 10px; color: #8D7C69; margin-top: 3px;">{{ s.label }}</span>
+                    <span style="display: block; margin-top: 2px;"><span style="font-family: 'Lora', 'Shippori Mincho', serif; font-weight: 600; font-size: 17.5px; color: #2C241B;">{{ s.value }}</span><span style="font-family: 'Lora', serif; font-size: 10.5px; color: #8D7C69;">{{ s.unit }}</span></span>
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px 13px;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"></path></svg>
+                <span style="font-size: 13px; font-weight: 700; color: #2C241B;">抽出ステップ</span>
+              </div>
+              <div style="margin-top: 6px;">
+                <sc-for list="{{ dSteps }}" as="st" hint-placeholder-count="5">
+                  <div style="display: flex; align-items: center; min-height: 34px;">
+                    <span style="width: 18px; align-self: stretch; display: flex; flex-direction: column; align-items: center;">
+                      <span style="flex: 1; width: 1.5px; background: {{ st.railTop }};"></span>
+                      <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ st.dotBg }}; flex-shrink: 0;"></span>
+                      <span style="flex: 1; width: 1.5px; background: {{ st.railBottom }};"></span>
+                    </span>
+                    <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 15.5px; color: #2C241B; width: 56px; padding-left: 10px;">{{ st.time }}</span>
+                    <span style="width: 1px; height: 16px; background: #E6DCC8;"></span>
+                    <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 15px; color: #2C241B; width: 60px; text-align: center;">{{ st.amt }}</span>
+                    <span style="flex: 1;"></span>
+                    <sc-if value="{{ st.hasSw }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-family: 'Lora', serif; font-size: 9px; font-weight: 600; letter-spacing: 0.07em; padding: 2.5px 7px; border-radius: 999px; margin-right: 8px; white-space: nowrap; flex-shrink: 0; border: 1px solid {{ st.swBorder }}; background: {{ st.swBg }}; color: {{ st.swColor }};">{{ st.swLabel }}</span>
+                    </sc-if>
+                    <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">{{ st.cumLabel }}</span>
+                    <span style="font-family: 'Lora', serif; font-size: 12.5px; color: #8D7C69; width: 44px; text-align: right;">{{ st.cum }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{ dTagsVisible }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 13px 16px 14px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #2C241B;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7l9 9-7 7-9-9Z"></path><circle cx="8.5" cy="8.5" r="1.3"></circle></svg>
+                  テイスト
+                </span>
+                <span style="display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px;">
+                  <sc-for list="{{ dTags }}" as="t" hint-placeholder-count="3">
+                    <span style="font-size: 12px; color: #8C5535; border: 1px solid #D9C3A6; background: #FBF6EC; border-radius: 999px; white-space: nowrap; padding: 5px 13px;">{{ t.label }}</span>
+                  </sc-for>
+                </span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ dNoteVisible }}" hint-placeholder-val="{{ false }}">
+              <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 13px 16px 14px;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #2C241B;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14v12l-4 4H5Z"></path><path d="M15 20.5v-4h4"></path></svg>
+                  メモ
+                </span>
+                <div style="font-size: 13.5px; color: #5C4F3E; margin-top: 8px; line-height: 1.8;">{{ dNote }}</div>
+              </div>
+            </sc-if>
+
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 5px 16px;">
+              <sc-for list="{{ dEquipRows }}" as="e" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 11px; min-height: 44px; border-bottom: 1px solid #F0E8D8;">
+                  <span style="font-size: 12.5px; color: #8D7C69; width: 58px; flex-shrink: 0;">{{ e.label }}</span>
+                  <span style="display: inline-flex; color: #A2674E; flex-shrink: 0;">{{ e.iconEl }}</span>
+                  <span style="flex: 1; font-size: 13.5px; color: #2C241B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ e.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 10px 18px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(244, 237, 225, 0) 0%, #F4EDE1 40%);">
+          <button onClick="{{ dRebrew }}" style="width: 100%; height: 54px; border: none; border-radius: 16px; background: #A2674E; color: #FBF4EA; font-size: 15.5px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 20px rgba(162, 103, 78, 0.28);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FBF4EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 6.3"></path><path d="M20 5v6h-6"></path></svg>
+            この記録でもう一度淹れる
+          </button>
+          <div style="text-align: center; font-size: 11px; color: #B3A38C; margin-top: 7px;">プレビューで確認してから開始します</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== 07 SETTINGS ============================== -->
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="07 Settings" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div data-scroll style="flex: 1; overflow-y: auto; min-height: 0; padding: 24px 18px 20px;">
+          <div style="display: flex; align-items: flex-start;">
+            <span>
+              <span style="display: block; font-family: 'Shippori Mincho', serif; font-weight: 700; font-size: 34px; color: #2C241B; line-height: 1.1;">設定</span>
+              <span style="display: block; font-size: 13px; color: #8D7C69; margin-top: 5px;">抽出環境を整える</span>
+            </span>
+            <span style="flex: 1;"></span>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#D8C5A8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 4px;"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8"></path></svg>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 22px;">
+            <!-- default brew -->
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 13px 16px 4px;">
+              <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid #EDE4D2;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-4 9H8Z"></path><path d="M12 15v3"></path><path d="M8 21h8"></path></svg>
+                <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">デフォルト抽出</span>
+              </div>
+              <div onClick="{{ cycleDefMethod }}" style="display: flex; align-items: center; gap: 10px; min-height: 50px; border-bottom: 1px solid #F0E8D8; cursor: pointer;">
+                <span style="font-size: 13px; color: #6E5F4F; flex: 1;">抽出方法</span>
+                <span style="font-family: 'Lora', serif; font-size: 13.5px; color: #8C5535; white-space: nowrap; flex-shrink: 0;">{{ defMethodVal }}</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8BBA3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; min-height: 50px; border-bottom: 1px solid #F0E8D8;">
+                <span style="font-size: 13px; color: #6E5F4F; flex: 1;">コーヒー量</span>
+                <button onClick="{{ decDefDose }}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg></button>
+                <span style="font-family: 'Lora', serif; font-size: 14.5px; color: #2C241B; min-width: 38px; text-align: center;">{{ defDoseVal }}</span>
+                <button onClick="{{ incDefDose }}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; min-height: 50px; border-bottom: 1px solid #F0E8D8;">
+                <span style="font-size: 13px; color: #6E5F4F; flex: 1;">比率</span>
+                <button onClick="{{ decDefRatio }}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg></button>
+                <span style="font-family: 'Lora', serif; font-size: 14.5px; color: #2C241B; min-width: 38px; text-align: center;">{{ defRatioVal }}</span>
+                <button onClick="{{ incDefRatio }}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #DDD1BA; background: #FBF7EF; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8D7C69" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button>
+              </div>
+              <div onClick="{{ cycleDefFlavor }}" style="display: flex; align-items: center; gap: 10px; min-height: 50px; border-bottom: 1px solid #F0E8D8; cursor: pointer;">
+                <span style="font-size: 13px; color: #6E5F4F; flex: 1;">4:6 味の方向</span>
+                <span style="font-size: 13.5px; color: #8C5535; white-space: nowrap; flex-shrink: 0;">{{ defFlavorVal }}</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8BBA3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+              <div onClick="{{ cycleDefStrength }}" style="display: flex; align-items: center; gap: 10px; min-height: 50px; cursor: pointer;">
+                <span style="font-size: 13px; color: #6E5F4F; flex: 1;">4:6 濃度</span>
+                <span style="font-size: 13.5px; color: #8C5535; white-space: nowrap; flex-shrink: 0;">{{ defStrengthVal }}</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8BBA3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+            </div>
+
+            <!-- brew assist -->
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 13px 16px 4px;">
+              <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid #EDE4D2;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"></path><path d="M10 19a2.2 2.2 0 0 0 4 0"></path></svg>
+                <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">抽出アシスト</span>
+              </div>
+              <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="3">
+                <div onClick="{{ t.tap }}" style="display: flex; align-items: center; gap: 11px; min-height: 52px; border-bottom: 1px solid #F0E8D8; cursor: pointer;">
+                  <span style="display: inline-flex; color: #A2674E;">{{ t.iconEl }}</span>
+                  <span style="flex: 1; min-width: 0;">
+                    <span style="display: block; font-size: 13px; color: #2C241B;">{{ t.label }}</span>
+                    <span style="display: block; font-size: 10.5px; color: #B3A38C;">{{ t.sub }}</span>
+                  </span>
+                  <span style="width: 46px; height: 28px; border-radius: 999px; position: relative; transition: background 0.2s; background: {{ t.trackBg }}; flex-shrink: 0;">
+                    <span style="position: absolute; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 4px rgba(60, 45, 30, 0.25); transition: left 0.2s; left: {{ t.knobLeft }};"></span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+
+            <!-- data -->
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 13px 16px 4px;">
+              <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid #EDE4D2;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="3"></ellipse><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"></path><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"></path></svg>
+                <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">データ</span>
+                <span style="flex: 1;"></span>
+                <span style="font-size: 11px; color: #B3A38C; white-space: nowrap;">{{ histCount }}件の記録</span>
+              </div>
+              <div onClick="{{ exportJSON }}" style="display: flex; align-items: center; gap: 11px; min-height: 50px; border-bottom: 1px solid #F0E8D8; cursor: pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"></path><path d="M6.5 9.5L12 4l5.5 5.5"></path><path d="M5 20h14"></path></svg>
+                <span style="flex: 1; font-size: 13px; color: #2C241B;">JSON でエクスポート</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8BBA3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+              <div onClick="{{ exportCSV }}" style="display: flex; align-items: center; gap: 11px; min-height: 50px; border-bottom: 1px solid #F0E8D8; cursor: pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"></path><path d="M6.5 9.5L12 4l5.5 5.5"></path><path d="M5 20h14"></path></svg>
+                <span style="flex: 1; font-size: 13px; color: #2C241B;">CSV でエクスポート</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8BBA3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+              <div onClick="{{ openClear }}" style="display: flex; align-items: center; gap: 11px; min-height: 50px; cursor: pointer;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A3543A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14"></path><path d="M9 7V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v2"></path><path d="M7 7l1 13h8l1-13"></path></svg>
+                <span style="flex: 1; font-size: 13px; color: #A3543A;">履歴を消去</span>
+              </div>
+            </div>
+
+            <!-- about -->
+            <div style="background: #FCFAF5; border: 1px solid #E6DCC8; border-radius: 18px; padding: 15px 16px 16px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A2674E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5"></path><circle cx="12" cy="8" r="0.5" fill="#A2674E"></circle></svg>
+                <span style="font-size: 13.5px; font-weight: 700; color: #2C241B;">アプリ情報</span>
+              </div>
+              <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+                <img src="assets/app-icon.png" alt="" style="width: 46px; height: 46px; border-radius: 11px; border: 1px solid #E6DCC8; display: block;">
+                <span>
+                  <img src="assets/wordmark-ink.png" alt="pourō" style="height: 20px; display: block;">
+                  <span style="display: block; font-size: 11.5px; color: #B3A38C; margin-top: 4px;">Pouro-Fable5 ・ Version 1.0</span>
+                </span>
+              </div>
+              <div style="font-size: 12px; color: #8D7C69; line-height: 1.9; margin-top: 8px;">非公式の抽出ガイドです。各メソッドの考え方を参考にした、家庭での再現を目的とする目安値を提供します。<br>記録はこの端末内にのみ保存されます。アカウントや同期はありません。<br>ホーム画面に追加すると、アプリとして利用できます。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================== TAB BAR ============================== -->
+    <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; border-top: 1px solid #E0D5C0; background: #F4EDE1; padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); flex-shrink: 0;">
+        <button onClick="{{ goTabBrew }}" style="flex: 1; min-height: 52px; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{ tabBrewColor }};">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16l-4 9H8Z"></path><path d="M12 15v3"></path><path d="M8 21h8"></path></svg>
+          <span style="font-size: 11px; font-weight: 500;">抽出</span>
+          <span style="width: 14px; height: 2.5px; border-radius: 2px; background: currentColor; opacity: {{ tabBrewBar }};"></span>
+        </button>
+        <button onClick="{{ goTabHist }}" style="flex: 1; min-height: 52px; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{ tabHistColor }};">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M18 2.5v4h-4"></path><path d="M12 8v4l2.6 1.7"></path></svg>
+          <span style="font-size: 11px; font-weight: 500;">履歴</span>
+          <span style="width: 14px; height: 2.5px; border-radius: 2px; background: currentColor; opacity: {{ tabHistBar }};"></span>
+        </button>
+        <button onClick="{{ goTabSet }}" style="flex: 1; min-height: 52px; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{ tabSetColor }};">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8"></path></svg>
+          <span style="font-size: 11px; font-weight: 500;">設定</span>
+          <span style="width: 14px; height: 2.5px; border-radius: 2px; background: currentColor; opacity: {{ tabSetBar }};"></span>
+        </button>
+      </div>
+    </sc-if>
+
+    <!-- ============================== TOAST ============================== -->
+    <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); background: #2A221B; color: #F6EFE3; font-size: 12.5px; padding: 10px 20px; border-radius: 999px; box-shadow: 0 10px 26px rgba(40, 28, 16, 0.3); animation: pfToast 0.25s ease; white-space: nowrap; z-index: 40;">{{ toastText }}</div>
+    </sc-if>
+
+    <!-- ============================== CLEAR CONFIRM SHEET ============================== -->
+    <sc-if value="{{ confirmVisible }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ cancelClear }}" style="position: absolute; inset: 0; background: rgba(44, 32, 20, 0.38); z-index: 50; animation: pfFade 0.2s ease; display: flex; flex-direction: column; justify-content: flex-end;">
+        <div onClick="{{ stopProp }}" style="background: #F8F3E8; border-radius: 24px 24px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); animation: pfSheet 0.25s ease;">
+          <div style="width: 36px; height: 4px; border-radius: 2px; background: #D8CBB2; margin: 0 auto;"></div>
+          <div style="font-family: 'Shippori Mincho', serif; font-weight: 600; font-size: 18px; color: #2C241B; text-align: center; margin-top: 18px;">履歴を消去しますか？</div>
+          <div style="font-size: 13px; color: #8D7C69; text-align: center; margin-top: 9px; line-height: 1.8;">{{ clearCount }}件の記録をこの端末から削除します。<br>この操作は元に戻せません。</div>
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onClick="{{ cancelClear }}" style="flex: 1; height: 50px; border-radius: 14px; border: 1px solid #D5C8B0; background: #FCFAF5; color: #2C241B; font-size: 14px; font-weight: 700; cursor: pointer;">キャンセル</button>
+            <button onClick="{{ confirmClear }}" style="flex: 1; height: 50px; border-radius: 14px; border: none; background: #A3543A; color: #FBF1EA; font-size: 14px; font-weight: 700; cursor: pointer;">消去する</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 390, &quot;height&quot;: 844}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'home',
+    selectedMethod: 'yon-roku',
+    draft: { method: 'yon-roku', dose: 20, ratio: 15, flavor: 'balanced', strength: 'standard' },
+    customRatio: false,
+    rebrewFrom: null,
+    brew: { stepIndex: 0, elapsed: 0, running: false },
+    log: { rating: null, tags: [], note: '', nextNote: '', equip: { bean: 0, grind: 0, temp: 0, dripper: 0 } },
+    history: null, // loaded in componentDidMount
+    settings: { defaults: { method: 'yon-roku', dose: 20, ratio: 15, flavor: 'balanced', strength: 'standard' }, assist: { wake: true, sound: false, haptic: false } },
+    detailId: null,
+    confirmClear: false,
+    toast: null
+  };
+
+  /* ================= static data ================= */
+  get METHODS() {
+    return {
+      'yon-roku': { id: 'yon-roku', num: '01', name: '4:6 Method', sub: '甘みと濃度を整える抽出', desc: '味の組み立てを調整しやすい定番の参考メソッド', time: '3:30', meters: [4, 4, 4] },
+      'hybrid':   { id: 'hybrid', num: '02', name: 'Hybrid', sub: '浸漬と透過を組み合わせる', desc: 'HARIO Switch 系の開閉ドリッパーで、甘さと抜けの両立をねらう', time: '3:00', meters: [5, 3, 4] },
+      'neo':      { id: 'neo', num: '03', name: '10 Pour', sub: '一定の注湯リズムで淹れる', desc: '小さな注湯を10回。30秒のあと15秒リズムで積み上げる', time: '3:30', meters: [3, 4, 5] },
+      'ice':      { id: 'ice', num: '04', name: 'Ice Brew', sub: '急冷で透明感を引き出す', desc: '氷を入れたサーバーへ抽出。湯と氷を分けて管理する', time: '3:00', meters: [3, 5, 3] }
+    };
+  }
+  get ORDER() { return ['yon-roku', 'hybrid', 'neo', 'ice']; }
+  get FLAVORS() { return [{ id: 'sweet', label: '甘み', front: [5, 7] }, { id: 'balanced', label: 'バランス', front: [6, 6] }, { id: 'bright', label: '明るさ', front: [7, 5] }]; }
+  get STRENGTHS() { return [{ id: 'light', label: '軽め', back: 2, draw: 180 }, { id: 'standard', label: '標準', back: 3, draw: 210 }, { id: 'strong', label: 'しっかり', back: 4, draw: 240 }]; }
+  get TAGS() { return ['フルーティ', '明るい', 'クリーン', '酸味', '甘み', 'ナッツ', 'チョコレート', 'フローラル']; }
+  get EQUIP_PRESETS() {
+    return {
+      bean: ['未設定', 'コロンビア エル・パライソ', 'エチオピア イルガチェフェ', 'ブラジル セラード', 'グアテマラ アンティグア'],
+      grind: ['中細挽き（中煎り適正）', '中挽き', '中粗挽き', '粗挽き', '細挽き'],
+      temp: ['93℃', '90℃', '88℃', '83℃', 'Hot / Ice'],
+      dripper: ['V60', 'HARIO Switch', 'CLEVER DRIPPER L', 'Origami']
+    };
+  }
+  get SEEDS() {
+    return [
+      { id: 's1', dateISO: '2026-06-11T07:42:00', methodId: 'yon-roku', dose: 20, ratio: 15, flavorId: 'sweet', strengthId: 'standard', rating: 4, tags: ['フルーティ', '明るい', 'クリーン'], note: '中細挽きでクリーン。余韻にピーチのような甘さが残る。', nextNote: '湯温を92℃に下げて、甘さの出方を確認する', equip: { bean: 'コロンビア エル・パライソ', grind: '中細挽き（中煎り適正）', temp: '93℃', dripper: 'V60' } },
+      { id: 's2', dateISO: '2026-06-09T08:15:00', methodId: 'hybrid', dose: 18, ratio: 15, flavorId: 'balanced', strengthId: 'standard', rating: 3, tags: ['甘み', 'クリーン'], note: '浸漬パートでとろみのある甘さ。少し重さも出た。', nextNote: '', equip: { bean: 'ブラジル セラード', grind: '中挽き', temp: '88℃', dripper: 'HARIO Switch' } },
+      { id: 's3', dateISO: '2026-06-07T15:20:00', methodId: 'ice', dose: 18, ratio: 15, flavorId: 'balanced', strengthId: 'standard', rating: 0, tags: ['明るい', 'クリーン'], note: '氷が多く薄まった。見送りではなくゼロ評価として記録。', nextNote: '氷の量を少し減らして再確認', equip: { bean: 'エチオピア イルガチェフェ', grind: '中細挽き（中煎り適正）', temp: 'Hot / Ice', dripper: 'V60' } },
+      { id: 's4', dateISO: '2026-06-05T07:30:00', methodId: 'yon-roku', dose: 20, ratio: 15, flavorId: 'balanced', strengthId: 'strong', rating: null, tags: ['ナッツ', '甘み'], note: '', nextNote: '', equip: { bean: 'グアテマラ アンティグア', grind: '中挽き', temp: '93℃', dripper: 'V60' } }
+    ];
+  }
+
+  /* ================= lifecycle ================= */
+  componentDidMount() {
+    let history = null;
+    let settings = null;
+    try {
+      const raw = localStorage.getItem('pouroFable5.history');
+      if (raw) history = JSON.parse(raw);
+      const rawS = localStorage.getItem('pouroFable5.settings');
+      if (rawS) settings = JSON.parse(rawS);
+    } catch (e) { /* ignore */ }
+    const patch = { history: Array.isArray(history) ? history : this.SEEDS };
+    if (settings && settings.defaults && settings.assist) patch.settings = settings;
+    this.setState(patch);
+    this._timer = setInterval(() => {
+      const s = this.state;
+      if (s.screen === 'brew' && s.brew.running) {
+        this.setState(prev => ({ brew: Object.assign({}, prev.brew, { elapsed: prev.brew.elapsed + 0.5 }) }));
+      }
+    }, 500);
+  }
+  componentWillUnmount() { clearInterval(this._timer); this._releaseWake(); }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState && prevState.screen !== this.state.screen) {
+      document.querySelectorAll('[data-scroll]').forEach(el => { el.scrollTop = 0; });
+    }
+  }
+
+  /* ================= helpers ================= */
+  getHistory() { return this.state.history || this.SEEDS; }
+  persistHistory(list) { try { localStorage.setItem('pouroFable5.history', JSON.stringify(list)); } catch (e) {} }
+  persistSettings(s) { try { localStorage.setItem('pouroFable5.settings', JSON.stringify(s)); } catch (e) {} }
+  showToast(text) {
+    clearTimeout(this._toastT);
+    this.setState({ toast: text });
+    this._toastT = setTimeout(() => this.setState({ toast: null }), 2200);
+  }
+  nav(screen) { this.setState({ screen: screen }); }
+  haptic() { try { if (this.state.settings.assist.haptic && navigator.vibrate) navigator.vibrate(12); } catch (e) {} }
+  async _requestWake() {
+    try { if (this.state.settings.assist.wake && navigator.wakeLock) this._wake = await navigator.wakeLock.request('screen'); } catch (e) {}
+  }
+  _releaseWake() { try { if (this._wake) { this._wake.release(); this._wake = null; } } catch (e) {} }
+
+  fmtLoose(sec) { const s = Math.max(0, Math.floor(sec)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  fmtDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  splitEvenly(total, count) {
+    const out = []; let used = 0;
+    for (let i = 0; i < count; i++) {
+      if (i === count - 1) out.push(total - used);
+      else { const a = Math.round(total / count); out.push(a); used += a; }
+    }
+    return out;
+  }
+
+  /* ================= icons ================= */
+  svgWrap(inner, size) {
+    return React.createElement('span', {
+      style: { display: 'inline-flex', width: size + 'px', height: size + 'px' },
+      dangerouslySetInnerHTML: { __html: '<svg width="' + size + '" height="' + size + '" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>' }
+    });
+  }
+  methodIcon(id, size) {
+    const SRC = {
+      'yon-roku': 'assets/method-46.png',
+      'hybrid': 'assets/method-hybrid.png',
+      'neo': 'assets/method-10-pour.png',
+      'ice': 'assets/method-ice-brew.png'
+    };
+    return React.createElement('span', {
+      style: { display: 'inline-flex', width: size + 'px', height: size + 'px', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }
+    }, React.createElement('img', {
+      src: SRC[id] || SRC['yon-roku'], alt: '',
+      style: { maxWidth: '100%', maxHeight: '100%', display: 'block' }
+    }));
+  }
+  uiIcon(name, size) {
+    const P24 = {
+      bean: '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/>',
+      drop: '<path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/>',
+      scale: '<path d="M12 4.5v14.5"/><path d="M8 19h8"/><path d="M4.5 7.5h15"/><path d="M4.5 7.5l-2 5a2.7 2.7 0 0 0 4 0Z"/><path d="M19.5 7.5l-2 5a2.7 2.7 0 0 0 4 0Z"/>',
+      kettle: '<path d="M8.5 9.5h9l1.6 10H6.9Z"/><path d="M9.2 9.5c0-2.5 1.4-4.2 3.8-4.2s3.8 1.7 3.8 4.2"/><path d="M8 11.5l-4.5-2.6 1.3 5.6"/>',
+      clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+      snow: '<path d="M12 3v18"/><path d="M4.2 7.5l15.6 9"/><path d="M19.8 7.5l-15.6 9"/>',
+      grind: '<circle cx="7.5" cy="7.5" r="1.4"/><circle cx="16.5" cy="7.5" r="1.4"/><circle cx="7.5" cy="16.5" r="1.4"/><circle cx="16.5" cy="16.5" r="1.4"/><circle cx="12" cy="12" r="1.4"/>',
+      thermo: '<path d="M10.5 14.2V5a1.5 1.5 0 0 1 3 0v9.2a4 4 0 1 1-3 0Z"/><circle cx="12" cy="17.8" r="1.4" fill="currentColor" stroke="none"/>',
+      dripperS: '<path d="M5 6h14l-3.4 8H8.4Z"/><path d="M12 14v3"/><path d="M8.5 20h7"/>',
+      moon: '<path d="M19.5 14A8 8 0 1 1 10 4.5a6.5 6.5 0 0 0 9.5 9.5Z"/>',
+      sound: '<path d="M4 9.5v5h3.5L12 19V5L7.5 9.5Z"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/>',
+      vibe: '<rect x="8.5" y="4" width="7" height="16" rx="2"/><path d="M4.5 9v6"/><path d="M19.5 9v6"/><path d="M2 10.5v3"/><path d="M22 10.5v3"/>'
+    };
+    return React.createElement('span', {
+      style: { display: 'inline-flex', width: size + 'px', height: size + 'px' },
+      dangerouslySetInnerHTML: { __html: '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + P24[name] + '</svg>' }
+    });
+  }
+  ratingDotsEl(rating, size, gap) {
+    const dots = [];
+    if (rating === null || rating === undefined) {
+      return React.createElement('span', { style: { fontSize: '10.5px', color: '#B3A38C', border: '1px dashed #D5C8B0', borderRadius: '999px', padding: '2px 8px', whiteSpace: 'nowrap' } }, '未評価');
+    }
+    for (let i = 1; i <= 5; i++) {
+      dots.push(React.createElement('span', { key: i, style: { width: size + 'px', height: size + 'px', borderRadius: '50%', background: i <= rating ? '#A2674E' : 'transparent', border: '1.2px solid ' + (i <= rating ? '#A2674E' : '#CBBC9F') } }));
+    }
+    return React.createElement('span', { style: { display: 'inline-flex', gap: gap + 'px', alignItems: 'center' } }, dots);
+  }
+
+  /* ================= recipe compute ================= */
+  computeRecipe(draft) {
+    const m = this.METHODS[draft.method] || this.METHODS['yon-roku'];
+    const dose = draft.dose;
+    const ratio = draft.ratio;
+    const water = Math.round(dose * ratio);
+    let steps = [];
+    let drawSec = 210;
+    let hot = null, ice = null;
+
+    if (m.id === 'yon-roku') {
+      const f = this.FLAVORS.find(x => x.id === draft.flavor) || this.FLAVORS[1];
+      const s = this.STRENGTHS.find(x => x.id === draft.strength) || this.STRENGTHS[1];
+      drawSec = s.draw;
+      const frontWater = Math.round(water * 0.4);
+      const backWater = water - frontWater;
+      const fSum = f.front[0] + f.front[1];
+      const p1 = Math.round(frontWater * f.front[0] / fSum);
+      const p2 = frontWater - p1;
+      const backAmts = this.splitEvenly(backWater, s.back);
+      const amts = [p1, p2].concat(backAmts);
+      let cum = 0;
+      steps = amts.map((a, i) => {
+        cum += a;
+        let note;
+        if (i === 0) note = '味の土台を作る注湯。中心からゆっくり';
+        else if (i === 1) note = '味の方向を整える注湯。粉床全体を均一に';
+        else if (i === amts.length - 1) note = '仕上げの注湯。目標湯量まで丁寧に';
+        else note = '濃度を作る注湯。落ち着いて均一に';
+        return { kind: 'pour', t: i * 45, amount: a, cum: cum, note: note };
+      });
+    } else if (m.id === 'hybrid') {
+      drawSec = 180;
+      const h1 = Math.round(water * 3 / 14);
+      const h2 = Math.round(water * 3 / 14);
+      const h3 = water - h1 - h2;
+      steps = [
+        { kind: 'pour', t: 0, amount: h1, cum: h1, note: '透過の注湯。Switch は開けたまま', sw: 'OPEN' },
+        { kind: 'pour', t: 30, amount: h2, cum: h1 + h2, note: '注ぎ終えたら湯温を約70℃へ下げる', sw: 'OPEN' },
+        { kind: 'pour', t: 75, amount: h3, cum: water, note: 'Switch を閉じて浸漬。低めの湯温で', sw: 'CLOSED' },
+        { kind: 'drain', t: 105, amount: 0, cum: water, note: 'Switch を開けて落とし切る', sw: 'OPEN' }
+      ];
+    } else if (m.id === 'neo') {
+      drawSec = 210;
+      const amts = this.splitEvenly(water, 10);
+      const times = [0, 30, 45, 60, 75, 90, 105, 120, 135, 150];
+      let cum = 0;
+      steps = amts.map((a, i) => {
+        cum += a;
+        let note;
+        if (i === 0) note = '1投目のあとは30秒待つ';
+        else if (i === 1) note = 'ここから15秒リズム。小さく正確に';
+        else if (i === 9) note = '最後の注湯。テンポを保って注ぎ切る';
+        else note = 'テンポを崩さず、注湯量を揃える';
+        return { kind: 'pour', t: times[i], amount: a, cum: cum, note: note };
+      });
+    } else if (m.id === 'ice') {
+      drawSec = 180;
+      hot = Math.round(dose * 7.5);
+      ice = Math.round(dose * 4);
+      const amts = this.splitEvenly(hot, 5);
+      let cum = 0;
+      steps = amts.map((a, i) => {
+        cum += a;
+        let note;
+        if (i === 0) note = '氷を入れたサーバーへ抽出を開始';
+        else if (i === 4) note = '最後の注湯。落ち切ったら氷となじませる';
+        else note = '30秒ごとに注ぐ。累計は湯量のみ';
+        return { kind: 'pour', t: i * 30, amount: a, cum: cum, note: note };
+      });
+    }
+
+    const pourCount = steps.filter(s => s.kind === 'pour').length;
+    steps.push({ kind: 'drawdown', t: drawSec, amount: 0, cum: steps.length ? steps[steps.length - 1].cum : 0, note: '落ち切りを待つ' });
+    return { m: m, dose: dose, ratio: ratio, water: m.id === 'ice' ? hot + ice : water, hot: hot, ice: ice, steps: steps, pourCount: pourCount, drawSec: drawSec };
+  }
+
+  summaryCols(r, compact) {
+    const cols = [];
+    cols.push({ iconEl: this.uiIcon('bean', 15), label: 'コーヒー', value: String(r.dose), unit: 'g' });
+    if (r.m.id === 'ice') {
+      cols.push({ iconEl: this.uiIcon('drop', 15), label: 'Hot', value: String(r.hot), unit: 'g' });
+      cols.push({ iconEl: this.uiIcon('snow', 15), label: 'Ice', value: String(r.ice), unit: 'g' });
+    } else {
+      cols.push({ iconEl: this.uiIcon('drop', 15), label: 'お湯', value: String(r.dose * r.ratio), unit: 'ml' });
+      if (!compact) cols.push({ iconEl: this.uiIcon('scale', 15), label: '比率', value: '1:' + r.ratio, unit: '' });
+    }
+    cols.push({ iconEl: this.uiIcon('kettle', 15), label: '注湯回数', value: String(r.pourCount), unit: '回' });
+    cols.push({ iconEl: this.uiIcon('clock', 15), label: '落ち切り', value: this.fmtLoose(r.drawSec), unit: '' });
+    return cols;
+  }
+
+  chipStyle(active) {
+    return active
+      ? { bg: '#F4E4D2', border: '#BD8A60', color: '#8C5535', fw: 700 }
+      : { bg: '#FCFAF5', border: '#DDD1BA', color: '#5C4F3E', fw: 500 };
+  }
+
+  setDraft(patch) { this.setState(prev => ({ draft: Object.assign({}, prev.draft, patch) })); }
+
+  /* ================= brew control ================= */
+  startBrew() {
+    this.setState({ brew: { stepIndex: 0, elapsed: 0, running: true }, screen: 'brew' });
+    this._requestWake();
+  }
+  finishBrew() {
+    this._releaseWake();
+    const r = this.computeRecipe(this.state.draft);
+    const presets = this.EQUIP_PRESETS;
+    const dripperIdx = r.m.id === 'hybrid' ? 1 : 0;
+    const tempIdx = r.m.id === 'ice' ? 4 : 0;
+    this.setState({
+      brew: Object.assign({}, this.state.brew, { running: false }),
+      log: { rating: null, tags: [], note: '', nextNote: '', equip: { bean: 1, grind: 0, temp: tempIdx, dripper: dripperIdx } },
+      screen: 'log'
+    });
+  }
+
+  saveLogEntry() {
+    const d = this.state.draft;
+    const r = this.computeRecipe(d);
+    const lg = this.state.log;
+    const p = this.EQUIP_PRESETS;
+    const entry = {
+      id: 'b' + Date.now().toString(36),
+      dateISO: new Date().toISOString(),
+      methodId: d.method, dose: d.dose, ratio: d.ratio,
+      flavorId: d.flavor, strengthId: d.strength,
+      rating: lg.rating, tags: lg.tags.slice(), note: lg.note, nextNote: lg.nextNote,
+      equip: { bean: p.bean[lg.equip.bean], grind: p.grind[lg.equip.grind], temp: p.temp[lg.equip.temp], dripper: p.dripper[lg.equip.dripper] }
+    };
+    const list = [entry].concat(this.getHistory()).slice(0, 500);
+    this.setState({ history: list, screen: 'history', rebrewFrom: null });
+    this.persistHistory(list);
+    this.showToast('記録を保存しました');
+  }
+
+  rebrewFromEntry(e) {
+    const draft = {
+      method: e.methodId || 'yon-roku',
+      dose: e.dose || 20,
+      ratio: e.ratio || 15,
+      flavor: e.flavorId || 'balanced',
+      strength: e.strengthId || 'standard'
+    };
+    this.setState({ draft: draft, selectedMethod: draft.method, rebrewFrom: { id: e.id, date: this.fmtDate(e.dateISO) }, screen: 'preview' });
+  }
+
+  /* ================= exports ================= */
+  download(filename, text, mime) {
+    try {
+      const blob = new Blob([text], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
+    } catch (e) {}
+  }
+
+  /* ================= renderVals ================= */
+  renderVals() {
+    const s = this.state;
+    const history = this.getHistory();
+    const M = this.METHODS;
+    const screen = s.screen;
+    const recipe = this.computeRecipe(s.draft);
+    const m = recipe.m;
+
+    /* ---- tabs ---- */
+    const tabFor = { home: 'brew', setup: 'brew', preview: 'brew', history: 'hist', detail: 'hist', settings: 'set' };
+    const activeTab = tabFor[screen] || null;
+    const showTabs = screen === 'home' || screen === 'history' || screen === 'settings';
+
+    /* ---- home ---- */
+    const selId = s.selectedMethod;
+    const order = this.ORDER;
+    const selIdx = order.indexOf(selId);
+    const makeRow = id => {
+      const mm = M[id];
+      return {
+        num: mm.num, name: mm.name, sub: mm.sub, time: '約' + mm.time,
+        iconEl: this.methodIcon(id, 34),
+        select: () => this.setState(prev => ({ selectedMethod: id, draft: Object.assign({}, prev.draft, { method: id }) }))
+      };
+    };
+    const beforeMethods = order.slice(0, selIdx).map(makeRow);
+    const afterMethods = order.slice(selIdx + 1).map(makeRow);
+    const sel = M[selId];
+    const meterLabels = ['甘み', '酸味', '濃度'];
+    const selMeters = sel.meters.map((v, i) => ({
+      label: meterLabels[i],
+      dots: [0, 1, 2, 3, 4, 5].map(j => ({ bg: j < v ? '#A2674E' : '#E3D7C2' }))
+    }));
+
+    /* ---- setup ---- */
+    const ratioChips = [14, 15, 16].map(rv => {
+      const st = this.chipStyle(s.draft.ratio === rv);
+      return Object.assign({ label: '1:' + rv, tap: () => this.setDraft({ ratio: rv }) }, st);
+    });
+    const flavorChips = this.FLAVORS.map(f => {
+      const st = this.chipStyle(s.draft.flavor === f.id);
+      return Object.assign({ label: f.label, tap: () => this.setDraft({ flavor: f.id }) }, st);
+    });
+    const strengthChips = this.STRENGTHS.map(g => {
+      const st = this.chipStyle(s.draft.strength === g.id);
+      return Object.assign({ label: g.label, tap: () => this.setDraft({ strength: g.id }) }, st);
+    });
+    const hybridRows = [
+      { time: '0:00', name: '透過 1投目', chip: 'OPEN', chipBg: '#FBF6EC', chipColor: '#8C5535', chipBorder: '#D9C3A6' },
+      { time: '0:30', name: '透過 2投目 → 湯温 約70℃へ', chip: 'OPEN', chipBg: '#FBF6EC', chipColor: '#8C5535', chipBorder: '#D9C3A6' },
+      { time: '1:15', name: '浸漬の注湯', chip: 'CLOSED', chipBg: '#8C5535', chipColor: '#FBF4EA', chipBorder: '#8C5535' },
+      { time: '1:45', name: '落とし切り', chip: 'OPEN', chipBg: '#FBF6EC', chipColor: '#8C5535', chipBorder: '#D9C3A6' }
+    ];
+
+    /* ---- preview steps ---- */
+    const stepRows = recipe.steps.filter(x => x.kind !== 'drawdown');
+    const mkStepRow = (st, i, arr) => ({
+      time: this.fmtLoose(st.t),
+      amt: st.kind === 'drain' ? '—' : st.amount + 'g',
+      cumLabel: st.kind === 'drain' ? '' : '累計',
+      cum: st.kind === 'drain' ? '' : st.cum + 'g',
+      dotBg: '#A2674E',
+      railTop: i === 0 ? 'transparent' : '#D9C9AD',
+      railBottom: i === arr.length - 1 ? 'transparent' : '#D9C9AD',
+      hasSw: !!st.sw,
+      swLabel: st.sw ? 'SW ' + st.sw : '',
+      swBg: st.sw === 'CLOSED' ? '#8C5535' : '#FBF6EC',
+      swColor: st.sw === 'CLOSED' ? '#FBF4EA' : '#8C5535',
+      swBorder: st.sw === 'CLOSED' ? '#8C5535' : '#D9C3A6'
+    });
+    const pvSteps = stepRows.map(mkStepRow);
+    const pvChecks = (() => {
+      if (m.id === 'ice') return [{ text: '氷 ' + recipe.ice + 'g をサーバーに先に入れる' }, { text: 'ドリッパーと濾紙を準備' }, { text: '累計表示は湯量のみ（氷は含めない）' }];
+      if (m.id === 'hybrid') return [{ text: 'Switch を開けた状態で開始' }, { text: '2投目のあと湯温を約70℃へ' }, { text: 'ドリッパーと濾紙を準備' }];
+      if (m.id === 'neo') return [{ text: 'ドリッパーと濾紙を準備' }, { text: 'ケトルとスケールを見やすい位置に' }, { text: '15秒リズムを意識する' }];
+      return [{ text: 'ドリッパーと濾紙を準備' }, { text: '湯温を確認' }, { text: '注湯リズムに注意' }];
+    })();
+
+    /* ---- brew ---- */
+    const bi = Math.min(s.brew.stepIndex, recipe.steps.length - 1);
+    const cur = recipe.steps[bi];
+    const isDraw = cur.kind === 'drawdown';
+    const isDrain = cur.kind === 'drain';
+    const next = recipe.steps[bi + 1] || null;
+    const pourIdxArr = recipe.steps.filter(x => x.kind === 'pour');
+    const curPourNum = recipe.steps.slice(0, bi + 1).filter(x => x.kind === 'pour').length;
+    const progress = Math.min(s.brew.elapsed / recipe.drawSec, 1);
+    const C = 2 * Math.PI * 112;
+    const arcDash = (progress * C).toFixed(1) + ' ' + C.toFixed(1);
+    const brewDots = recipe.steps.map((st, i) => {
+      const done = i < bi, curr = i === bi;
+      const isLastDot = st.kind === 'drawdown';
+      return {
+        bg: curr ? '#A2674E' : done ? '#C9A77F' : '#F4EDE1',
+        border: curr ? '#A2674E' : done ? '#C9A77F' : '#CBBC9F',
+        label: isLastDot ? '⊥' : st.kind === 'drain' ? 'SW' : String(recipe.steps.slice(0, i + 1).filter(x => x.kind === 'pour').length),
+        labelColor: curr ? '#A2674E' : '#B3A38C',
+        lineBg: i === 0 ? 'transparent' : (i <= bi ? '#C9A77F' : '#DCCFB4')
+      };
+    });
+    let chipVisible = false, chipText = '', chipBg = '', chipColor = '', chipBorder = '';
+    if (m.id === 'hybrid' && cur.sw) {
+      chipVisible = true;
+      chipText = 'Switch：' + cur.sw;
+      const closed = cur.sw === 'CLOSED';
+      chipBg = closed ? '#8C5535' : '#FBF6EC';
+      chipColor = closed ? '#FBF4EA' : '#8C5535';
+      chipBorder = closed ? '#8C5535' : '#D9C3A6';
+    } else if (m.id === 'ice') {
+      chipVisible = true;
+      chipText = 'Hot ' + recipe.hot + 'g ・ Ice ' + recipe.ice + 'g';
+      chipBg = '#FBF6EC'; chipColor = '#8C5535'; chipBorder = '#D9C3A6';
+    }
+    const isLastStep = bi === recipe.steps.length - 1;
+    let nextVisible = false, nextTime = '', nextAmtLabel = '', nextTip = '';
+    if (next) {
+      nextVisible = true;
+      nextTime = this.fmtLoose(next.t);
+      if (next.kind === 'drawdown') { nextAmtLabel = '落ち切り'; nextTip = '目安 ' + this.fmtLoose(recipe.drawSec) + 'まで待つ'; }
+      else if (next.kind === 'drain') { nextAmtLabel = 'SW OPEN'; nextTip = next.note; }
+      else { nextAmtLabel = next.amount + 'g'; nextTip = next.note; }
+    }
+
+    /* ---- log ---- */
+    const lg = s.log;
+    const rateDots = [1, 2, 3, 4, 5].map(v => ({
+      bg: lg.rating !== null && v <= lg.rating ? '#A2674E' : '#FCFAF5',
+      border: lg.rating !== null && v <= lg.rating ? '#A2674E' : '#CBBC9F',
+      tap: () => this.setState(prev => {
+        const curR = prev.log.rating;
+        const newR = (curR === v) ? (v === 1 ? 0 : null) : v;
+        return { log: Object.assign({}, prev.log, { rating: newR }) };
+      })
+    }));
+    const rateLabel = lg.rating === null ? '未評価（タップで設定）' : lg.rating === 0 ? '0 / 5（ゼロ評価）' : lg.rating + ' / 5';
+    const tagPills = this.TAGS.map(t => {
+      const on = lg.tags.indexOf(t) >= 0;
+      const st = this.chipStyle(on);
+      return Object.assign({
+        label: t,
+        tap: () => this.setState(prev => {
+          const arr = prev.log.tags.slice();
+          const ix = arr.indexOf(t);
+          if (ix >= 0) arr.splice(ix, 1); else arr.push(t);
+          return { log: Object.assign({}, prev.log, { tags: arr }) };
+        })
+      }, st);
+    });
+    const p = this.EQUIP_PRESETS;
+    const equipMeta = [
+      { key: 'bean', label: '豆名', icon: 'bean' },
+      { key: 'grind', label: '挽き目', icon: 'grind' },
+      { key: 'temp', label: '湯温', icon: 'thermo' },
+      { key: 'dripper', label: 'ドリッパー', icon: 'dripperS' }
+    ];
+    const equipRows = equipMeta.map(em => ({
+      label: em.label,
+      iconEl: this.uiIcon(em.icon, 15),
+      value: p[em.key][lg.equip[em.key]],
+      tap: () => this.setState(prev => {
+        const eq = Object.assign({}, prev.log.equip);
+        eq[em.key] = (eq[em.key] + 1) % p[em.key].length;
+        return { log: Object.assign({}, prev.log, { equip: eq }) };
+      })
+    }));
+
+    /* ---- history ---- */
+    const hasHistory = history.length > 0;
+    const feat = hasHistory ? history[0] : null;
+    let featVals = {};
+    if (feat) {
+      const fr = this.computeRecipe({ method: feat.methodId, dose: feat.dose, ratio: feat.ratio, flavor: feat.flavorId, strength: feat.strengthId });
+      featVals = {
+        featIconEl: this.methodIcon(feat.methodId, 40),
+        featName: M[feat.methodId].name,
+        featSub: M[feat.methodId].sub,
+        featDate: this.fmtDate(feat.dateISO),
+        featCols: this.summaryCols(fr, true),
+        featTagsVisible: feat.tags.length > 0,
+        featTags: feat.tags.slice(0, 3).map(t => ({ label: t })),
+        featNoteVisible: !!feat.note,
+        featNote: feat.note,
+        featDetailTap: () => this.setState({ detailId: feat.id, screen: 'detail' }),
+        featRebrewTap: () => this.rebrewFromEntry(feat)
+      };
+    }
+    const histRows = history.slice(1).map(e => {
+      const mm = M[e.methodId] || M['yon-roku'];
+      const meta = e.methodId === 'ice'
+        ? e.dose + 'g ｜ Hot ' + Math.round(e.dose * 7.5) + ' / Ice ' + Math.round(e.dose * 4)
+        : e.dose + 'g ｜ ' + (e.dose * e.ratio) + 'ml';
+      return {
+        iconEl: this.methodIcon(e.methodId, 30),
+        name: mm.name,
+        date: this.fmtDate(e.dateISO),
+        meta: meta,
+        ratingEl: this.ratingDotsEl(e.rating, 6, 3),
+        tags: (e.tags || []).slice(0, 2).map(t => ({ label: t })),
+        tap: () => this.setState({ detailId: e.id, screen: 'detail' })
+      };
+    });
+
+    /* ---- detail ---- */
+    let dVals = {};
+    const dEntry = history.find(e => e.id === s.detailId) || feat;
+    if (dEntry) {
+      const dm = M[dEntry.methodId] || M['yon-roku'];
+      const dr = this.computeRecipe({ method: dEntry.methodId, dose: dEntry.dose, ratio: dEntry.ratio, flavor: dEntry.flavorId, strength: dEntry.strengthId });
+      const dStepRows = dr.steps.filter(x => x.kind !== 'drawdown');
+      const fl = this.FLAVORS.find(f => f.id === dEntry.flavorId);
+      const st = this.STRENGTHS.find(g => g.id === dEntry.strengthId);
+      dVals = {
+        dBack: () => this.setState({ screen: 'history' }),
+        dIconEl: this.methodIcon(dEntry.methodId, 38),
+        dName: dm.name,
+        dSub: dm.sub,
+        dDate: this.fmtDate(dEntry.dateISO),
+        dRateEl: this.ratingDotsEl(dEntry.rating, 9, 4),
+        dNextVisible: !!dEntry.nextNote,
+        dNextNote: dEntry.nextNote,
+        dCols: this.summaryCols(dr, true),
+        dChipsVisible: dEntry.methodId === 'yon-roku',
+        dFlavorLabel: fl ? fl.label : 'バランス',
+        dStrengthLabel: st ? st.label : '標準',
+        dSteps: dStepRows.map(mkStepRow),
+        dTagsVisible: (dEntry.tags || []).length > 0,
+        dTags: (dEntry.tags || []).map(t => ({ label: t })),
+        dNoteVisible: !!dEntry.note,
+        dNote: dEntry.note,
+        dEquipRows: equipMeta.map(em => ({ label: em.label, iconEl: this.uiIcon(em.icon, 15), value: (dEntry.equip && dEntry.equip[em.key]) || '未設定' })),
+        dRebrew: () => this.rebrewFromEntry(dEntry)
+      };
+    }
+
+    /* ---- settings ---- */
+    const stg = s.settings;
+    const updSettings = patch => {
+      const ns = Object.assign({}, stg, patch);
+      this.setState({ settings: ns });
+      this.persistSettings(ns);
+    };
+    const cycleList = (list, cur) => list[(list.indexOf(cur) + 1) % list.length];
+    const flavorLabel = id => (this.FLAVORS.find(f => f.id === id) || this.FLAVORS[1]).label;
+    const strengthLabel = id => (this.STRENGTHS.find(f => f.id === id) || this.STRENGTHS[1]).label;
+    const assistMeta = [
+      { key: 'wake', label: '画面をスリープさせない', sub: '抽出中のみ有効', icon: 'moon' },
+      { key: 'sound', label: 'サウンド合図', sub: '注湯の切り替えで鳴らす', icon: 'sound' },
+      { key: 'haptic', label: 'ハプティクス合図', sub: '対応端末で振動する', icon: 'vibe' }
+    ];
+    const toggles = assistMeta.map(am => ({
+      label: am.label, sub: am.sub,
+      iconEl: this.uiIcon(am.icon, 16),
+      trackBg: stg.assist[am.key] ? '#A2674E' : '#DDD2BC',
+      knobLeft: stg.assist[am.key] ? '21px' : '3px',
+      tap: () => updSettings({ assist: Object.assign({}, stg.assist, { [am.key]: !stg.assist[am.key] }) })
+    }));
+
+    return Object.assign({
+      /* nav */
+      showTabs: showTabs,
+      tabBrewColor: activeTab === 'brew' ? '#A2674E' : '#8D7C69',
+      tabHistColor: activeTab === 'hist' ? '#A2674E' : '#8D7C69',
+      tabSetColor: activeTab === 'set' ? '#A2674E' : '#8D7C69',
+      tabBrewBar: activeTab === 'brew' ? 1 : 0,
+      tabHistBar: activeTab === 'hist' ? 1 : 0,
+      tabSetBar: activeTab === 'set' ? 1 : 0,
+      goTabBrew: () => this.nav('home'),
+      goTabHist: () => this.nav('history'),
+      goTabSet: () => this.nav('settings'),
+
+      /* screens */
+      isHome: screen === 'home',
+      isSetup: screen === 'setup',
+      isPreview: screen === 'preview',
+      isBrew: screen === 'brew',
+      isLog: screen === 'log',
+      isHistory: screen === 'history',
+      isDetail: screen === 'detail',
+      isSettings: screen === 'settings',
+
+      /* home */
+      beforeMethods: beforeMethods,
+      afterMethods: afterMethods,
+      selNum: sel.num, selName: sel.name, selSub: sel.sub, selDesc: sel.desc, selTime: sel.time,
+      selIconEl: this.methodIcon(selId, 46),
+      selMeters: selMeters,
+      goSetup: () => this.setState({ draft: Object.assign({}, s.draft, { method: selId }), rebrewFrom: null, screen: 'setup' }),
+
+      /* setup */
+      backToHome: () => this.nav('home'),
+      mName: m.name, mSub: m.sub,
+      mIconEl: this.methodIcon(m.id, 40),
+      doseVal: String(s.draft.dose),
+      decDose: () => this.setDraft({ dose: Math.max(8, s.draft.dose - 1) }),
+      incDose: () => this.setDraft({ dose: Math.min(40, s.draft.dose + 1) }),
+      ratioCardVisible: m.id !== 'ice',
+      ratioChips: ratioChips,
+      customColor: s.customRatio ? '#8C5535' : '#B3A38C',
+      toggleCustom: () => this.setState({ customRatio: !s.customRatio }),
+      customVisible: s.customRatio,
+      ratioText: '1:' + s.draft.ratio,
+      decRatio: () => this.setDraft({ ratio: Math.max(12, s.draft.ratio - 1) }),
+      incRatio: () => this.setDraft({ ratio: Math.min(18, s.draft.ratio + 1) }),
+      is46: m.id === 'yon-roku',
+      isHy: m.id === 'hybrid',
+      isNeo: m.id === 'neo',
+      isIce: m.id === 'ice',
+      flavorChips: flavorChips,
+      strengthChips: strengthChips,
+      hybridRows: hybridRows,
+      neoPer: String(Math.round(recipe.dose * recipe.ratio / 10)),
+      iceHot: recipe.hot === null ? '' : String(recipe.hot),
+      iceIce: recipe.ice === null ? '' : String(recipe.ice),
+      sumCols: this.summaryCols(recipe, true),
+      goPreview: () => this.nav('preview'),
+
+      /* preview */
+      backToSetup: () => this.nav('setup'),
+      rebrewVisible: !!s.rebrewFrom,
+      rebrewLabel: s.rebrewFrom ? '履歴から再現 ・ ' + s.rebrewFrom.date + ' の記録' : '',
+      pvCols: this.summaryCols(recipe, false),
+      pvStepCount: recipe.pourCount + '回の注湯',
+      pvSteps: pvSteps,
+      pvDrawLabel: this.fmtLoose(recipe.drawSec),
+      pvChecks: pvChecks,
+      startBrew: () => this.startBrew(),
+
+      /* brew */
+      bIconEl: this.methodIcon(m.id, 32),
+      bName: m.name, bSub: m.sub,
+      bStepBig: isDraw ? '落ち切り' : isDrain ? '仕上げ' : String(curPourNum),
+      bStepSmall: isDraw || isDrain ? '' : ' 投目 / ' + recipe.pourCount,
+      chipVisible: chipVisible, chipText: chipText, chipBg: chipBg, chipColor: chipColor, chipBorder: chipBorder,
+      timeText: this.fmtLoose(s.brew.elapsed),
+      arcDash: arcDash,
+      brewDots: brewDots,
+      isPour: !isDraw && !isDrain,
+      isDraw: isDraw || isDrain,
+      drawTitle: isDrain ? 'Switch を開く' : '落ち切りを待つ',
+      drawSub: isDrain ? '落とし切りに入ります' : '目安 ' + this.fmtLoose(recipe.drawSec) + '。完了は手動で押してください',
+      curAmt: String(cur.amount || 0),
+      cumHeader: m.id === 'ice' ? '累計（湯のみ）' : '合計',
+      curCum: String(cur.cum || 0),
+      curNote: cur.note,
+      nextVisible: nextVisible && !isDraw,
+      nextTime: nextTime, nextAmtLabel: nextAmtLabel, nextTip: nextTip,
+      brewBackTap: () => {
+        if (bi > 0) this.setState({ brew: Object.assign({}, s.brew, { stepIndex: bi - 1 }) });
+        else { this._releaseWake(); this.setState({ screen: 'preview', brew: { stepIndex: 0, elapsed: 0, running: false } }); }
+      },
+      pauseTap: () => this.setState({ brew: Object.assign({}, s.brew, { running: !s.brew.running }) }),
+      isRunning: s.brew.running,
+      isPaused: !s.brew.running,
+      pauseLabel: s.brew.running ? '一時停止' : '再開',
+      nextTap: () => {
+        this.haptic();
+        if (isLastStep) this.finishBrew();
+        else this.setState({ brew: Object.assign({}, s.brew, { stepIndex: bi + 1 }) });
+      },
+      nextIsFinish: isLastStep,
+      nextIsArrow: !isLastStep,
+      nextCircleBg: isLastStep ? '#A2674E' : '#FBF7EF',
+      nextCircleBorder: isLastStep ? '#A2674E' : '#DDD1BA',
+      nextLabel: isLastStep ? '完了' : '次へ',
+      nextLabelColor: isLastStep ? '#A2674E' : '#8D7C69',
+
+      /* log */
+      logBack: () => this.nav('home'),
+      rateDots: rateDots,
+      rateLabel: rateLabel,
+      tagPills: tagPills,
+      equipRows: equipRows,
+      noteVal: lg.note,
+      noteChange: ev => this.setState(prev => ({ log: Object.assign({}, prev.log, { note: ev.target.value }) })),
+      nextNoteVal: lg.nextNote,
+      nextNoteChange: ev => this.setState(prev => ({ log: Object.assign({}, prev.log, { nextNote: ev.target.value }) })),
+      saveLog: () => this.saveLogEntry(),
+
+      /* history */
+      hasHistory: hasHistory,
+      emptyVisible: !hasHistory,
+      histDecoIcon: this.methodIcon('yon-roku', 44),
+      histDecoIcon2: this.methodIcon('yon-roku', 52),
+      histRows: histRows,
+
+      /* settings */
+      defMethodVal: M[stg.defaults.method].name,
+      cycleDefMethod: () => updSettings({ defaults: Object.assign({}, stg.defaults, { method: cycleList(this.ORDER, stg.defaults.method) }) }),
+      defDoseVal: stg.defaults.dose + 'g',
+      decDefDose: ev => { ev.stopPropagation(); updSettings({ defaults: Object.assign({}, stg.defaults, { dose: Math.max(8, stg.defaults.dose - 1) }) }); },
+      incDefDose: ev => { ev.stopPropagation(); updSettings({ defaults: Object.assign({}, stg.defaults, { dose: Math.min(40, stg.defaults.dose + 1) }) }); },
+      defRatioVal: '1:' + stg.defaults.ratio,
+      decDefRatio: ev => { ev.stopPropagation(); updSettings({ defaults: Object.assign({}, stg.defaults, { ratio: Math.max(12, stg.defaults.ratio - 1) }) }); },
+      incDefRatio: ev => { ev.stopPropagation(); updSettings({ defaults: Object.assign({}, stg.defaults, { ratio: Math.min(18, stg.defaults.ratio + 1) }) }); },
+      defFlavorVal: flavorLabel(stg.defaults.flavor),
+      cycleDefFlavor: () => updSettings({ defaults: Object.assign({}, stg.defaults, { flavor: cycleList(['sweet', 'balanced', 'bright'], stg.defaults.flavor) }) }),
+      defStrengthVal: strengthLabel(stg.defaults.strength),
+      cycleDefStrength: () => updSettings({ defaults: Object.assign({}, stg.defaults, { strength: cycleList(['light', 'standard', 'strong'], stg.defaults.strength) }) }),
+      toggles: toggles,
+      histCount: String(history.length),
+      exportJSON: () => { this.download('pouro-fable5-history.json', JSON.stringify(history, null, 2), 'application/json'); this.showToast('JSON を書き出しました'); },
+      exportCSV: () => {
+        const cols = ['id', 'dateISO', 'methodId', 'dose', 'ratio', 'rating', 'tags', 'note', 'nextNote'];
+        const cell = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+        const rows = [cols.join(',')].concat(history.map(e => cols.map(c => cell(c === 'tags' ? (e.tags || []).join('|') : e[c])).join(',')));
+        this.download('pouro-fable5-history.csv', rows.join('\n'), 'text/csv');
+        this.showToast('CSV を書き出しました');
+      },
+      openClear: () => this.setState({ confirmClear: true }),
+
+      /* overlays */
+      toastVisible: !!s.toast,
+      toastText: s.toast || '',
+      confirmVisible: s.confirmClear,
+      clearCount: String(history.length),
+      cancelClear: () => this.setState({ confirmClear: false }),
+      confirmClear: () => {
+        this.setState({ history: [], confirmClear: false });
+        this.persistHistory([]);
+        this.showToast('履歴を消去しました');
+      },
+      stopProp: ev => ev.stopPropagation()
+    }, featVals, dVals);
+  }
+}
+
+</script>
+</body>
+</html>

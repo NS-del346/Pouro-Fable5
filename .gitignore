@@ -1,0 +1,6 @@
+# Large source-zip excluded from repo (13.4 MB — store separately)
+reference/source-zips/Pouro-Fable5｜Final Mock Rebuild (2).zip
+
+# OS
+.DS_Store
+Thumbs.db
