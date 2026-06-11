@@ -1142,6 +1142,13 @@ function renderPreview() {
   ).join('');
 }
 
+function clearLogEquipmentInputs() {
+  ['log-bean', 'log-grind', 'log-temperature', 'log-equipment'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
 /* ── Brew Log screen ────────────────────────────────────────────────────────── */
 function renderLog() {
   const recipe = state.activeRecipe || RecipeEngine.build(
@@ -1155,12 +1162,6 @@ function renderLog() {
   document.getElementById('log-method-name').textContent  = recipe.name;
   document.getElementById('log-method-sub').textContent   = m.sub;
   document.getElementById('log-summary-grid').innerHTML   = buildSummaryCols(recipe);
-
-  // Clear equipment inputs for a fresh brew (they reset each time renderLog is called)
-  ['log-bean', 'log-grind', 'log-temperature', 'log-equipment'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
 
   const ratingContainer = document.getElementById('log-rating-dots');
   ratingContainer.innerHTML = Array.from({ length: 5 }, (_, i) => {
@@ -1658,6 +1659,7 @@ function wireEvents() {
         completedAt:  new Date(t.finishedAtWall || Date.now()).toISOString(),
       };
 
+      clearLogEquipmentInputs();
       renderLog();
       showScreen('log');
     }
