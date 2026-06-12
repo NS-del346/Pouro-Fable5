@@ -46,15 +46,12 @@ npx serve .
 | PR-003 | Recipe engine + real timer |
 | PR-004 | History + localStorage persistence + Rebrew |
 | PR-005 | Settings persistence + export + clear history |
-| **PR-006A** | **Visual parity + UX clarity polish** ← current |
-| PR-006 | PWA manifest + service worker + offline |
-| PR-007 | Engine refinements (variable 4:6 back pours, assist hardening) |
+| PR-006A | Visual parity + UX clarity polish |
+| **PR-006B** | **PWA manifest + service worker + offline QA** ← current |
+| PR-007 | Engine refinements / reproducibility enhancement |
 
-> **PR-006A** is display-layer only: method PNG icons restored across all screens,
-> tab bar shown only on Home / History / Settings, softened selected-chip tone,
-> consistent Hybrid OPEN/CLOSED vocabulary, Ice Brew ratio card hidden with
-> HOT/ICE guidance, Japanese date display, rating clear-on-retap, rebrew pill,
-> Settings assist sub-text + history count, and an artifact-style clear sheet.
-> RecipeEngine, timer, localStorage schema, and export/clear logic are unchanged.
+> **PR-006B** adds the Web App Manifest, iOS home screen metadata, safe Service Worker
+> registration, offline app shell caching, Google Fonts runtime caching, and offline QA
+> documentation. RecipeEngine, timer, localStorage schema, and export/clear logic are unchanged.
 
-See [`docs/design/PR-006A_VISUAL_PARITY_UX_CLARITY.md`](docs/design/PR-006A_VISUAL_PARITY_UX_CLARITY.md) for full details.
+See [`docs/design/PR-006B_PWA_OFFLINE.md`](docs/design/PR-006B_PWA_OFFLINE.md) for full details.

@@ -1,0 +1,27 @@
+{
+  "name": "Pourō",
+  "short_name": "Pourō",
+  "description": "手淹れコーヒーガイドとタイマー",
+  "lang": "ja",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FBF8F2",
+  "theme_color": "#8C5535",
+  "icons": [
+    {
+      "src": "assets/app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
