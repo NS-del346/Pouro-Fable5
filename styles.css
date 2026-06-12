@@ -820,6 +820,55 @@ img {
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
   position: relative;
+  z-index: 1;
+}
+
+/* Luminous progress ring — quiet light sweep at arc tip */
+#brew-ring {
+  --brew-progress-angle: 0deg;
+}
+
+#brew-ring::after {
+  content: '';
+  position: absolute;
+  /* Center over the 252×252 SVG within the flex container */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 252px;
+  height: 252px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(
+    from calc(var(--brew-progress-angle) - 18deg) at 50% 50%,
+    transparent 0deg,
+    rgba(185, 138, 99, 0.05) 8deg,
+    rgba(185, 138, 99, 0.28) 18deg,
+    rgba(185, 138, 99, 0.05) 28deg,
+    transparent 38deg,
+    transparent 360deg
+  );
+  /* Clip to the ring band (r≈112, stroke area ~8px wide for glow) */
+  mask: radial-gradient(
+    circle at center,
+    transparent 96px,
+    black 104px,
+    black 120px,
+    transparent 128px
+  );
+  -webkit-mask: radial-gradient(
+    circle at center,
+    transparent 96px,
+    black 104px,
+    black 120px,
+    transparent 128px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #brew-ring::after {
+    display: none;
+  }
 }
 
 /* Step progress dots (brew screen) */

@@ -31,7 +31,7 @@ const METHODS = {
     name: '4:6 Method',
     sub: '前半で味、後半で濃度を調節',
     time: '約3:30',
-    desc: '前半2投で味の方向を、後半3投で濃度を調整。再現性が高く、風味のコントロールに優れた手法です。',
+    desc: '前半2投で味の方向を、後半の投数（軽め: 2投・標準: 3投・しっかり: 4投）で濃度を調整。再現性が高く、風味のコントロールに優れた手法です。',
     meters: [
       { label: '甘さ',  dots: [true, true, true, true, false, false] },
       { label: '酸味',  dots: [true, true, false, false, false, false] },
@@ -53,7 +53,7 @@ const METHODS = {
     num: 'Hybrid',
     name: 'Hybrid',
     sub: 'HARIO Switch 浸漬 + 透過',
-    time: '約3:30',
+    time: '約3:00',
     desc: 'スイッチの開閉で浸漬と透過を組み合わせた方法。OPEN で湯を落とし（透過）、CLOSED で湯を溜めて浸漬させます。',
     meters: [
       { label: 'ボディ', dots: [true, true, true, true, true, false] },
@@ -67,7 +67,7 @@ const METHODS = {
     checklist: [
       'スイッチを「開（OPEN）」の状態にしてセットしてください',
       'フィルターをリンスし、ドリッパーを温めてください',
-      '0:45 でスイッチを「閉（CLOSED）」に切り替える準備をしてください',
+      '第2投のあとスイッチを「閉（CLOSED）」に切り替えてください',
     ],
   },
 
@@ -149,69 +149,108 @@ const RecipeEngine = {
     const frontWater = Math.round(totalWater * 0.4);
     const backWater  = totalWater - frontWater;
 
-    // Front 2 pours — flavor affects split ratio
+    // Front 2 pours — flavor sets split direction
+    // sweet: smaller first pour (甘め寄り); bright: larger first pour (明るめ寄り)
     let p1, p2;
     if (flavor === 'sweet') {
-      p1 = Math.round(frontWater * 0.6); p2 = frontWater - p1;
-    } else if (flavor === 'bright') {
       p1 = Math.round(frontWater * 0.4); p2 = frontWater - p1;
+    } else if (flavor === 'bright') {
+      p1 = Math.round(frontWater * 0.6); p2 = frontWater - p1;
     } else {
       p1 = Math.round(frontWater / 2);   p2 = frontWater - p1;
     }
 
-    // Back 3 pours — strength reflected in instructions/descriptions
-    const p3 = Math.round(backWater / 3);
-    const p4 = Math.round(backWater / 3);
-    const p5 = backWater - p3 - p4;
+    // Back pours — strength determines count and interval
+    // light: 2 pours (45s interval) → 4 total
+    // standard: 3 pours (45s interval) → 5 total
+    // strong: 4 pours (30s interval) → 6 total
+    const backPourCount = strength === 'light' ? 2 : strength === 'strong' ? 4 : 3;
+    const backInterval  = strength === 'strong' ? 30 : 45;
+    const backStart     = 90;
 
-    const flavorNote = { sweet: '甘め寄り', balanced: 'バランス', bright: '明るめ寄り' };
-    const strengthNote = { light: '軽め', standard: '標準', strong: 'リッチ' };
+    const perBack  = Math.round(backWater / backPourCount);
+    const backAmts = Array.from({ length: backPourCount }, (_, i) =>
+      i === backPourCount - 1 ? backWater - perBack * (backPourCount - 1) : perBack
+    );
+    const backTimes = Array.from({ length: backPourCount }, (_, i) =>
+      backStart + i * backInterval
+    );
+
+    const flavorNote   = { sweet: '甘め寄り', balanced: 'バランス', bright: '明るめ寄り' };
+    const strengthNote = { light: '軽め', standard: '標準', strong: 'しっかり' };
+    const backLabels   = ['第3投', '第4投', '第5投', '第6投'];
+    const backInstruction = (i, last) => {
+      if (i === 0)    return `濃度を整える（${strengthNote[strength] || strength}）`;
+      if (i === last) return '最終注湯';
+      return '濃度を重ねる';
+    };
 
     let cum = 0;
+    const steps = [
+      { id: 's1', timeSec: 0,  label: '第1投', instruction: `蒸らし — ${flavorNote[flavor] || flavor}`,
+        pourAmount: p1, totalAmount: (cum += p1), type: 'pour' },
+      { id: 's2', timeSec: 45, label: '第2投', instruction: '味の方向を定める',
+        pourAmount: p2, totalAmount: (cum += p2), type: 'pour' },
+    ];
+    backAmts.forEach((amt, i) => {
+      steps.push({
+        id: `s${3 + i}`, timeSec: backTimes[i], label: backLabels[i],
+        instruction: backInstruction(i, backPourCount - 1),
+        pourAmount: amt, totalAmount: (cum += amt), type: 'pour',
+      });
+    });
+    steps.push({
+      id: 'draw', timeSec: 210, label: 'ドローダウン',
+      instruction: '落ちるのを待つ（目安 3:30）',
+      pourAmount: 0, totalAmount: cum, type: 'drawdown',
+    });
+
+    const totalPours  = 2 + backPourCount;
+    const intervalStr = strength === 'strong' ? '前半0:45 / 後半0:30' : '0:45 間隔';
+
     return {
       id: 'yon-roku', name: '4:6 Method',
       dose, ratio, totalWater,
       targetDrawdownSec: 210,
       flavor, strength,
-      pourCount: 5,
+      pourCount: totalPours,
       summary: {
         coffee: `${dose}g`, water: `${totalWater}ml`,
-        pours: '5回', interval: '0:45 間隔',
-        drawdown: `目安 3:30（${strengthNote[strength]}）`,
+        pours: `${totalPours}回`, interval: intervalStr,
+        drawdown: `目安 3:30（${strengthNote[strength] || strength}）`,
       },
-      steps: [
-        { id: 's1', timeSec: 0,   label: '第1投', instruction: `蒸らし — ${flavorNote[flavor]}`,       pourAmount: p1, totalAmount: (cum += p1), type: 'pour' },
-        { id: 's2', timeSec: 45,  label: '第2投', instruction: '味の方向を定める',                       pourAmount: p2, totalAmount: (cum += p2), type: 'pour' },
-        { id: 's3', timeSec: 90,  label: '第3投', instruction: `濃度を整える（${strengthNote[strength]}）`, pourAmount: p3, totalAmount: (cum += p3), type: 'pour' },
-        { id: 's4', timeSec: 135, label: '第4投', instruction: '濃度を重ねる',                           pourAmount: p4, totalAmount: (cum += p4), type: 'pour' },
-        { id: 's5', timeSec: 180, label: '第5投', instruction: '最終注湯',                               pourAmount: p5, totalAmount: (cum += p5), type: 'pour' },
-        { id: 'draw', timeSec: 210, label: 'ドローダウン', instruction: '落ちるのを待つ（目安 3:30）',      pourAmount: 0,  totalAmount: cum,          type: 'drawdown' },
-      ],
+      steps,
     };
   },
 
   _buildHybrid(dose, ratio) {
     const totalWater = Math.round(dose * ratio);
-    const p1 = Math.round(totalWater * 0.6);
-    const p2 = totalWater - p1;
+    // Artifact design: 2 small OPEN percolation pours, 1 large CLOSED immersion pour
+    // h1 ≈ h2 ≈ 3/14 of total (~21%), h3 = remainder (~57%)
+    const h1 = Math.round(totalWater * 3 / 14);
+    const h2 = Math.round(totalWater * 3 / 14);
+    const h3 = totalWater - h1 - h2;
     let cum = 0;
     return {
       id: 'hybrid', name: 'Hybrid',
       dose, ratio, totalWater,
-      targetDrawdownSec: 210,
-      pourCount: 2,
+      targetDrawdownSec: 180,
+      pourCount: 3,
       summary: {
         coffee: `${dose}g`, water: `${totalWater}ml`,
-        pours: '2回 + Switch操作',
-        interval: 'OPEN → CLOSED → OPEN',
-        drawdown: '目安 3:30',
+        pours: '3回 + Switch操作',
+        interval: 'OPEN → OPEN(閉) → CLOSED(開)',
+        drawdown: '目安 3:00',
       },
       steps: [
-        { id: 's1',  timeSec: 0,   label: '第1投',      instruction: '注湯（スイッチ OPEN）',          pourAmount: p1, totalAmount: (cum += p1), type: 'pour',   switchState: 'open'   },
-        { id: 'sw1', timeSec: 45,  label: 'CLOSE',      instruction: 'スイッチを閉じる — 浸漬開始',    pourAmount: 0,  totalAmount: cum,          type: 'switch', switchState: 'closed' },
-        { id: 's2',  timeSec: 90,  label: '第2投',      instruction: '追加注湯（スイッチ CLOSED）',    pourAmount: p2, totalAmount: (cum += p2), type: 'pour',   switchState: 'closed' },
-        { id: 'sw2', timeSec: 135, label: 'OPEN',       instruction: 'スイッチを開く — 透過開始',      pourAmount: 0,  totalAmount: cum,          type: 'switch', switchState: 'open'   },
-        { id: 'draw', timeSec: 210, label: 'ドローダウン', instruction: '落ちるのを待つ（目安 3:30）',  pourAmount: 0,  totalAmount: cum,          type: 'drawdown'                      },
+        { id: 's1',  timeSec: 0,   label: '第1投',              instruction: '透過の注湯（Switch OPEN のまま）',
+          pourAmount: h1, totalAmount: (cum += h1), type: 'pour',     switchState: 'open'   },
+        { id: 's2',  timeSec: 30,  label: '第2投',              instruction: '透過の注湯 — 注ぎ終えたら Switch を閉じる',
+          pourAmount: h2, totalAmount: (cum += h2), type: 'pour',     switchState: 'open'   },
+        { id: 's3',  timeSec: 75,  label: '第3投',              instruction: '浸漬の注湯（Switch CLOSED）',
+          pourAmount: h3, totalAmount: (cum += h3), type: 'pour',     switchState: 'closed' },
+        { id: 'draw', timeSec: 105, label: 'Switch OPEN・落とし切り', instruction: 'Switch を開けて落とし切る（目安 3:00）',
+          pourAmount: 0,  totalAmount: cum,          type: 'drawdown', switchState: 'open'   },
       ],
     };
   },
@@ -373,7 +412,7 @@ const state = {
 const TASTE_TAGS = ['甘い', 'フルーティ', '明るい', 'クリーン', 'ナッツ', 'チョコ', 'スパイシー', 'まろやか'];
 const RATING_LABELS    = ['', '微妙', 'まあまあ', '良い', 'とても良い', '最高'];
 const FLAVOR_LABELS    = { sweet: '甘め', balanced: 'バランス', bright: '明るめ' };
-const STRENGTH_LABELS  = { light: 'ライト', standard: '標準', strong: 'リッチ' };
+const STRENGTH_LABELS  = { light: '軽め', standard: '標準', strong: 'しっかり' };
 const METHOD_DISPLAY_NAMES = {
   'yon-roku': '4:6 Method', 'hybrid': 'Hybrid', 'neo': '10 Pour', 'ice': 'Ice Brew',
 };
@@ -430,10 +469,11 @@ function normalizeHistoryEntry(entry) {
                      : [],
       note:        entry.log?.note        || entry.note     || '',
       nextNote:    entry.log?.nextNote    || entry.nextNote || '',
-      grind:       entry.log?.grind       || '',
-      temperature: entry.log?.temperature || '',
-      bean:        entry.log?.bean        || '',
-      equipment:   entry.log?.equipment   || '',
+      grind:          entry.log?.grind          || '',
+      temperature:    entry.log?.temperature    || '',
+      bean:           entry.log?.bean           || '',
+      equipment:      entry.log?.equipment      || '',
+      actualDrawdown: entry.log?.actualDrawdown || '',
     },
   };
 }
@@ -552,6 +592,7 @@ function _formatDate(iso) {
 let DOM = {};
 function cacheDOM() {
   DOM.brewTimeDisplay = document.getElementById('brew-time-display');
+  DOM.brewRing        = document.getElementById('brew-ring');
   DOM.brewArc         = document.getElementById('brew-arc');
   DOM.brewStepBig     = document.getElementById('brew-step-big');
   DOM.brewStepSmall   = document.getElementById('brew-step-small');
@@ -563,10 +604,11 @@ function cacheDOM() {
   DOM.brewDrawCard    = document.getElementById('brew-draw-card');
   DOM.brewDrawTitle   = document.getElementById('brew-draw-title');
   DOM.brewDrawSub     = document.getElementById('brew-draw-sub');
-  DOM.brewNextHint    = document.getElementById('brew-next-hint');
-  DOM.brewNextTime    = document.getElementById('brew-next-time');
-  DOM.brewNextAmt     = document.getElementById('brew-next-amt');
-  DOM.brewNextTip     = document.getElementById('brew-next-tip');
+  DOM.brewNextHint      = document.getElementById('brew-next-hint');
+  DOM.brewNextTime      = document.getElementById('brew-next-time');
+  DOM.brewNextAmt       = document.getElementById('brew-next-amt');
+  DOM.brewNextTip       = document.getElementById('brew-next-tip');
+  DOM.brewNextCountdown = document.getElementById('brew-next-countdown');
   DOM.brewChipWrap    = document.getElementById('brew-chip-wrap');
   DOM.brewChip        = document.getElementById('brew-chip');
   DOM.brewPauseIcon   = document.getElementById('brew-pause-icon');
@@ -747,6 +789,30 @@ function _updateTimerDisplay() {
     'stroke-dasharray',
     `${(circumference * progress).toFixed(1)} ${circumference.toFixed(1)}`
   );
+
+  // Luminous ring: update CSS custom property for the glow sweep angle
+  if (DOM.brewRing) {
+    const angle = Math.max(0, Math.min(360, progress * 360));
+    DOM.brewRing.style.setProperty('--brew-progress-angle', `${angle.toFixed(1)}deg`);
+  }
+
+  // Next-pour countdown: show seconds until next step
+  const cdEl = DOM.brewNextCountdown;
+  if (cdEl) {
+    const recipe = state.activeRecipe;
+    if (recipe) {
+      const nextStep = recipe.steps[t.currentStepIndex + 1];
+      if (nextStep && nextStep.type !== 'drawdown') {
+        const secs = Math.max(0, nextStep.timeSec - elapsedSec);
+        cdEl.textContent = secs > 0 ? `${secs}秒後` : '注湯タイム';
+      } else if (nextStep && nextStep.type === 'drawdown') {
+        const secs = Math.max(0, nextStep.timeSec - elapsedSec);
+        cdEl.textContent = secs > 0 ? `${secs}秒後` : '落ち切り待ち';
+      } else {
+        cdEl.textContent = '';
+      }
+    }
+  }
 }
 
 // RAF loop — runs at up to 60 fps when the page is visible.
@@ -1183,7 +1249,7 @@ function renderPreview() {
 }
 
 function clearLogEquipmentInputs() {
-  ['log-bean', 'log-grind', 'log-temperature', 'log-equipment'].forEach(id => {
+  ['log-bean', 'log-grind', 'log-temperature', 'log-equipment', 'log-actual-drawdown'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -1405,10 +1471,11 @@ function renderDetail() {
   }
 
   const eq = entry.log || entry.equip || {};
-  document.getElementById('detail-equip-bean').textContent    = eq.bean        || '—';
-  document.getElementById('detail-equip-grind').textContent   = eq.grind       || '—';
-  document.getElementById('detail-equip-temp').textContent    = eq.temperature || eq.temp    || '—';
-  document.getElementById('detail-equip-dripper').textContent = eq.equipment   || eq.dripper || '—';
+  document.getElementById('detail-equip-bean').textContent     = eq.bean           || '—';
+  document.getElementById('detail-equip-grind').textContent    = eq.grind          || '—';
+  document.getElementById('detail-equip-temp').textContent     = eq.temperature    || eq.temp    || '—';
+  document.getElementById('detail-equip-dripper').textContent  = eq.equipment      || eq.dripper || '—';
+  document.getElementById('detail-equip-drawdown').textContent = eq.actualDrawdown || '—';
 }
 
 /* ── Settings screen ────────────────────────────────────────────────────────── */
@@ -1486,7 +1553,8 @@ function exportCSV() {
 
   const cols = ['id','completedAt','methodId','methodName','dose','ratio',
                 'totalWater','hotWater','ice','elapsedSec',
-                'rating','tags','note','nextNote','bean','grind','temperature','equipment'];
+                'rating','tags','note','nextNote','actualDrawdown',
+                'bean','grind','temperature','equipment'];
 
   const rows = [cols.join(',')];
   history.forEach(h => {
@@ -1504,9 +1572,10 @@ function exportCSV() {
       h.brew?.elapsedSec   ?? '',
       log.rating !== null && log.rating !== undefined ? log.rating : '',
       (log.tags || []).join('|'),
-      log.note     || '',
-      log.nextNote || '',
-      log.bean        || '',
+      log.note           || '',
+      log.nextNote       || '',
+      log.actualDrawdown || '',
+      log.bean           || '',
       log.grind       || '',
       log.temperature || '',
       log.equipment   || '',
@@ -1749,12 +1818,13 @@ function wireEvents() {
       log: {
         rating:      normalizeRating(state.log.rating),
         tags:        [...state.log.tags],
-        note:        document.getElementById('log-memo').value.trim(),
-        nextNote:    document.getElementById('log-next-note').value.trim(),
-        bean:        document.getElementById('log-bean').value.trim(),
-        grind:       document.getElementById('log-grind').value.trim(),
-        temperature: document.getElementById('log-temperature').value.trim(),
-        equipment:   document.getElementById('log-equipment').value.trim(),
+        note:           document.getElementById('log-memo').value.trim(),
+        nextNote:       document.getElementById('log-next-note').value.trim(),
+        actualDrawdown: document.getElementById('log-actual-drawdown')?.value.trim() || '',
+        bean:           document.getElementById('log-bean').value.trim(),
+        grind:          document.getElementById('log-grind').value.trim(),
+        temperature:    document.getElementById('log-temperature').value.trim(),
+        equipment:      document.getElementById('log-equipment').value.trim(),
       },
     };
 
