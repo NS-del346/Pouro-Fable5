@@ -557,8 +557,10 @@ img {
   flex-shrink: 0;
 }
 
-.step-switch-open   { border: 1px solid #C9B88C; background: #FBF4E5; color: #8C5535; }
-.step-switch-closed { border: 1px solid var(--color-border-ice); background: var(--color-surface-ice); color: var(--color-text-ice); }
+/* OPEN = percolation (water drains) / CLOSED = immersion (water held) —
+   CLOSED is the critical user action, so it gets the solid emphasis */
+.step-switch-open   { border: 1px solid #D9C3A6; background: #FBF6EC; color: #8C5535; }
+.step-switch-closed { border: 1px solid #8C5535; background: #8C5535; color: #FBF4EA; }
 
 /* ── Spinner Control ───────────────────────────────────────────────────────── */
 .spinner-wrap {
@@ -615,16 +617,16 @@ img {
 }
 
 .chip-btn.active {
-  background: var(--color-accent);
-  border: 1px solid var(--color-accent);
-  color: #fff;
+  background: #F4E4D2;
+  border: 1px solid #BD8A60;
+  color: #8C5535;
   font-weight: 700;
 }
 
 .chip-btn.inactive {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-input);
-  color: var(--color-text-muted);
+  color: #5C4F3E;
   font-weight: 500;
 }
 
@@ -645,6 +647,24 @@ img {
   font-size: 13px;
   color: var(--color-text-mid);
   flex: 1;
+}
+
+.toggle-text {
+  flex: 1;
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.toggle-text .toggle-label {
+  display: block;
+}
+
+.toggle-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+  line-height: 1.5;
 }
 
 .toggle-track {
@@ -1032,22 +1052,27 @@ img {
   white-space: nowrap;
 }
 
-/* ── Rebrew Banner ─────────────────────────────────────────────────────────── */
-.rebrew-banner {
+/* ── Rebrew Pill ───────────────────────────────────────────────────────────── */
+.rebrew-pill-wrap {
   display: flex;
-  align-items: center;
-  gap: 9px;
-  background: var(--color-next-note-bg);
-  border: 1px solid var(--color-next-note-border);
-  border-radius: var(--radius-md);
-  padding: 11px 14px;
-  margin: 0 18px 4px;
+  justify-content: center;
+  padding-bottom: 10px;
 }
 
-.rebrew-banner-text {
-  font-size: 12.5px;
-  color: var(--color-text-mid);
-  flex: 1;
+.rebrew-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #C9A77F;
+  background: #F4E6D3;
+  color: #8C5535;
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* ── Ice Brew Section ──────────────────────────────────────────────────────── */
@@ -1128,6 +1153,7 @@ img {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  animation: pfFade 0.2s ease both;
 }
 
 .overlay-bg.hidden {
@@ -1137,10 +1163,18 @@ img {
 .overlay-sheet {
   width: 100%;
   max-width: 430px;
-  background: var(--color-surface);
+  background: var(--color-surface-muted);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-  padding: 20px 20px calc(20px + var(--safe-bottom));
+  padding: 22px 20px calc(22px + var(--safe-bottom));
   animation: pfSheet 0.25s ease both;
+}
+
+.sheet-grabber {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: #D8CBB2;
+  margin: 0 auto;
 }
 
 /* ── Animations ────────────────────────────────────────────────────────────── */
@@ -1205,10 +1239,11 @@ img {
     transform: none;
     transition: none;
   }
+  .overlay-bg,
   .overlay-sheet {
     animation: none;
   }
-  .pf-toast {
+  .toast {
     animation: none;
   }
 }

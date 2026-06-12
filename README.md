@@ -45,15 +45,16 @@ npx serve .
 | PR-002 | App shell + design token system |
 | PR-003 | Recipe engine + real timer |
 | PR-004 | History + localStorage persistence + Rebrew |
-| **PR-005** | **Settings persistence + export + clear history** ← current |
+| PR-005 | Settings persistence + export + clear history |
+| **PR-006A** | **Visual parity + UX clarity polish** ← current |
 | PR-006 | PWA manifest + service worker + offline |
+| PR-007 | Engine refinements (variable 4:6 back pours, assist hardening) |
 
-> **PR-005** adds settings persistence (`pouroFable5.settings.v1`).
-> Default brew settings (method, dose, ratio) are applied to Recipe Setup on boot.
-> Brew Log now has equipment input fields (bean, grind, temperature, dripper).
-> JSON and CSV export are fully implemented.
-> Clear History now fully removes `pouroFable5.history.v1` from localStorage.
-> Clearing history does not delete settings.
-> PWA manifest and service worker remain PR-006.
+> **PR-006A** is display-layer only: method PNG icons restored across all screens,
+> tab bar shown only on Home / History / Settings, softened selected-chip tone,
+> consistent Hybrid OPEN/CLOSED vocabulary, Ice Brew ratio card hidden with
+> HOT/ICE guidance, Japanese date display, rating clear-on-retap, rebrew pill,
+> Settings assist sub-text + history count, and an artifact-style clear sheet.
+> RecipeEngine, timer, localStorage schema, and export/clear logic are unchanged.
 
-See [`docs/design/PR-005_SETTINGS_EXPORT_CLEAR.md`](docs/design/PR-005_SETTINGS_EXPORT_CLEAR.md) for full details.
+See [`docs/design/PR-006A_VISUAL_PARITY_UX_CLARITY.md`](docs/design/PR-006A_VISUAL_PARITY_UX_CLARITY.md) for full details.

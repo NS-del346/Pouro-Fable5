@@ -54,7 +54,7 @@ const METHODS = {
     name: 'Hybrid',
     sub: 'HARIO Switch 浸漬 + 透過',
     time: '約3:30',
-    desc: 'スイッチを使って浸漬と透過を組み合わせた方法。前半は弁を開いて注湯・浸漬、後半は弁を閉じて透過させます。',
+    desc: 'スイッチの開閉で浸漬と透過を組み合わせた方法。OPEN で湯を落とし（透過）、CLOSED で湯を溜めて浸漬させます。',
     meters: [
       { label: 'ボディ', dots: [true, true, true, true, true, false] },
       { label: '甘さ',   dots: [true, true, true, true, false, false] },
@@ -114,6 +114,7 @@ const METHODS = {
       '氷をサーバーにセットしてください',
       'フィルターをリンスし、ドリッパーを温めてください',
       '通常より湯量を少なくして濃く抽出します — 急冷で完成します',
+      '累計表示は注いだ湯量のみです — 氷は含めません',
     ],
   },
 };
@@ -530,13 +531,18 @@ function safeWriteSettings(settings) {
   }
 }
 
+// Display-only Japanese date format — stored data stays ISO
 function _formatDate(iso) {
   if (!iso) return '—';
   try {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+    // Date-only legacy entries have no time information
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+      const [, mo, da] = iso.split('-');
+      return `${Number(mo)}月${Number(da)}日`;
+    }
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '—';
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
   } catch {
     return '—';
   }
@@ -582,6 +588,13 @@ function cacheDOM() {
 function iconSvgFor(methodId, size = 26) {
   const m = METHODS[methodId];
   return m ? m.icon.replace(/width="26" height="26"/, `width="${size}" height="${size}"`) : '';
+}
+
+/* Method PNG icon — primary method visual across screens (Fable5 artifact parity) */
+function methodImgHTML(methodId, size) {
+  const m = METHODS[methodId];
+  if (!m || !m.img) return '';
+  return `<span style="display:inline-flex;width:${size}px;height:${size}px;align-items:center;justify-content:center;flex-shrink:0;"><img src="${m.img}" alt="" style="max-width:100%;max-height:100%;display:block;"></span>`;
 }
 
 /* ── Summary columns ────────────────────────────────────────────────────────── */
@@ -670,8 +683,10 @@ function buildRatingStars(rating) {
 }
 
 /* ── Screen navigation ──────────────────────────────────────────────────────── */
-const BREW_FLOW_SCREENS = ['home', 'setup', 'preview', 'brew', 'log'];
-const HISTORY_SCREENS   = ['history', 'detail'];
+// Fable5 tab rule: the tab bar shows only on root screens.
+// Flow/detail screens (setup, preview, brew, log, detail) hide it so the
+// CTA bar lands directly on the safe area without a double bottom.
+const TAB_BAR_SCREENS = ['home', 'history', 'settings'];
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -679,13 +694,13 @@ function showScreen(id) {
   if (el) el.classList.add('active');
 
   const tabBar = document.getElementById('tab-bar');
-  if (id === 'brew') {
-    tabBar.classList.add('hidden');
-  } else {
+  if (TAB_BAR_SCREENS.includes(id)) {
     tabBar.classList.remove('hidden');
-    // Stop timer when leaving brew screen
-    if (state.timer.isRunning) stopTimer();
+  } else {
+    tabBar.classList.add('hidden');
   }
+  // Stop timer when leaving brew screen
+  if (id !== 'brew' && state.timer.isRunning) stopTimer();
 
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.remove('active');
@@ -693,9 +708,9 @@ function showScreen(id) {
   });
 
   let activeTab = null;
-  if (BREW_FLOW_SCREENS.includes(id)) activeTab = 'brew';
-  if (HISTORY_SCREENS.includes(id))   activeTab = 'history';
-  if (id === 'settings')               activeTab = 'settings';
+  if (id === 'home')     activeTab = 'brew';
+  if (id === 'history')  activeTab = 'history';
+  if (id === 'settings') activeTab = 'settings';
 
   if (activeTab) {
     const tabEl = document.getElementById(`tab-${activeTab}`);
@@ -836,24 +851,35 @@ function updateBrewStep() {
     DOM.brewPourNote.textContent = step.instruction;
   }
 
-  // Hybrid switch badge
+  // Context chip row — Hybrid switch state / Ice hot-ice reminder.
+  // OPEN = percolation (water drains), CLOSED = immersion (water held).
   if (recipe.id === 'hybrid' && step.switchState) {
     DOM.brewSwitchRow.classList.remove('hidden');
     DOM.brewSwitchRow.style.display = 'flex';
     if (step.switchState === 'open') {
       DOM.brewSwitchChip.textContent  = 'OPEN';
-      DOM.brewSwitchChip.style.background = '#FBF4E5';
-      DOM.brewSwitchChip.style.border     = '1px solid #C9B88C';
+      DOM.brewSwitchChip.style.background = '#FBF6EC';
+      DOM.brewSwitchChip.style.border     = '1px solid #D9C3A6';
       DOM.brewSwitchChip.style.color      = '#8C5535';
-      DOM.brewSwitchDesc.textContent  = 'スイッチ開';
+      DOM.brewSwitchDesc.textContent  = 'スイッチ開・湯が落ちています（透過）';
     } else {
       DOM.brewSwitchChip.textContent  = 'CLOSED';
-      DOM.brewSwitchChip.style.background = 'var(--color-surface-ice)';
-      DOM.brewSwitchChip.style.border     = '1px solid var(--color-border-ice)';
-      DOM.brewSwitchChip.style.color      = 'var(--color-text-ice)';
-      DOM.brewSwitchDesc.textContent  = 'スイッチ閉・浸漬中';
+      DOM.brewSwitchChip.style.background = '#8C5535';
+      DOM.brewSwitchChip.style.border     = '1px solid #8C5535';
+      DOM.brewSwitchChip.style.color      = '#FBF4EA';
+      DOM.brewSwitchDesc.textContent  = 'スイッチ閉・湯を溜めています（浸漬）';
     }
-  } else if (recipe.id !== 'hybrid') {
+  } else if (recipe.id === 'ice') {
+    DOM.brewSwitchRow.classList.remove('hidden');
+    DOM.brewSwitchRow.style.display = 'flex';
+    DOM.brewSwitchChip.textContent  = `HOT ${recipe.hotWater}g ・ ICE ${recipe.ice}g`;
+    DOM.brewSwitchChip.style.background = '#FBF6EC';
+    DOM.brewSwitchChip.style.border     = '1px solid #D9C3A6';
+    DOM.brewSwitchChip.style.color      = '#8C5535';
+    DOM.brewSwitchDesc.textContent  = '氷はサーバーに先入れ';
+  } else {
+    // No context for this step (e.g. Hybrid drawdown) — hide instead of
+    // letting the previous step's state linger
     DOM.brewSwitchRow.classList.add('hidden');
   }
 
@@ -943,9 +969,13 @@ function initBrew(recipe) {
 
   // Brew screen method header
   const m = METHODS[recipe.id];
-  DOM.brewMethodIcon.innerHTML    = m.iconSm;
+  DOM.brewMethodIcon.innerHTML    = methodImgHTML(recipe.id, 32);
   DOM.brewMethodName.textContent  = recipe.name;
   DOM.brewMethodSub.textContent   = m.sub;
+
+  // Ice Brew counts hot water only — say so in the cumulative header
+  document.getElementById('brew-cum-label').textContent =
+    recipe.id === 'ice' ? '累計（湯のみ）' : '累計';
 
   // Reset timer display
   DOM.brewTimeDisplay.textContent = '0:00';
@@ -985,7 +1015,7 @@ function renderHome() {
       ).join('');
       html += `<div class="method-selected-card">
         <div style="display:flex;gap:14px;">
-          <span style="display:inline-flex;color:var(--color-accent);flex-shrink:0;margin-top:4px;">${m.icon}</span>
+          <span style="display:inline-flex;flex-shrink:0;margin-top:4px;">${methodImgHTML(id, 46)}</span>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;">
               <span style="font-family:var(--font-serif);font-size:13px;color:var(--color-text-faint);">${m.num}</span>
@@ -1006,7 +1036,7 @@ function renderHome() {
       </div>`;
     } else {
       html += `<div class="method-row" data-method-id="${id}">
-        <span class="method-row-icon">${m.iconSm}</span>
+        <span class="method-row-icon">${methodImgHTML(id, 34)}</span>
         <span class="method-row-num">${m.num}</span>
         <span style="flex:1;min-width:0;">
           <span class="method-row-name">${m.name}</span>
@@ -1038,7 +1068,7 @@ function renderSetup() {
   const m = METHODS[state.selectedMethodId];
   const d = state.draft;
 
-  document.getElementById('setup-method-icon').innerHTML    = m.icon;
+  document.getElementById('setup-method-icon').innerHTML    = methodImgHTML(m.id, 40);
   document.getElementById('setup-method-name').textContent  = m.name;
   document.getElementById('setup-method-sub').textContent   = m.sub;
   document.getElementById('dose-display').textContent       = d.dose;
@@ -1048,6 +1078,8 @@ function renderSetup() {
   document.getElementById('hybrid-card').style.display   = m.id === 'hybrid'   ? '' : 'none';
   document.getElementById('neo-card').style.display      = m.id === 'neo'       ? '' : 'none';
   document.getElementById('ice-card').style.display      = m.id === 'ice'       ? '' : 'none';
+  // Ice Brew uses a fixed formula (ratio is ignored), so hide the ratio card
+  document.getElementById('ratio-card').style.display    = m.id === 'ice'       ? 'none' : '';
 
   if (m.id === 'ice') {
     const hot = Math.round(d.dose * 7.5);
@@ -1108,17 +1140,25 @@ function renderPreview() {
   const recipe = RecipeEngine.build(m.id, d.dose, d.ratio, d.flavor, d.strength);
   state._previewRecipe = recipe;  // stash for Start Brew button
 
-  document.getElementById('preview-method-icon').innerHTML    = m.icon;
+  document.getElementById('preview-method-icon').innerHTML    = methodImgHTML(m.id, 40);
   document.getElementById('preview-method-name').textContent  = recipe.name;
   document.getElementById('preview-method-sub').textContent   = m.sub;
 
-  const banner = document.getElementById('rebrew-banner');
+  const banner   = document.getElementById('rebrew-banner');
+  const noteCard = document.getElementById('rebrew-next-note-card');
   if (state.rebrewFrom) {
     banner.classList.remove('hidden');
     document.getElementById('rebrew-banner-text').textContent =
-      `${state.rebrewFrom.date} の記録をもとにレシピを読み込みました`;
+      `履歴から再現 ・ ${state.rebrewFrom.date} の記録`;
+    if (state.rebrewFrom.nextNote) {
+      noteCard.classList.remove('hidden');
+      document.getElementById('rebrew-next-note-text').textContent = state.rebrewFrom.nextNote;
+    } else {
+      noteCard.classList.add('hidden');
+    }
   } else {
     banner.classList.add('hidden');
+    noteCard.classList.add('hidden');
   }
 
   const flavorContainer = document.getElementById('preview-flavor-chips');
@@ -1158,7 +1198,7 @@ function renderLog() {
   const m = METHODS[recipe.id];
 
   document.getElementById('log-method-label').textContent = recipe.name;
-  document.getElementById('log-method-icon').innerHTML    = m.icon;
+  document.getElementById('log-method-icon').innerHTML    = methodImgHTML(recipe.id, 40);
   document.getElementById('log-method-name').textContent  = recipe.name;
   document.getElementById('log-method-sub').textContent   = m.sub;
   document.getElementById('log-summary-grid').innerHTML   = buildSummaryCols(recipe);
@@ -1171,10 +1211,14 @@ function renderLog() {
     </button>`;
   }).join('');
   document.getElementById('log-rate-label').textContent =
-    state.log.rating ? RATING_LABELS[state.log.rating] : '—';
+    state.log.rating
+      ? `${state.log.rating} / 5 ・ ${RATING_LABELS[state.log.rating]}`
+      : '未評価（タップで設定）';
   ratingContainer.querySelectorAll('.rating-dot-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      state.log.rating = parseInt(btn.dataset.rating);
+      const v = parseInt(btn.dataset.rating);
+      // Tapping the current rating again clears it (saved as null via normalizeRating)
+      state.log.rating = state.log.rating === v ? 0 : v;
       renderLog();
     });
   });
@@ -1216,7 +1260,7 @@ function renderHistory() {
         feat.recipe?.flavor || feat.flavor || 'balanced',
         feat.recipe?.strength || feat.strength || 'standard');
 
-  document.getElementById('hist-feat-icon').innerHTML    = fm.icon;
+  document.getElementById('hist-feat-icon').innerHTML    = methodImgHTML(feat.methodId, 40);
   document.getElementById('hist-feat-name').textContent  = feat.methodName || fm.name;
   document.getElementById('hist-feat-sub').textContent   = fm.sub;
   document.getElementById('hist-feat-date').textContent  = _formatDate(feat.completedAt || feat.createdAt || feat.date);
@@ -1250,15 +1294,16 @@ function renderHistory() {
     const hTags   = h.log?.tags   || h.tags   || [];
     const dateStr = _formatDate(h.completedAt || h.createdAt || h.date);
 
-    // Ice Brew: show HOT/ICE instead of ratio
+    // Ice Brew: show HOT/ICE instead of total water
     let meta;
     if (h.methodId === 'ice' || h.ratio === null) {
       const hr = h.recipe || {};
       meta = (hr.hotWater != null && hr.ice != null)
-        ? `${h.dose}g · HOT ${hr.hotWater}g / ICE ${hr.ice}g`
-        : `${h.dose}g · Ice Brew`;
+        ? `${h.dose}g ｜ HOT ${hr.hotWater}g / ICE ${hr.ice}g`
+        : `${h.dose}g ｜ Ice Brew`;
     } else {
-      meta = `${h.dose}g · 1:${h.ratio}`;
+      const water = h.recipe?.totalWater ?? Math.round(h.dose * h.ratio);
+      meta = `${h.dose}g ｜ ${water}ml`;
     }
 
     const stars = Array.from({ length: 5 }, (_, i) =>
@@ -1266,11 +1311,11 @@ function renderHistory() {
     ).join('');
     const ratingDisp = hRating !== null
       ? `<span style="display:inline-flex;gap:3px;">${stars}</span>`
-      : `<span style="font-size:11px;color:var(--color-text-faint);">未評価</span>`;
+      : `<span style="font-size:10.5px;color:var(--color-text-faint);border:1px dashed #D5C8B0;border-radius:var(--radius-pill);padding:2px 8px;white-space:nowrap;">未評価</span>`;
     const tags = hTags.slice(0, 2).map(t => `<span class="tag-chip">${t}</span>`).join('');
 
     return `<div class="history-row" data-history-id="${h.id}">
-      <span style="display:inline-flex;color:var(--color-accent);flex-shrink:0;">${hm.iconSm}</span>
+      <span style="display:inline-flex;flex-shrink:0;">${methodImgHTML(h.methodId, 30)}</span>
       <span style="flex:1;min-width:0;">
         <span style="display:flex;align-items:baseline;gap:8px;">
           <span style="font-family:var(--font-serif);font-weight:600;font-size:16px;color:var(--color-text);">${h.methodName || hm.name}</span>
@@ -1316,7 +1361,7 @@ function renderDetail() {
   const nextNote = entry.log?.nextNote || entry.nextNote || '';
 
   document.getElementById('detail-date-label').textContent  = dateStr;
-  document.getElementById('detail-icon').innerHTML           = m.icon;
+  document.getElementById('detail-icon').innerHTML           = methodImgHTML(entry.methodId, 38);
   document.getElementById('detail-name').textContent         = entry.methodName || m.name;
   document.getElementById('detail-sub').textContent          = m.sub;
   document.getElementById('detail-rating').innerHTML         = rating !== null
@@ -1372,6 +1417,7 @@ function renderSettings() {
   document.getElementById('sett-method-val').textContent = METHOD_DISPLAY_NAMES[s.defMethodId];
   document.getElementById('sett-dose-val').textContent   = `${s.defDose}g`;
   document.getElementById('sett-ratio-val').textContent  = `1:${s.defRatio}`;
+  document.getElementById('sett-history-count').textContent = `${state.history.length}件の記録`;
 
   ['wake', 'sound', 'haptic'].forEach(key => {
     const track = document.getElementById(`toggle-${key}`);
@@ -1494,7 +1540,11 @@ function _applyRebrewEntry(entry) {
   state.draft.strength      = entry.recipe?.strength || entry.strength || 'standard';
   state.draft.customRatio   = false;
   const dateStr             = _formatDate(entry.completedAt || entry.createdAt || entry.date);
-  state.rebrewFrom          = { id: entry.id, date: dateStr };
+  state.rebrewFrom          = {
+    id: entry.id,
+    date: dateStr,
+    nextNote: entry.log?.nextNote || entry.nextNote || '',
+  };
   renderPreview();
   showScreen('preview');
 }
@@ -1771,22 +1821,30 @@ function wireEvents() {
   document.getElementById('btn-export-json').addEventListener('click', () => exportJSON());
   document.getElementById('btn-export-csv').addEventListener('click',  () => exportCSV());
 
-  // Settings — clear history (full localStorage removal)
+  // Settings — clear history (removes the history key only; settings stay)
+  const confirmOverlay = document.getElementById('confirm-overlay');
   document.getElementById('btn-clear-history').addEventListener('click', () => {
-    document.getElementById('confirm-overlay').classList.remove('hidden');
+    document.getElementById('confirm-body').innerHTML =
+      `保存済みの抽出履歴 ${state.history.length}件をこの端末から削除します。<br>この操作は元に戻せません。`;
+    confirmOverlay.classList.remove('hidden');
   });
   document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
-    document.getElementById('confirm-overlay').classList.add('hidden');
+    confirmOverlay.classList.add('hidden');
+  });
+  // Backdrop tap cancels (taps inside the sheet don't reach the backdrop)
+  confirmOverlay.addEventListener('click', e => {
+    if (e.target === confirmOverlay) confirmOverlay.classList.add('hidden');
   });
   document.getElementById('btn-confirm-ok').addEventListener('click', () => {
     const ok = safeClearHistory();
-    document.getElementById('confirm-overlay').classList.add('hidden');
+    confirmOverlay.classList.add('hidden');
     if (ok) {
       state.history = [];
       renderHistory();
-      showToast('履歴を削除しました');
+      renderSettings();
+      showToast('履歴を消去しました');
     } else {
-      showToast('履歴を削除できませんでした');
+      showToast('履歴を消去できませんでした');
     }
   });
 }
