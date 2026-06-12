@@ -6,7 +6,7 @@
      Everything else → network-only (no interference)
    ============================================================================= */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2'; /* PR-011A: precached index.html / styles.css / app.js / manifest changed */
 const APP_CACHE  = `pouro-app-${CACHE_VERSION}`;
 const FONT_CACHE = `pouro-fonts-${CACHE_VERSION}`;
 
