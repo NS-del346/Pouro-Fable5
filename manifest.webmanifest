@@ -1,7 +1,7 @@
 {
   "name": "Pourō",
   "short_name": "Pourō",
-  "description": "手淹れコーヒーガイドとタイマー",
+  "description": "ハンドドリップの抽出ガイドと記録",
   "lang": "ja",
   "dir": "ltr",
   "start_url": "./",

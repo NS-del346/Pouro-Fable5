@@ -27,7 +27,7 @@
     <div class="screen-scroll" data-scroll style="padding: 26px 18px 24px;">
 
       <div style="text-align:center;">
-        <img src="assets/wordmark-ink.png" alt="pourō" style="height:32px;margin:0 auto;">
+        <div class="logo-wordmark" role="img" aria-label="pourō">pour<span class="logo-o">ō<span class="logo-macron" aria-hidden="true">ō</span></span></div>
         <div style="margin-top:8px;font-size:12px;letter-spacing:0.04em;color:var(--color-text-muted);">Pour slowly. Brew deeply.</div>
         <div style="margin-top:18px;font-family:var(--font-mincho);font-weight:700;font-size:22px;color:var(--color-text);">今日の抽出を整える</div>
       </div>
@@ -448,8 +448,8 @@
        ═══════════════════════════════════════════════════════════════════════ -->
   <div id="screen-log" class="screen">
     <div class="screen-header">
-      <button class="btn-back" id="btn-log-back" aria-label="戻る">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+      <button class="btn-back" id="btn-log-close" aria-label="記録せず閉じる">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>
       </button>
       <div>
         <div class="screen-header-title">抽出記録</div>
@@ -574,7 +574,7 @@
           <span style="display:block;font-size:13px;color:var(--color-text-muted);margin-top:5px;">抽出の記録</span>
         </span>
         <span style="flex:1;"></span>
-        <img src="assets/method-46.png" alt="" style="width:44px;height:44px;margin-top:4px;flex-shrink:0;">
+        <img src="assets/method-46.png" alt="" style="width:44px;height:44px;object-fit:contain;margin-top:4px;flex-shrink:0;">
       </div>
 
       <!-- Has history -->
@@ -634,7 +634,7 @@
 
       <!-- Empty state -->
       <div id="history-empty" class="hidden" style="text-align:center;padding:70px 20px 40px;color:var(--color-text-faint);">
-        <img src="assets/method-46.png" alt="" style="width:52px;height:52px;margin:0 auto;">
+        <img src="assets/method-46.png" alt="" style="width:52px;height:52px;object-fit:contain;margin:0 auto;">
         <div style="font-family:var(--font-mincho);font-size:16px;color:var(--color-text-muted);margin-top:14px;">記録はまだありません</div>
         <div style="font-size:12.5px;margin-top:6px;">一杯淹れて、最初の記録を残しましょう</div>
       </div>
@@ -854,21 +854,32 @@
         <div class="card">
           <div style="display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--color-border-divider);">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
-            <span style="font-size:13.5px;font-weight:700;color:var(--color-text);">データ</span>
+            <span style="font-size:13.5px;font-weight:700;color:var(--color-text);">データ管理</span>
             <span style="flex:1;"></span>
             <span id="sett-history-count" style="font-size:11.5px;color:var(--color-text-faint);white-space:nowrap;"></span>
           </div>
-          <div class="settings-row" style="cursor:pointer;" id="btn-export-json">
-            <span class="settings-row-label">JSON でエクスポート</span>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14"/><path d="M5 9l7 7 7-7"/><path d="M5 21h14"/></svg>
-          </div>
+          <div class="settings-group-label">履歴を書き出す</div>
           <div class="settings-row" style="cursor:pointer;" id="btn-export-csv">
-            <span class="settings-row-label">CSV でエクスポート</span>
+            <span class="settings-row-text">
+              <span class="settings-row-label">CSVを書き出す</span>
+              <span class="settings-row-sub">Excel / Numbers / Google Sheetsで開ける記録表</span>
+            </span>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14"/><path d="M5 9l7 7 7-7"/><path d="M5 21h14"/></svg>
           </div>
-          <div class="settings-row" style="border-bottom:none;cursor:pointer;" id="btn-clear-history">
+          <div class="settings-row" style="cursor:pointer;" id="btn-export-json">
+            <span class="settings-row-text">
+              <span class="settings-row-label">詳細データ（JSON）</span>
+              <span class="settings-row-sub">すべての記録項目を含む完全なデータです</span>
+            </span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14"/><path d="M5 9l7 7 7-7"/><path d="M5 21h14"/></svg>
+          </div>
+          <div class="settings-row" style="cursor:pointer;" id="btn-clear-history">
             <span style="font-size:13px;color:#A3543A;flex:1;">履歴を消去</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A3543A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16"/><path d="M9 6.5V4.8a1.3 1.3 0 0 1 1.3-1.3h3.4A1.3 1.3 0 0 1 15 4.8v1.7"/><path d="M6.5 6.5l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13"/></svg>
+          </div>
+          <div style="padding:11px 0 4px;">
+            <span style="font-size:12px;font-weight:700;color:var(--color-text-mid);">データについて</span>
+            <p style="font-size:11px;color:var(--color-text-faint);line-height:1.7;margin:4px 0 0;">記録はこの端末内にのみ保存され、サーバーには送信されません。書き出したファイルは表計算アプリなどで利用できます。</p>
           </div>
         </div>
 
@@ -876,8 +887,8 @@
         <div class="about-card">
           <img src="assets/app-icon.png" alt="pourō icon" class="about-icon">
           <img src="assets/wordmark-ink.png" alt="pourō" style="height:22px;margin-top:4px;">
-          <span class="about-version">Version 0.9.0 (PR-009)</span>
-          <p class="about-legal">Pourō は個人の手淹れコーヒー体験を記録するアプリです。<br>Fable5 design artifact より構築。</p>
+          <span class="about-version">Version 0.9.1 (PR-011A)</span>
+          <p class="about-legal">Pourō は、ハンドドリップの抽出条件と結果を記録する個人用ツールです。</p>
         </div>
 
       </div><!-- /flex-col gap-14 -->
@@ -911,7 +922,7 @@
   <div id="confirm-overlay" class="overlay-bg hidden">
     <div class="overlay-sheet">
       <div class="sheet-grabber"></div>
-      <div style="font-family:var(--font-mincho);font-weight:600;font-size:18px;color:var(--color-text);text-align:center;margin-top:18px;">履歴を消去しますか？</div>
+      <div id="confirm-title" style="font-family:var(--font-mincho);font-weight:600;font-size:18px;color:var(--color-text);text-align:center;margin-top:18px;">履歴を消去しますか？</div>
       <div id="confirm-body" style="font-size:13px;color:var(--color-text-muted);text-align:center;margin-top:9px;line-height:1.8;">保存済みの抽出履歴をこの端末から削除します。<br>この操作は元に戻せません。</div>
       <div style="display:flex;gap:10px;margin-top:20px;">
         <button id="btn-confirm-cancel" style="flex:1;height:50px;border:1px solid #D5C8B0;border-radius:var(--radius-md);background:#FCFAF5;font-size:14px;font-weight:700;color:var(--color-text);cursor:pointer;">キャンセル</button>
