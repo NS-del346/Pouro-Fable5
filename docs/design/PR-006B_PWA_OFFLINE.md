@@ -5,7 +5,7 @@
 - Web App Manifest (`manifest.webmanifest`)
 - iOS home screen metadata (`theme-color`, `apple-touch-icon`)
 - Service Worker registration (`sw.js`, registered from `app.js` after boot)
-- Offline app shell cache (26 assets pre-cached at install time)
+- Offline app shell cache (28 assets pre-cached at install time)
 - Google Fonts runtime cache (stale-while-revalidate)
 - GitHub Pages relative path compatibility (`start_url: ./`, `scope: ./`)
 
@@ -49,7 +49,7 @@
 | Other origins | Network-only (no interference) |
 | Install failure | `console.warn('[Pouro] Service worker install failed:', err)` then re-throw |
 
-## Precache asset list (`APP_SHELL` — 26 entries)
+## Precache asset list (`APP_SHELL` — 28 entries)
 
 All entries verified to exist in the repository before listing.
 
@@ -96,7 +96,7 @@ Verify with `find assets -maxdepth 3 -type f | sort` before adding new entries.
 - Online load works; no console errors
 - Manifest recognized in DevTools → Application → Manifest
 - Service Worker registered and in `activated` state
-- Cache Storage shows `pouro-app-v1` with all 26 entries
+- Cache Storage shows `pouro-app-v1` with all 28 entries
 - Offline reload works after first online load (DevTools Network → Offline)
 - CSS / JS / method PNG icons / wordmark all available offline
 - Google Fonts appear in `pouro-fonts-v1` after first online load
