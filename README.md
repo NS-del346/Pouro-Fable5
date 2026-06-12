@@ -49,12 +49,12 @@ npx serve .
 | PR-006A | Visual parity + UX clarity polish |
 | PR-006B | PWA manifest + service worker + offline QA |
 | PR-007 | Engine refinements + reproducibility enhancement |
-| **PR-008** | **Post-engine QA / release hardening** ← current |
-| PR-009 | Release candidate / final deploy QA |
+| PR-008 | Post-engine QA / release hardening |
+| **PR-009** | **Release candidate / final deploy QA** ← current |
+| PR-010 | Public release / archive handoff |
 
-> **PR-008** performs a full post-engine regression QA across all four brewing methods,
-> verifies 4:6 variable strength (4/5/6 pours), Hybrid 3-pour structure, Active Brew
-> countdown, History/Rebrew/Export/Clear, PWA offline behavior, and 375px viewport.
-> Fixes Hybrid setup card times that were stale from pre-PR-007 (0:45/1:30/2:15/3:30 → 0:30/1:15/1:45).
+> **PR-009** confirms the app is release-candidate ready after full flow, PWA/offline,
+> storage/export, and 375px viewport QA. Fixes stale About card version string
+> (PR-006A → PR-009). No engine or schema changes.
 
-See [`docs/design/PR-008_RELEASE_HARDENING.md`](docs/design/PR-008_RELEASE_HARDENING.md) for full details.
+See [`docs/design/PR-009_RELEASE_CANDIDATE_QA.md`](docs/design/PR-009_RELEASE_CANDIDATE_QA.md) for full details.
