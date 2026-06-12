@@ -1871,4 +1871,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSettings();
   wireEvents();
   showScreen('home');
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
 });
