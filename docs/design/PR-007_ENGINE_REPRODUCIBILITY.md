@@ -149,11 +149,28 @@ bean, grind, temperature, equipment
 
 ---
 
+## Visual display: Active Brew progress
+
+Luminous ring (conic-gradient sweep) was evaluated but **not adopted in PR-007**.
+
+Reason: 375px 幅で情報密度を圧迫するため。秒の進行補助は next-pour countdown テキスト案内で対応。
+
+| Display text | Condition |
+|---|---|
+| `XX秒後` | Next step > 0s away |
+| `注湯タイム` | Next pour step at 0s |
+| `落ち切り待ち` | Drawdown step at 0s |
+| `''` | No next step / final |
+
+---
+
 ## QA Results
 
 | Check | Result |
 |-------|--------|
 | git diff --check | clean |
+| Active Brew: no luminous ring / glow / sweep | ✓ |
+| Active Brew: next-pour countdown present | ✓ |
 | 4:6 sweet/balanced/bright front split correct | ✓ |
 | 4:6 light/standard/strong pour count = 4/5/6 | ✓ |
 | 4:6 pour totals equal totalWater for all combinations | ✓ |

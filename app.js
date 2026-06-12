@@ -592,7 +592,6 @@ function _formatDate(iso) {
 let DOM = {};
 function cacheDOM() {
   DOM.brewTimeDisplay = document.getElementById('brew-time-display');
-  DOM.brewRing        = document.getElementById('brew-ring');
   DOM.brewArc         = document.getElementById('brew-arc');
   DOM.brewStepBig     = document.getElementById('brew-step-big');
   DOM.brewStepSmall   = document.getElementById('brew-step-small');
@@ -789,12 +788,6 @@ function _updateTimerDisplay() {
     'stroke-dasharray',
     `${(circumference * progress).toFixed(1)} ${circumference.toFixed(1)}`
   );
-
-  // Luminous ring: update CSS custom property for the glow sweep angle
-  if (DOM.brewRing) {
-    const angle = Math.max(0, Math.min(360, progress * 360));
-    DOM.brewRing.style.setProperty('--brew-progress-angle', `${angle.toFixed(1)}deg`);
-  }
 
   // Next-pour countdown: show seconds until next step
   const cdEl = DOM.brewNextCountdown;
