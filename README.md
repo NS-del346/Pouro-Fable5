@@ -48,12 +48,13 @@ npx serve .
 | PR-005 | Settings persistence + export + clear history |
 | PR-006A | Visual parity + UX clarity polish |
 | PR-006B | PWA manifest + service worker + offline QA |
-| **PR-007** | **Engine refinements + reproducibility enhancement** ← current |
-| PR-008 | Post-engine QA / release hardening |
+| PR-007 | Engine refinements + reproducibility enhancement |
+| **PR-008** | **Post-engine QA / release hardening** ← current |
+| PR-009 | Release candidate / final deploy QA |
 
-> **PR-007** implements variable 4:6 strength logic (4/5/6 total pours by strength),
-> refines the Hybrid recipe to the Fable5 artifact 3-pour structure, adds Active Brew
-> next-pour countdown, and adds `actualDrawdown` / `nextNote` reproducibility fields
-> to Brew Log, History Detail, and exports. Backward compatible with existing data.
+> **PR-008** performs a full post-engine regression QA across all four brewing methods,
+> verifies 4:6 variable strength (4/5/6 pours), Hybrid 3-pour structure, Active Brew
+> countdown, History/Rebrew/Export/Clear, PWA offline behavior, and 375px viewport.
+> Fixes Hybrid setup card times that were stale from pre-PR-007 (0:45/1:30/2:15/3:30 → 0:30/1:15/1:45).
 
-See [`docs/design/PR-007_ENGINE_REPRODUCIBILITY.md`](docs/design/PR-007_ENGINE_REPRODUCIBILITY.md) for full details.
+See [`docs/design/PR-008_RELEASE_HARDENING.md`](docs/design/PR-008_RELEASE_HARDENING.md) for full details.
