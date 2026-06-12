@@ -47,11 +47,13 @@ npx serve .
 | PR-004 | History + localStorage persistence + Rebrew |
 | PR-005 | Settings persistence + export + clear history |
 | PR-006A | Visual parity + UX clarity polish |
-| **PR-006B** | **PWA manifest + service worker + offline QA** ← current |
-| PR-007 | Engine refinements / reproducibility enhancement |
+| PR-006B | PWA manifest + service worker + offline QA |
+| **PR-007** | **Engine refinements + reproducibility enhancement** ← current |
+| PR-008 | Post-engine QA / release hardening |
 
-> **PR-006B** adds the Web App Manifest, iOS home screen metadata, safe Service Worker
-> registration, offline app shell caching, Google Fonts runtime caching, and offline QA
-> documentation. RecipeEngine, timer, localStorage schema, and export/clear logic are unchanged.
+> **PR-007** implements variable 4:6 strength logic (4/5/6 total pours by strength),
+> refines the Hybrid recipe to the Fable5 artifact 3-pour structure, adds Active Brew
+> next-pour countdown, and adds `actualDrawdown` / `nextNote` reproducibility fields
+> to Brew Log, History Detail, and exports. Backward compatible with existing data.
 
-See [`docs/design/PR-006B_PWA_OFFLINE.md`](docs/design/PR-006B_PWA_OFFLINE.md) for full details.
+See [`docs/design/PR-007_ENGINE_REPRODUCIBILITY.md`](docs/design/PR-007_ENGINE_REPRODUCIBILITY.md) for full details.
