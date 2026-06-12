@@ -47,6 +47,10 @@ self.addEventListener('install', event => {
     caches.open(APP_CACHE)
       .then(cache => cache.addAll(APP_SHELL))
       .then(() => self.skipWaiting())
+      .catch(err => {
+        console.warn('[Pouro] Service worker install failed:', err);
+        throw err;
+      })
   );
 });
 
