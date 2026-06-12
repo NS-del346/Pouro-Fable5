@@ -309,6 +309,36 @@ img {
   background: var(--color-border);
 }
 
+/* ── Logo Wordmark (Home header) ───────────────────────────────────────────── */
+/* Text-based wordmark: the macron of "ō" is tinted amber by stacking the same
+   glyph on top of itself and clipping the overlay to the macron region.
+   Both layers share font metrics, so the accent stays aligned across font
+   sizes and serif fallbacks (Lora → Georgia). */
+.logo-wordmark {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 31px;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+}
+
+.logo-o {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-macron {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  color: var(--color-accent);
+  clip-path: inset(0 0 72% 0);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ── Method Row (unselected) ───────────────────────────────────────────────── */
 .method-row {
   display: flex;
@@ -326,14 +356,23 @@ img {
   flex-shrink: 0;
 }
 
+/* Fixed label column so every row's title starts at the same x position,
+   regardless of the label width ("4:6" vs "10 Pour") */
 .method-row-num {
   font-family: var(--font-serif);
   font-size: 13px;
   color: var(--color-text-faint);
+  width: 52px;
   flex-shrink: 0;
 }
 
+.method-row-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .method-row-name {
+  display: block;
   font-family: var(--font-serif);
   font-weight: 600;
   font-size: 17px;
@@ -341,9 +380,12 @@ img {
 }
 
 .method-row-sub {
+  display: block;
   font-size: 12.5px;
   color: var(--color-text-muted);
-  margin-top: 1px;
+  margin-top: 2px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .method-row-time {
@@ -375,6 +417,8 @@ img {
   font-size: 13px;
   color: var(--color-text-mid);
   margin-top: 2px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 /* Meter dots row */
@@ -709,6 +753,32 @@ img {
   font-size: 13px;
   color: var(--color-text-mid);
   flex: 1;
+}
+
+.settings-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+  margin-top: 10px;
+}
+
+.settings-row-text {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 0;
+}
+
+.settings-row-text .settings-row-label {
+  display: block;
+}
+
+.settings-row-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+  line-height: 1.5;
 }
 
 .settings-row-value {

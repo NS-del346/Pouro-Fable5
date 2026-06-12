@@ -1053,6 +1053,16 @@ function initBrew(recipe) {
 }
 
 /* ── Home screen ────────────────────────────────────────────────────────────── */
+// Home subcopy uses word-break: keep-all, so insert <wbr> after Japanese
+// punctuation to allow line breaks only at natural phrase boundaries.
+// Display-only transform — METHODS data itself stays plain text.
+function homeSubHTML(sub) {
+  return sub
+    .replace(/、/g, '、<wbr>')
+    .replace(/・/g, '・<wbr>')
+    .replace(/ \+ /g, ' + '); // keep "浸漬 + 透過" style pairs on one line
+}
+
 function renderHome() {
   const container = document.getElementById('method-list');
   if (!container) return;
@@ -1083,7 +1093,7 @@ function renderHome() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>
             </div>
             <div class="method-selected-name">${m.name}</div>
-            <div class="method-selected-sub">${m.sub}</div>
+            <div class="method-selected-sub">${homeSubHTML(m.sub)}</div>
           </div>
         </div>
         <div class="meters-row">${metersHTML}</div>
@@ -1097,9 +1107,9 @@ function renderHome() {
       html += `<div class="method-row" data-method-id="${id}">
         <span class="method-row-icon">${methodImgHTML(id, 34)}</span>
         <span class="method-row-num">${m.num}</span>
-        <span style="flex:1;min-width:0;">
+        <span class="method-row-text">
           <span class="method-row-name">${m.name}</span>
-          <span class="method-row-sub">${m.sub}</span>
+          <span class="method-row-sub">${homeSubHTML(m.sub)}</span>
         </span>
         <span class="method-row-time">${m.time}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
@@ -1491,6 +1501,32 @@ function renderSettings() {
   safeWriteSettings(s);
 }
 
+/* ── Confirm dialog (shared bottom sheet) ───────────────────────────────────── */
+// Single overlay reused by Clear History and Brew Log close — the OK action is
+// swapped per caller instead of adding new dialog markup.
+let _confirmOnOk = null;
+
+function showConfirm({ title, body, okText, onOk }) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').innerHTML    = body;
+  document.getElementById('btn-confirm-ok').textContent = okText;
+  _confirmOnOk = onOk;
+  document.getElementById('confirm-overlay').classList.remove('hidden');
+}
+
+function hideConfirm() {
+  document.getElementById('confirm-overlay').classList.add('hidden');
+  _confirmOnOk = null;
+}
+
+// True when the Brew Log screen has any unsaved user input
+function _logHasInput() {
+  if (state.log.rating || state.log.tags.length) return true;
+  return ['log-memo', 'log-next-note', 'log-bean', 'log-grind',
+          'log-temperature', 'log-equipment', 'log-actual-drawdown']
+    .some(id => (document.getElementById(id)?.value || '').trim() !== '');
+}
+
 /* ── Toast ──────────────────────────────────────────────────────────────────── */
 let _toastTimer = null;
 function showToast(msg) {
@@ -1777,11 +1813,24 @@ function wireEvents() {
     }
   });
 
-  // Log ← back
-  document.getElementById('btn-log-back').addEventListener('click', () => {
-    showScreen('brew');
-    if (state.timer.isFinished) {
-      // Brew already finished — do nothing, just show brew screen in final state
+  // Log — close without saving (PR-011A)
+  // Brew Log is a post-brew record screen, so the header control closes to Home
+  // instead of going back to the finished Timer. Skipping the record on purpose
+  // is a supported choice — nothing is written to history.
+  document.getElementById('btn-log-close').addEventListener('click', () => {
+    const goHome = () => {
+      renderHome();
+      showScreen('home');
+    };
+    if (_logHasInput()) {
+      showConfirm({
+        title:  '記録せずに閉じますか？',
+        body:   '入力中の内容は保存されません。',
+        okText: '閉じる',
+        onOk:   goHome,
+      });
+    } else {
+      goHome();
     }
   });
 
@@ -1887,28 +1936,34 @@ function wireEvents() {
   // Settings — clear history (removes the history key only; settings stay)
   const confirmOverlay = document.getElementById('confirm-overlay');
   document.getElementById('btn-clear-history').addEventListener('click', () => {
-    document.getElementById('confirm-body').innerHTML =
-      `保存済みの抽出履歴 ${state.history.length}件をこの端末から削除します。<br>この操作は元に戻せません。`;
-    confirmOverlay.classList.remove('hidden');
+    showConfirm({
+      title:  '履歴を消去しますか？',
+      body:   `保存済みの抽出履歴 ${state.history.length}件をこの端末から削除します。<br>この操作は元に戻せません。`,
+      okText: '消去する',
+      onOk:   () => {
+        const ok = safeClearHistory();
+        if (ok) {
+          state.history = [];
+          renderHistory();
+          renderSettings();
+          showToast('履歴を消去しました');
+        } else {
+          showToast('履歴を消去できませんでした');
+        }
+      },
+    });
   });
   document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
-    confirmOverlay.classList.add('hidden');
+    hideConfirm();
   });
   // Backdrop tap cancels (taps inside the sheet don't reach the backdrop)
   confirmOverlay.addEventListener('click', e => {
-    if (e.target === confirmOverlay) confirmOverlay.classList.add('hidden');
+    if (e.target === confirmOverlay) hideConfirm();
   });
   document.getElementById('btn-confirm-ok').addEventListener('click', () => {
-    const ok = safeClearHistory();
-    confirmOverlay.classList.add('hidden');
-    if (ok) {
-      state.history = [];
-      renderHistory();
-      renderSettings();
-      showToast('履歴を消去しました');
-    } else {
-      showToast('履歴を消去できませんでした');
-    }
+    const onOk = _confirmOnOk;
+    hideConfirm();
+    if (onOk) onOk();
   });
 }
 
