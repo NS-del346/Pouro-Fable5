@@ -4,9 +4,9 @@
 
 - PR: PR-011R0 — Recipe source and POINT/TIPS planning doc
 - Branch: `pr-011r0-recipe-point-tips-planning-doc`
-- PR URL: _(to be filled after PR creation)_
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/14
 - Merge status: OPEN (docs-only planning PR)
-- Implementation commit: _(to be filled)_
+- Implementation commit: a381537
 - Merge commit: _(to be filled after merge)_
 
 ## 2. What Changed
