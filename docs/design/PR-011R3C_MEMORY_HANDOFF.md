@@ -15,7 +15,7 @@
 - Base: `main` (branched from `origin/main` @ PR #24 merge `78ae1f7`)
 - PR title: `PR-011R3C Method Detail / Recipe Detail planning only`
 - Commit message: `docs: plan method detail tips integration`
-- PR URL: _(fill after opening the draft PR)_
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/25 (draft)
 - Merge method: _(squash, planned)_
 - Merge commit: _(fill after merge)_
 
