@@ -12,8 +12,8 @@
 - Branch: `pr-011r2-recipe-method-detail-ia`
 - Base: `main`
 - PR title: `PR-011R2 Recipe / Method Detail information architecture`
-- PR URL: _(placeholder — fill after opening)_
-- Commit before merge: _(placeholder)_
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/19
+- Commit before merge: `1cd899c` _(updated at merge)_
 - Merge method: _(placeholder — expected squash and merge)_
 - Merge commit: _(placeholder)_
 - Independent Verification: _(placeholder)_
@@ -114,7 +114,7 @@ Keep R3 and R4 separate. Do not start either in PR-011R2.
 ## 9. Merge metadata placeholders
 
 ```text
-PR URL:          _(fill after opening draft PR)_
+PR URL:          https://github.com/NS-del346/Pouro-Fable5/pull/19
 Branch:          pr-011r2-recipe-method-detail-ia
 Commit (pre-merge): _(fill)_
 Merge method:    _(expected: squash and merge)_
