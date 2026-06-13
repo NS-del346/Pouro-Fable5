@@ -5,8 +5,10 @@
 - PR: PR-011A2 — Recipe Setup dose direct input
 - Branch: `pr-011a2-recipe-setup-dose-direct-input`
 - Commits: feat: Recipe Setup dose direct input
-- PR URL: (filled on open)
-- Merge status: pending review
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/13
+- Merge status: MERGED
+- Implementation commit: 110e2323d7b5b3bc63f01a7a41e980922c3ffccc
+- Merge commit: 4ef6e8591fdf5f7d0df442eae53eba799c84d60e
 
 ## 2. What Changed
 
@@ -49,21 +51,27 @@ Recipe Setup 画面のコーヒー量 (dose) 表示を、タップ / クリッ�
 
 ## 5. Verification Result
 
-Verdict: PASS（実装者 QA。独立検証は別途）
+Implementer QA:
 
-Key findings:
-
-- Scope compliance: 変更は dose 表示 UI / 入力モード / validation / CSS のみ
+- Verdict: PASS
 - Validation: 12 ケース全通過（valid/min/max/0/101/empty/decimal/abc/g-suffix/全角/trim）
 - Visual / accessibility: 375px・390px で横スクロールなし、開閉時のレイアウト跳ね 0px、
   tap target 79×60px、aria-label あり、inputmode=numeric、type=text
-- Data / schema: 各 schema・engine・SW・manifest に diff なし
+- Data / schema: RecipeEngine / Timer / localStorage / History / CSV / JSON / SW / manifest / assets に diff なし
 - Regression: +/- ステッパー従来通り、Summary 反映 (30g→450ml) 確認
+
+Independent Verification:
+
+- Verdict: PASS WITH MINOR NOTES
+- Merge recommendation: Merge now
+- Required fixes before merge: none
+- Confirmed: scope compliance, validation behavior, accessibility, schema safety, no out-of-scope changes
 
 ## 6. Known Minor Notes
 
 - iOS 安定性優先で `type="text" + inputmode="numeric"` を採用（`type="number"` 不使用）。
 - Esc キャンセルは物理キーボード前提。ソフトキーボードのみの環境では blur=確定が主動線。
+- 直接入力は 1〜100g を許容する一方、既存ステッパーは 10〜40g の範囲に留まる。PR-011A2 の違反ではないが、後続の軽微 UX 調整 PR で range 整合を検討する。(Direct input allows 1–100g, while steppers remain 10–40g. This is not a PR-011A2 violation, but range consistency should be considered in a later UX cleanup PR.)
 
 ## 7. Decisions to Carry Forward
 
@@ -94,6 +102,7 @@ Key findings:
 
 - PR: PR-011A2
 - QA note: this file (Sections 4–5)
-- Independent Verification Report: pending
+- Independent Verification Report: PASS WITH MINOR NOTES
+- Merge commit: 4ef6e8591fdf5f7d0df442eae53eba799c84d60e
 - GitHub Pages: https://ns-del346.github.io/Pouro-Fable5/
 - Previous handoff: docs/design/PR-011A_MEMORY_HANDOFF.md
