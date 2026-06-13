@@ -31,7 +31,7 @@ const METHODS = {
     name: '4:6 Method',
     sub: '前半で味、後半で濃度を調節',
     time: '約3:30',
-    desc: '前半2投で味の方向を、後半の投数（軽め: 2投・標準: 3投・しっかり: 4投）で濃度を調整。再現性が高く、風味のコントロールに優れた手法です。',
+    desc: '総湯量は粉量の約15倍が目安。前半40%の2投で甘さ・明るさを、後半60%の投数（軽め: 1投・標準: 2投・しっかり: 3投）で濃度を調整します。中粗挽き〜粗挽き、湯温は浅煎り93℃・中煎り88℃・深煎り83℃前後が目安です。Philocoffea掲載の解説を参考に中立表現で整理しています。',
     meters: [
       { label: '甘さ',  dots: [true, true, true, true, false, false] },
       { label: '酸味',  dots: [true, true, false, false, false, false] },
@@ -145,43 +145,45 @@ const RecipeEngine = {
   },
 
   _buildYonRoku(dose, ratio, flavor = 'balanced', strength = 'standard') {
+    // 4:6 Method — Philocoffea / Tetsu Kasuya 掲載の解説を参考に中立表現で整理。
+    //   総湯量は粉量の約15倍（既定 1:15）。前半40%で味（甘さ・明るさ）を、
+    //   後半60%を分割回数で濃度を調整する。例: 20g → 300g、前半120g / 後半180g。
     const totalWater = Math.round(dose * ratio);
-    const frontWater = Math.round(totalWater * 0.4);
-    const backWater  = totalWater - frontWater;
+    const frontWater = Math.round(totalWater * 0.4);   // 前半40%（味の調整）
+    const backWater  = totalWater - frontWater;        // 後半60%（濃度の調整）
 
-    // Front 2 pours — flavor sets split direction
-    // sweet: smaller first pour (甘め寄り); bright: larger first pour (明るめ寄り)
+    // 前半40% — 2投の配分で印象を調整（合計は frontWater で固定）。
+    //   バランス 50:50 ／ 甘め 50:70(=5:7) ／ 明るめ 70:50(=7:5)  ※300g例
     let p1, p2;
     if (flavor === 'sweet') {
-      p1 = Math.round(frontWater * 0.4); p2 = frontWater - p1;
+      p1 = Math.round(frontWater * 5 / 12); p2 = frontWater - p1;
     } else if (flavor === 'bright') {
-      p1 = Math.round(frontWater * 0.6); p2 = frontWater - p1;
+      p1 = Math.round(frontWater * 7 / 12); p2 = frontWater - p1;
     } else {
-      p1 = Math.round(frontWater / 2);   p2 = frontWater - p1;
+      p1 = Math.round(frontWater / 2);      p2 = frontWater - p1;
     }
 
-    // Back pours — strength determines count and interval
-    // light: 2 pours (45s interval) → 4 total
-    // standard: 3 pours (45s interval) → 5 total
-    // strong: 4 pours (30s interval) → 6 total
-    const backPourCount = strength === 'light' ? 2 : strength === 'strong' ? 4 : 3;
-    const backInterval  = strength === 'strong' ? 30 : 45;
-    const backStart     = 90;
+    // 後半60% — 分割回数で濃度を調整。
+    //   軽め(薄く): 1投 / 標準(より濃く): 2投 / しっかり(さらに濃く): 3投
+    //   例(300g): 軽め 180×1 ／ 標準 90×2 ／ しっかり 60×3
+    const backPourCount = strength === 'light' ? 1 : strength === 'strong' ? 3 : 2;
+
+    // 目安タイム — 前半 0:00 / 0:45、後半は 1:30 から。
+    // 5投構成（しっかり）のみ最終投が 2:45 で、最後の間隔だけ30秒になる。
+    const backTimesByCount = { 1: [90], 2: [90, 135], 3: [90, 135, 165] };
+    const backTimes = backTimesByCount[backPourCount];
 
     const perBack  = Math.round(backWater / backPourCount);
     const backAmts = Array.from({ length: backPourCount }, (_, i) =>
       i === backPourCount - 1 ? backWater - perBack * (backPourCount - 1) : perBack
     );
-    const backTimes = Array.from({ length: backPourCount }, (_, i) =>
-      backStart + i * backInterval
-    );
 
     const flavorNote   = { sweet: '甘め寄り', balanced: 'バランス', bright: '明るめ寄り' };
     const strengthNote = { light: '軽め', standard: '標準', strong: 'しっかり' };
-    const backLabels   = ['第3投', '第4投', '第5投', '第6投'];
+    const backLabels   = ['第3投', '第4投', '第5投'];
     const backInstruction = (i, last) => {
-      if (i === 0)    return `濃度を整える（${strengthNote[strength] || strength}）`;
       if (i === last) return '最終注湯';
+      if (i === 0)    return `濃度を整える（${strengthNote[strength] || strength}）`;
       return '濃度を重ねる';
     };
 
@@ -206,7 +208,7 @@ const RecipeEngine = {
     });
 
     const totalPours  = 2 + backPourCount;
-    const intervalStr = strength === 'strong' ? '前半0:45 / 後半0:30' : '0:45 間隔';
+    const intervalStr = backPourCount === 3 ? '0:45 間隔（最終0:30）' : '0:45 間隔';
 
     return {
       id: 'yon-roku', name: '4:6 Method',
