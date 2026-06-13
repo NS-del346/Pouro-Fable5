@@ -2,12 +2,13 @@
 
 ## Status
 
-- PR status: OPEN (draft) — data/docs foundation only
-- PR URL: _(to be filled after PR open)_
+- PR status: MERGED — data/docs foundation only
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/17
 - Branch: `pr-011r1-point-tips-master-v21-data-foundation`
-- Commit: _(to be filled after commit/push)_
-- Merge commit: _(to be filled after merge)_
-- Independent Verification: _(to be filled — use the verifier prompt)_
+- Commit before merge: `698b1abd6ba1959dadc8a202d92b7b75550b72fa`
+- Merge method: Squash and merge
+- Merge commit: `4c4de1d201820f1d9457fdf413863bc93ce4ff72`
+- Independent Verification: PASS
 
 ## What changed
 
