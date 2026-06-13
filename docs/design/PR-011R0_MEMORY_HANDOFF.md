@@ -5,9 +5,10 @@
 - PR: PR-011R0 — Recipe source and POINT/TIPS planning doc
 - Branch: `pr-011r0-recipe-point-tips-planning-doc`
 - PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/14
-- Merge status: OPEN (docs-only planning PR)
-- Implementation commit: a381537
-- Merge commit: _(to be filled after merge)_
+- Merge status: **MERGED** (docs-only planning PR)
+- Planning docs commit: a381537
+- Handoff fill-in commit: e159871
+- Merge commit: 5970cfb287f8b1e186062da9235f4ee5b3b44973
 
 ## 2. What Changed
 
@@ -58,8 +59,7 @@ or UI integration is added.
 
 - Implementer QA: docs-only confirmed via `git diff --name-only`; no app or
   runtime data file present in the diff.
-- Independent Verification: _(to be filled — use the verifier prompt in the
-  PR-011R0 instruction doc)_
+- Independent Verification: **PASS WITH MINOR NOTES**
 
 ## 6. Watch Items for PR-011R1
 
