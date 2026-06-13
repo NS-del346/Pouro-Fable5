@@ -2,8 +2,8 @@
 
 ## 1. Status
 
-- PR status: **DRAFT (planning only, awaiting independent verification + merge)**
-- Independent Verification: **pending**
+- PR status: **MERGED**
+- Independent Verification: **PASS WITH MINOR NOTES**
 - Nature: **docs-only planning PR**. Defines the implementation plan for a future
   Method Detail / Recipe Detail surface. No UI, no runtime import, no data change.
 - Builds on (all merged): PR-011R1 (data foundation), PR-011R2 (IA policy),
@@ -15,9 +15,9 @@
 - Base: `main` (branched from `origin/main` @ PR #24 merge `78ae1f7`)
 - PR title: `PR-011R3C Method Detail / Recipe Detail planning only`
 - Commit message: `docs: plan method detail tips integration`
-- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/25 (draft)
-- Merge method: _(squash, planned)_
-- Merge commit: _(fill after merge)_
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/25 (merged)
+- Merge method: Squash and merge
+- Merge commit: `e442dbd3583d69a53e0f807ea1dbb00f50a3bf6a`
 
 ## 3. What changed
 
@@ -145,10 +145,11 @@ Docs only:
 - History Detail POINT/TIPS integration.
 - **PR-011R4**: Timer semantics audit / recipe timeline alignment.
 
-## 14. Merge metadata placeholders
+## 14. Merge metadata
 
 ```text
-- PR: <fill after opening draft PR>
-- Merge commit: <fill after merge>
-- Independent Verification: <PASS / PASS WITH MINOR NOTES / FAIL>
+- PR: https://github.com/NS-del346/Pouro-Fable5/pull/25 (MERGED)
+- Merge method: Squash and merge
+- Merge commit: e442dbd3583d69a53e0f807ea1dbb00f50a3bf6a
+- Independent Verification: PASS WITH MINOR NOTES
 ```
