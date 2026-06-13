@@ -121,6 +121,107 @@ const METHODS = {
 
 const METHOD_ORDER = ['yon-roku', 'hybrid', 'neo', 'ice'];
 
+/* ── Contextual POINT/TIPS (PR-011R3A) ─────────────────────────────────────────
+ * Compact, contextual POINT/TIPS for Recipe Setup and Preview only.
+ *
+ * Data source: this is a scoped, read-only adapter DERIVED from
+ *   docs/data/coffee_app_tips_master_v2.1.json  (POINT/TIPS Master v2.1).
+ * Item content (contentShortJa / contentJa) is copied verbatim — it is NOT
+ * rewritten or invented here. Only items that are appAdoption "adoptable",
+ * in an app-mapped recipeCode (ALL/406/ICE/HYB_NEW/NEO), and relevant to the
+ * "setup" or "preview" surfaces are embedded. Quarantine items (e.g.
+ * P-OTHER-001), source/verification metadata, and out-of-scope reference codes
+ * (HYB_BASE / HYB_DEVIL) are intentionally excluded.
+ *
+ * Embedding (rather than runtime fetch) keeps the feature working offline: the
+ * data ships inside app.js, which sw.js already pre-caches in APP_SHELL, so no
+ * service worker change and no extra network request are required. If this
+ * array is ever empty or unavailable, Setup/Preview still render normally and
+ * the brewing flow is unaffected (graceful no-op).
+ *
+ * Later surfaces (timer / finish / historyDetail / Method Detail) are out of
+ * scope for PR-011R3A and intentionally not wired here.
+ */
+const TIPS_DATA = [
+  { id: 'P-ALL-001', type: 'POINT', recipeCode: 'ALL', displayContext: ["setup"], contentShortJa: '器具を温める', contentJa: 'ペーパーをリンスし、ドリッパーとサーバーを温めてから抽出します。' },
+  { id: 'P-ALL-002', type: 'POINT', recipeCode: 'ALL', displayContext: ["setup"], contentShortJa: '粉で再計量する', contentJa: '豆を挽いたあと、粉の状態でもう一度重さを確認します。' },
+  { id: 'P-ALL-003', type: 'POINT', recipeCode: 'ALL', displayContext: ["setup","timer"], contentShortJa: '量と時間を測る', contentJa: 'スケールとタイマーを使い、湯量と時間を記録しながら抽出します。' },
+  { id: 'P-ICE-001', type: 'POINT', recipeCode: 'ICE', displayContext: ["setup"], contentShortJa: '氷80gを先に入れる', contentJa: '抽出前に、サーバーへ約80gの氷を入れておきます。' },
+  { id: 'T-406-001', type: 'TIPS', recipeCode: '406', displayContext: ["preview","historyDetail"], contentShortJa: '1投目で味を寄せる', contentJa: '1投目を少なめにすると甘み寄り、多めにすると酸味寄りに調整しやすくなります。' },
+  { id: 'T-406-002', type: 'TIPS', recipeCode: '406', displayContext: ["preview","historyDetail"], contentShortJa: '後半で濃度調整', contentJa: '後半60%は、注ぐ回数を増やすほど濃度を出しやすくなります。' },
+  { id: 'T-ALL-001', type: 'TIPS', recipeCode: 'ALL', displayContext: ["preview","historyDetail"], contentShortJa: '焙煎度で湯温調整', contentJa: '湯温は焙煎度に合わせて調整します。浅煎りは高め、中深煎りは少し下げると設計しやすくなります。' },
+  { id: 'T-HYB-NEW-001', type: 'TIPS', recipeCode: 'HYB_NEW', displayContext: ["preview","historyDetail"], contentShortJa: '低温で雑味を抑える', contentJa: '後半の温度を下げると、雑味を抑えながら甘みを引き出しやすくなります。' },
+  { id: 'T-HYB-NEW-002', type: 'TIPS', recipeCode: 'HYB_NEW', displayContext: ["preview","historyDetail"], contentShortJa: '水も総湯量に含める', contentJa: '常温水は総湯量300gに含め、液温70〜80℃を目安に調整します。' },
+  { id: 'T-ICE-001', type: 'TIPS', recipeCode: 'ICE', displayContext: ["preview","historyDetail"], contentShortJa: '湯温で苦味を調整', contentJa: '湯温を高めにすると香りやビター感を出しやすく、苦味を抑えたい時は少し下げます。' },
+  { id: 'T-ICE-002', type: 'TIPS', recipeCode: 'ICE', displayContext: ["preview","historyDetail"], contentShortJa: '1・2投目で味調整', contentJa: '1投目と2投目の配分を変えると、甘みと酸味の出方を調整できます。' },
+  { id: 'T-NEO-001', type: 'TIPS', recipeCode: 'NEO', displayContext: ["setup","preview"], contentShortJa: '粗挽き＋高湯温', contentJa: '超粗挽きと95〜96℃程度の高めの湯温を前提にします。' },
+  { id: 'T-NEO-002', type: 'TIPS', recipeCode: 'NEO', displayContext: ["preview","historyDetail"], contentShortJa: '回数で質感を狙う', contentJa: '注湯回数を増やすことで、質感やマウスフィールを狙います。' },
+  { id: 'T-NEO-004', type: 'TIPS', recipeCode: 'NEO', displayContext: ["setup","preview","historyDetail"], contentShortJa: '通常より粗く始める', contentJa: '極粗挽き前提のため、通常のV60より粗い設定から始めます。' },
+];
+
+/* Map app method ids → POINT/TIPS Master v2.1 recipeCode.
+ * Hybrid maps to HYB_NEW (the app's current single Hybrid recipe); the app does
+ * not expose HYB_BASE / HYB_DEVIL separately, so that wording never surfaces. */
+const METHOD_RECIPE_CODE = {
+  'yon-roku': '406',
+  'ice':      'ICE',
+  'hybrid':   'HYB_NEW',
+  'neo':      'NEO',
+};
+
+/* Deterministic contextual selection — no randomness.
+ * Filters by displayContext (array) + recipeCode (method-specific or globally
+ * relevant ALL), then orders: for setup POINT before TIPS, then method-specific
+ * before ALL, then stable item-id ascending. Returns at most `limit` items.
+ * Returns [] for unknown methods or when data is unavailable (never throws). */
+function selectContextualTips(methodId, surface, limit = 2) {
+  try {
+    const code = METHOD_RECIPE_CODE[methodId];
+    if (!code || !Array.isArray(TIPS_DATA)) return [];
+    const preferPoint = surface === 'setup';
+    return TIPS_DATA
+      .filter(it =>
+        it &&
+        (it.type === 'POINT' || it.type === 'TIPS') &&
+        Array.isArray(it.displayContext) &&
+        it.displayContext.includes(surface) &&
+        (it.recipeCode === code || it.recipeCode === 'ALL'))
+      .sort((a, b) => {
+        if (preferPoint && a.type !== b.type) return a.type === 'POINT' ? -1 : 1;
+        const aAll = a.recipeCode === 'ALL', bAll = b.recipeCode === 'ALL';
+        if (aAll !== bAll) return aAll ? 1 : -1;            // method-specific first
+        return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;      // stable id order
+      })
+      .slice(0, limit);
+  } catch {
+    return [];   // graceful no-op — Setup/Preview still render, brewing unaffected
+  }
+}
+
+/* Render a compact, quiet POINT/TIPS card into `container`.
+ * `label` is the short heading ("POINT" / "TIPS"). Hides the container when no
+ * items are available so the screen layout stays clean. */
+function renderContextualTips(container, label, items) {
+  if (!container) return;
+  if (!items || items.length === 0) {
+    container.innerHTML = '';
+    container.classList.add('hidden');
+    return;
+  }
+  const rows = items.map(it =>
+    `<div class="ctx-tip-item">` +
+      `<span class="ctx-tip-short">${it.contentShortJa}</span>` +
+      `<span class="ctx-tip-detail">${it.contentJa}</span>` +
+    `</div>`
+  ).join('');
+  container.innerHTML =
+    `<div class="ctx-tip-head">` +
+      `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="7.8" r="0.6" fill="var(--color-accent)"/></svg>` +
+      `<span class="ctx-tip-label">${label}</span>` +
+    `</div>` + rows;
+  container.classList.remove('hidden');
+}
+
 /* ── Recipe Engine ──────────────────────────────────────────────────────────── */
 /*
  * RecipeEngine generates a recipe object from user inputs.
@@ -1163,6 +1264,13 @@ function renderSetup() {
   updateFlavorChips();
   updateStrengthChips();
   renderSetupSummary();
+
+  // Contextual POINT block — updates whenever the method changes (PR-011R3A)
+  renderContextualTips(
+    document.getElementById('setup-tips'),
+    'POINT',
+    selectContextualTips(m.id, 'setup'),
+  );
 }
 
 /* Dose direct input — tap the gram value to type it (PR-011A2).
@@ -1289,6 +1397,13 @@ function renderPreview() {
   checklist.innerHTML = m.checklist.map(item =>
     `<div class="checklist-item"><span class="checklist-dot"></span><span>${item}</span></div>`
   ).join('');
+
+  // Contextual TIPS block — preview-relevant items for the previewed recipe (PR-011R3A)
+  renderContextualTips(
+    document.getElementById('preview-tips'),
+    'TIPS',
+    selectContextualTips(m.id, 'preview'),
+  );
 }
 
 function clearLogEquipmentInputs() {
