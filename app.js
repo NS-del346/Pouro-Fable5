@@ -1163,6 +1163,44 @@ function renderSetup() {
   renderSetupSummary();
 }
 
+/* Dose direct input — tap the gram value to type it (PR-011A2).
+   Accepts integers 1–100 only; full-width digits are normalized and a
+   trailing "g" is tolerated. Anything else keeps the last valid dose. */
+const DOSE_INPUT_MIN = 1;
+const DOSE_INPUT_MAX = 100;
+
+function normalizeDoseInput(raw) {
+  let s = String(raw).trim()
+    .replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+    .replace(/[gGｇＧ]$/, '').trim();
+  if (!/^[0-9]+$/.test(s)) return null;
+  const n = parseInt(s, 10);
+  return (n >= DOSE_INPUT_MIN && n <= DOSE_INPUT_MAX) ? n : null;
+}
+
+function openDoseEditor() {
+  document.getElementById('btn-dose-edit').classList.add('hidden');
+  // keep the hint's space reserved (visibility, not display) so the card
+  // doesn't jump when switching to the input
+  document.getElementById('dose-edit-hint').style.visibility = 'hidden';
+  document.getElementById('dose-input-wrap').classList.remove('hidden');
+  const input = document.getElementById('dose-input');
+  input.value = String(state.draft.dose);
+  input.focus();
+  input.select();
+}
+
+function closeDoseEditor(commit) {
+  if (commit) {
+    const n = normalizeDoseInput(document.getElementById('dose-input').value);
+    if (n !== null) state.draft.dose = n;
+  }
+  document.getElementById('dose-input-wrap').classList.add('hidden');
+  document.getElementById('btn-dose-edit').classList.remove('hidden');
+  document.getElementById('dose-edit-hint').style.visibility = '';
+  renderSetup();
+}
+
 function renderSetupSummary() {
   const d = state.draft;
   const recipe = RecipeEngine.build(state.selectedMethodId, d.dose, d.ratio, d.flavor, d.strength);
@@ -1685,6 +1723,19 @@ function wireEvents() {
   });
   document.getElementById('btn-dose-inc').addEventListener('click', () => {
     if (state.draft.dose < 40) { state.draft.dose++; renderSetup(); }
+  });
+
+  // Setup — dose direct input (tap the value to edit)
+  document.getElementById('btn-dose-edit').addEventListener('click', openDoseEditor);
+  const doseInput = document.getElementById('dose-input');
+  let doseEditCancelled = false;
+  doseInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter')       { e.preventDefault(); doseInput.blur(); }
+    else if (e.key === 'Escape') { doseEditCancelled = true; doseInput.blur(); }
+  });
+  doseInput.addEventListener('blur', () => {
+    closeDoseEditor(!doseEditCancelled);
+    doseEditCancelled = false;
   });
 
   // Setup — ratio chips

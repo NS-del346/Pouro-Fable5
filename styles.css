@@ -644,6 +644,60 @@ img {
   margin-left: 3px;
 }
 
+/* Dose direct input (PR-011A2) — the gram value doubles as an edit trigger */
+.dose-display-btn {
+  border: none;
+  background: none;
+  padding: 0 6px;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.dose-display-btn .spinner-num {
+  border-bottom: 1px dashed var(--color-accent-soft);
+}
+
+.dose-display-btn:focus-visible {
+  outline: 1px solid var(--color-accent-soft);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.dose-input-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.dose-input {
+  width: 92px;
+  border: none;
+  border-bottom: 1px dashed var(--color-accent);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 46px;
+  color: var(--color-text);
+  text-align: center;
+  padding: 0;
+}
+
+.dose-input:focus {
+  outline: none;
+}
+
+.dose-edit-hint {
+  display: block;
+  font-size: 10.5px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+}
+
 /* ── Chip Selector ─────────────────────────────────────────────────────────── */
 .chip-grid-3 {
   display: grid;

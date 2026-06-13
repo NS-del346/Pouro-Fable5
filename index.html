@@ -80,7 +80,14 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
             </button>
             <span class="spinner-value">
-              <span class="spinner-num" id="dose-display">20</span><span class="spinner-unit">g</span>
+              <button type="button" class="dose-display-btn" id="btn-dose-edit" aria-label="コーヒー量を入力">
+                <span class="spinner-num" id="dose-display">20</span><span class="spinner-unit">g</span>
+              </button>
+              <span class="dose-input-wrap hidden" id="dose-input-wrap">
+                <input id="dose-input" class="dose-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" maxlength="4" aria-label="コーヒー量を入力">
+                <span class="spinner-unit">g</span>
+              </span>
+              <span class="dose-edit-hint" id="dose-edit-hint">タップして編集</span>
             </span>
             <button class="btn-spinner" id="btn-dose-inc" aria-label="増やす">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
