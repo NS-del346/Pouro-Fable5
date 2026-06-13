@@ -121,26 +121,27 @@ const METHODS = {
 
 const METHOD_ORDER = ['yon-roku', 'hybrid', 'neo', 'ice'];
 
-/* ── Contextual POINT/TIPS (PR-011R3A) ─────────────────────────────────────────
- * Compact, contextual POINT/TIPS for Recipe Setup and Preview only.
+/* ── Contextual POINT/TIPS (PR-011R3A + PR-011R3B) ─────────────────────────────
+ * Compact, contextual POINT/TIPS for Recipe Setup, Preview, and Finish only.
  *
  * Data source: this is a scoped, read-only adapter DERIVED from
  *   docs/data/coffee_app_tips_master_v2.1.json  (POINT/TIPS Master v2.1).
  * Item content (contentShortJa / contentJa) is copied verbatim — it is NOT
  * rewritten or invented here. Only items that are appAdoption "adoptable",
  * in an app-mapped recipeCode (ALL/406/ICE/HYB_NEW/NEO), and relevant to the
- * "setup" or "preview" surfaces are embedded. Quarantine items (e.g.
- * P-OTHER-001), source/verification metadata, and out-of-scope reference codes
- * (HYB_BASE / HYB_DEVIL) are intentionally excluded.
+ * "setup", "preview", or "finish" surfaces are embedded. Quarantine items
+ * (e.g. P-OTHER-001), source/verification metadata, and out-of-scope reference
+ * codes (HYB_BASE / HYB_DEVIL) are intentionally excluded.
  *
  * Embedding (rather than runtime fetch) keeps the feature working offline: the
  * data ships inside app.js, which sw.js already pre-caches in APP_SHELL, so no
  * service worker change and no extra network request are required. If this
- * array is ever empty or unavailable, Setup/Preview still render normally and
- * the brewing flow is unaffected (graceful no-op).
+ * array is ever empty or unavailable, Setup/Preview/Finish still render
+ * normally and the brewing flow is unaffected (graceful no-op).
  *
- * Later surfaces (timer / finish / historyDetail / Method Detail) are out of
- * scope for PR-011R3A and intentionally not wired here.
+ * PR-011R3B adds only the "finish" surface (Brew Complete / 抽出記録). Timer,
+ * History Detail, and Method Detail surfaces remain out of scope and are not
+ * wired here.
  */
 const TIPS_DATA = [
   { id: 'P-ALL-001', type: 'POINT', recipeCode: 'ALL', displayContext: ["setup"], contentShortJa: '器具を温める', contentJa: 'ペーパーをリンスし、ドリッパーとサーバーを温めてから抽出します。' },
@@ -157,6 +158,13 @@ const TIPS_DATA = [
   { id: 'T-NEO-001', type: 'TIPS', recipeCode: 'NEO', displayContext: ["setup","preview"], contentShortJa: '粗挽き＋高湯温', contentJa: '超粗挽きと95〜96℃程度の高めの湯温を前提にします。' },
   { id: 'T-NEO-002', type: 'TIPS', recipeCode: 'NEO', displayContext: ["preview","historyDetail"], contentShortJa: '回数で質感を狙う', contentJa: '注湯回数を増やすことで、質感やマウスフィールを狙います。' },
   { id: 'T-NEO-004', type: 'TIPS', recipeCode: 'NEO', displayContext: ["setup","preview","historyDetail"], contentShortJa: '通常より粗く始める', contentJa: '極粗挽き前提のため、通常のV60より粗い設定から始めます。' },
+  // PR-011R3B — finish surface items (displayContext includes "finish").
+  // No adoptable HYB_NEW or ALL "finish" item exists in v2.1, so Hybrid Finish
+  // shows no card (graceful hide). HYB_DEVIL finish items are out of scope.
+  { id: 'P-406-002', type: 'POINT', recipeCode: '406', displayContext: ["finish","historyDetail"], contentShortJa: '3分半を目安に', contentJa: '3分半を目安に落ち切るか確認します。長くても4分程度を目安にします。' },
+  { id: 'P-ICE-004', type: 'POINT', recipeCode: 'ICE', displayContext: ["finish"], contentShortJa: '氷を溶かして完成', contentJa: '落ち切ったらサーバーを揺らし、氷を溶かして全体を冷やします。' },
+  { id: 'T-ICE-003', type: 'TIPS', recipeCode: 'ICE', displayContext: ["finish","historyDetail"], contentShortJa: '3分超なら少し粗く', contentJa: '3分を大きく超える場合は、次回は少し粗めに挽くと調整しやすくなります。' },
+  { id: 'T-NEO-003', type: 'TIPS', recipeCode: 'NEO', displayContext: ["finish","historyDetail"], contentShortJa: '3分半までかける', contentJa: '短時間で終えず、約3分半までかけて成分を引き出します。' },
 ];
 
 /* Map app method ids → POINT/TIPS Master v2.1 recipeCode.
@@ -171,14 +179,18 @@ const METHOD_RECIPE_CODE = {
 
 /* Deterministic contextual selection — no randomness.
  * Filters by displayContext (array) + recipeCode (method-specific or globally
- * relevant ALL), then orders: for setup POINT before TIPS, then method-specific
- * before ALL, then stable item-id ascending. Returns at most `limit` items.
- * Returns [] for unknown methods or when data is unavailable (never throws). */
+ * relevant ALL), then orders: setup prefers POINT, finish prefers TIPS, then
+ * method-specific before ALL, then stable item-id ascending. Returns at most
+ * `limit` items. Returns [] for unknown methods or when data is unavailable
+ * (never throws). */
 function selectContextualTips(methodId, surface, limit = 2) {
   try {
     const code = METHOD_RECIPE_CODE[methodId];
     if (!code || !Array.isArray(TIPS_DATA)) return [];
-    const preferPoint = surface === 'setup';
+    // setup leads with POINT; finish leads with TIPS (next-adjustment focus).
+    const preferType = surface === 'setup' ? 'POINT'
+                     : surface === 'finish' ? 'TIPS'
+                     : null;
     return TIPS_DATA
       .filter(it =>
         it &&
@@ -187,14 +199,14 @@ function selectContextualTips(methodId, surface, limit = 2) {
         it.displayContext.includes(surface) &&
         (it.recipeCode === code || it.recipeCode === 'ALL'))
       .sort((a, b) => {
-        if (preferPoint && a.type !== b.type) return a.type === 'POINT' ? -1 : 1;
+        if (preferType && a.type !== b.type) return a.type === preferType ? -1 : 1;
         const aAll = a.recipeCode === 'ALL', bAll = b.recipeCode === 'ALL';
         if (aAll !== bAll) return aAll ? 1 : -1;            // method-specific first
         return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;      // stable id order
       })
       .slice(0, limit);
   } catch {
-    return [];   // graceful no-op — Setup/Preview still render, brewing unaffected
+    return [];   // graceful no-op — Setup/Preview/Finish still render, brewing unaffected
   }
 }
 
@@ -1426,6 +1438,13 @@ function renderLog() {
   document.getElementById('log-method-name').textContent  = recipe.name;
   document.getElementById('log-method-sub').textContent   = m.sub;
   document.getElementById('log-summary-grid').innerHTML   = buildSummaryCols(recipe);
+
+  // PR-011R3B — compact contextual "finish" TIPS (hidden when none exist for the method).
+  renderContextualTips(
+    document.getElementById('finish-tips'),
+    '次回のヒント',
+    selectContextualTips(recipe.id, 'finish'),
+  );
 
   const ratingContainer = document.getElementById('log-rating-dots');
   ratingContainer.innerHTML = Array.from({ length: 5 }, (_, i) => {
