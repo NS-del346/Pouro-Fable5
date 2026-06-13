@@ -2,7 +2,8 @@
 
 ## 1. Status
 
-- PR status: **DRAFT (open, not merged)** — awaiting independent verification.
+- PR status: **MERGED**
+- Independent Verification: **PASS WITH MINOR NOTES**
 - Nature: narrow runtime/UI integration. Extends the PR-011R3A contextual
   POINT/TIPS mechanism to the **Finish / Brew Complete** surface only.
 - Builds on: PR-011R1 (data foundation), PR-011R2 (IA policy), PR-011R3A
@@ -15,7 +16,9 @@
 - Branch: `pr-011r3b-contextual-tips-finish-only`
 - Base: `main` (branched from `origin/main` @ PR #22 merge `b3e9048`)
 - PR title: `PR-011R3B Contextual POINT/TIPS UI integration - Finish only`
-- Commit: `feat: add contextual tips to finish screen`
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/23 (merged)
+- Merge method: Squash and merge
+- Merge commit: `4784d6c7d6eacf142aaad86c18d88a03daabca6c`
 
 ## 3. What changed
 
