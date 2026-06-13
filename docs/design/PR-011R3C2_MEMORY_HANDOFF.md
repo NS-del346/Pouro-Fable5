@@ -80,12 +80,19 @@ Copy is intentionally non-promissory. No forbidden expressions are used
 ## 7. Validation results
 
 ```
-git status              → only index.html modified (+ pre-existing untracked files)
+git status              → index.html + this handoff doc modified/added (+ pre-existing untracked files)
 git diff --stat         → index.html | 17 +++++++++++++++++
+                          docs/design/PR-011R3C2_MEMORY_HANDOFF.md | 116 ++++++++++++++++++
 git diff --name-only    → index.html
+                          docs/design/PR-011R3C2_MEMORY_HANDOFF.md
 node docs/data/validate_tips_master.mjs → PASS: 40  FAIL: 0  ALL CHECKS PASS
 node --check app.js     → OK (no syntax errors; app.js unchanged)
 ```
+
+Diff scope:
+
+- Settings static note in `index.html`.
+- PR-011R3C2 memory handoff doc (this file).
 
 Visual check (mobile preset, port 4005 dev server): the note renders in Settings
 between the Data and About cards, static and non-interactive. (Note: the project
