@@ -234,6 +234,310 @@ function renderContextualTips(container, label, items) {
   container.classList.remove('hidden');
 }
 
+/* ── Method Detail (PR-011R3D) ─────────────────────────────────────────────────
+ * A secondary, non-active-brew explanatory surface reachable from Preview only.
+ * It helps the user understand the selected method before brewing. It does NOT
+ * drive the brew (no timer/countdown), reads NO History/localStorage, writes
+ * nothing, and changes no recipe generation. See
+ *   docs/design/PR-011R3C_METHOD_DETAIL_PLANNING.md
+ *   docs/design/PR-011R3C_METHOD_DETAIL_FIELD_MAPPING.md
+ *
+ * All content below is authored, static, trusted copy (no user-generated input),
+ * carried verbatim from the PR-011R3C planning §9 / Source of Truth as 目安
+ * (guides). Numbers are not re-derived. Wording follows the neutral / non-official
+ * policy (planning §10): no 完全 / 100% / 必ず / 究極 / 神 / 悪魔 / 唯一の正解, etc.
+ * The POINT/TIPS section reuses the existing read-only TIPS_DATA adapter; timer
+ * active-step copy, quarantine items, P-OTHER-001, HYB_DEVIL wording, and raw
+ * source metadata are never surfaced here. Because every value rendered is a
+ * trusted constant from this file, innerHTML is used for static markup only.
+ */
+const METHOD_DETAIL_NEUTRAL_NOTE =
+  'Pourōは非公式の個人用抽出支援ツールです。各メソッドの考え方を参考に、アプリ向けに中立表現で整理しています。';
+
+const METHOD_DETAIL_NOT_CLAIMED = [
+  '公式な再現であること',
+  '監修・提携・承認を受けていること',
+  'どの豆でも同じ結果になること',
+  '唯一の正解であること',
+];
+
+/* Per-method authored content. Keyed by app method id. `amountLabel` distinguishes
+ * per-pour (注湯) from cumulative (累計) schedule columns. `progression` is used
+ * instead of a fixed pour table when exact amounts are intentionally not fixed. */
+const METHOD_DETAIL = {
+  'yon-roku': {
+    label: '4:6 Method',
+    overview: '前半40%で味の方向（甘さ・明るさ）を、後半60%で濃度を調整する考え方の抽出です。総湯量は粉量の約15倍を目安にします。',
+    baseline: [
+      { k: '粉量',   v: '20g（目安）' },
+      { k: '総湯量', v: '300g（粉量 × 15）' },
+      { k: '比率',   v: '1:15' },
+      { k: '構成',   v: '前半40% / 後半60%' },
+      { k: '投数',   v: '5投（60g × 5・目安）' },
+    ],
+    equipment: [
+      '円錐ドリッパー（V60 など）を想定します。',
+      'ペーパーをリンスし、ドリッパーとサーバーを温めておきます。',
+    ],
+    grindTemp: [
+      '挽き目: 中粗挽き〜粗挽きを目安に、豆に合わせて調整します。',
+      '湯温: 浅煎りは高め、中深煎りは少し下げると設計しやすくなります。',
+    ],
+    scheduleTitle: '注湯スケジュール（60g × 5・目安）',
+    amountLabel: '注湯',
+    schedule: [
+      { t: '0:00', a: '60g' },
+      { t: '0:45', a: '60g' },
+      { t: '1:30', a: '60g' },
+      { t: '2:15', a: '60g' },
+      { t: '2:45', a: '60g' },
+      { t: '約3:30', a: '完成', done: true },
+    ],
+    scheduleNote: '前半40%は2投（合計約120g）、後半60%は投数で濃度を調整します。標準的な中濃度の例として 60 / 60 / 90 / 90 の4投構成もあります。',
+    taste: '前半40%の配分で甘さ・明るさの印象を、後半60%の投数や湯量で濃度・ボディを調整します。1投目を少なめにすると甘み寄り、多めにすると酸味寄りに寄せやすくなります。',
+    verification: '公開されている解説（Philocoffea 掲載など）を参考に、アプリ向けに中立表現で整理しています。数値はすべて目安です。',
+  },
+
+  'ice': {
+    label: 'Ice 4:6',
+    overview: 'ホットで濃いめに抽出し、サーバーの氷で急冷するアイスの淹れ方です。クリアでフルーティな仕上がりを狙います。',
+    baseline: [
+      { k: '粉量', v: '20g（目安）' },
+      { k: 'お湯', v: '150g（HOT・30g × 5）' },
+      { k: '氷',   v: '約80g（サーバーに先入れ）' },
+      { k: '投数', v: '5投（目安）' },
+    ],
+    equipment: [
+      '抽出前に、サーバーへ約80gの氷を入れておきます。',
+      'ペーパーをリンスし、ドリッパーを温めておきます。',
+    ],
+    grindTemp: [
+      '挽き目: 豆に合わせて調整します。',
+      '湯温: 高めにすると香りやビター感を出しやすく、苦味を抑えたい時は少し下げます。',
+    ],
+    scheduleTitle: '注湯スケジュール（30g × 5・目安）',
+    amountLabel: '注湯',
+    schedule: [
+      { t: '0:00', a: '30g' },
+      { t: '0:30', a: '30g' },
+      { t: '1:00', a: '30g' },
+      { t: '1:30', a: '30g' },
+      { t: '2:00', a: '30g' },
+      { t: '約3:00', a: '急冷・完成', done: true },
+    ],
+    scheduleNote: '落ち切ったらサーバーを揺らし、氷を溶かして全体を冷やします。固定タイムラインで進めやすい構成です。累計は注いだ湯量のみで、氷は含めません。',
+    taste: '1投目と2投目の配分を変えると、甘みと酸味の出方を調整できます。湯温で苦味の出方も調整できます。',
+    verification: '公開されている解説を参考に、アプリ向けに中立表現で整理しています。数値はすべて目安です。',
+  },
+
+  'hybrid': {
+    label: 'Hybrid / HARIO Switch',
+    overview: 'HARIO Switch の開閉で浸漬と透過を組み合わせるハイブリッドの考え方です。Pourō では主要な Hybrid 候補として扱います。',
+    baseline: [
+      { k: '総湯量', v: '300g（目安）' },
+      { k: '比率',   v: '1:15 目安' },
+      { k: '常温水', v: '総湯量に含む（量は固定しない・目安）' },
+      { k: '液温',   v: '70〜80℃ を目安' },
+    ],
+    equipment: [
+      'HARIO Switch を前提とします。',
+      '常温水はドリッパーに加え、総湯量300gに含めます（正確な量は指定しません）。',
+    ],
+    grindTemp: [
+      '挽き目: 豆に合わせて調整します。',
+      '液温: 70〜80℃ を目安に、後半の温度を下げると雑味を抑えながら甘みを引き出しやすくなります。',
+    ],
+    scheduleTitle: '進行モデル（目安）',
+    progression: [
+      '注湯を進め、常温水もドリッパーに加えます（総湯量300gに含む）。',
+      '約2:10 で Switch を閉じます（浸漬）。',
+      '約2:45 で Switch を開きます（落とし切り）。',
+      '液温は70〜80℃を目安に調整します。',
+    ],
+    scheduleNote: '常温水の正確な量は指定していません。豆や好みに合わせて調整してください。',
+    taste: '後半の温度を下げると、雑味を抑えながら甘みを引き出しやすくなります。常温水の量や液温で全体の印象を調整します。',
+    verification: '公開されている解説を参考に、アプリ向けに中立表現で整理しています。数値はすべて目安で、常温水の量は固定していません。',
+  },
+
+  'neo': {
+    label: '10投式ドリップ',
+    subLabel: 'THE NEO BREW / HARIO V60 NEO',
+    overview: '30gずつ10回に分けて注ぐ、再現性を重視した淹れ方です。総湯量は粉量の約15倍を目安にします。',
+    baseline: [
+      { k: '粉量',   v: '20g（目安）' },
+      { k: '総湯量', v: '300g（粉量 × 15）' },
+      { k: '比率',   v: '1:15' },
+      { k: '投数',   v: '10投（30g × 10）' },
+    ],
+    equipment: [
+      'HARIO V60 を想定します。',
+      'ペーパーをリンスし、ドリッパーを温めておきます。',
+    ],
+    grindTemp: [
+      '挽き目: 極粗挽き。通常の V60 より粗い設定から始めます。',
+      '湯温: 95〜96℃ 程度の高めを目安にします。',
+    ],
+    scheduleTitle: '注湯スケジュール（30gずつ・累計）',
+    amountLabel: '累計',
+    schedule: [
+      { t: '0:00', a: '30g' },
+      { t: '0:30', a: '60g' },
+      { t: '0:45', a: '90g' },
+      { t: '1:00', a: '120g' },
+      { t: '1:15', a: '150g' },
+      { t: '1:30', a: '180g' },
+      { t: '1:45', a: '210g' },
+      { t: '2:00', a: '240g' },
+      { t: '2:15', a: '270g' },
+      { t: '2:30', a: '300g' },
+      { t: '約3:30', a: '完成', done: true },
+    ],
+    scheduleNote: '各投30gずつ、累計で進めます。短時間で終えず、約3分半までかけて成分を引き出します。1:45（累計210g）の投も省略しません。',
+    taste: '注湯回数を増やすことで、質感やマウスフィールを狙います。',
+    verification: '公開されている解説を参考に、アプリ向けに中立表現で整理しています。数値はすべて目安です。',
+  },
+};
+
+/* Aggregate POINT/TIPS for Method Detail, grouped by context (planning §8.1).
+ * Reuses the read-only TIPS_DATA adapter. Includes only setup / preview / finish
+ * / historyDetail contexts (timer active-step copy is excluded), only adoptable
+ * method-or-ALL items (quarantine / P-OTHER-001 / HYB_DEVIL are absent from
+ * TIPS_DATA), dedupes across groups, and orders method-specific before ALL then
+ * ascending id. Never throws — returns [] on any problem (section hides). */
+function selectMethodDetailTips(methodId) {
+  try {
+    const code = METHOD_RECIPE_CODE[methodId];
+    if (!code || !Array.isArray(TIPS_DATA)) return [];
+    const contexts = [
+      { key: 'setup',         label: '抽出前' },
+      { key: 'preview',       label: 'プランニング' },
+      { key: 'finish',        label: '次回の調整' },
+      { key: 'historyDetail', label: 'ふり返り' },
+    ];
+    const seen = new Set();
+    const groups = [];
+    contexts.forEach(ctx => {
+      const items = TIPS_DATA
+        .filter(it =>
+          it &&
+          (it.type === 'POINT' || it.type === 'TIPS') &&
+          Array.isArray(it.displayContext) &&
+          it.displayContext.includes(ctx.key) &&
+          !it.displayContext.includes('quarantine') &&
+          (it.recipeCode === code || it.recipeCode === 'ALL') &&
+          !seen.has(it.id))
+        .sort((a, b) => {
+          const aAll = a.recipeCode === 'ALL', bAll = b.recipeCode === 'ALL';
+          if (aAll !== bAll) return aAll ? 1 : -1;
+          return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+        });
+      items.forEach(it => seen.add(it.id));
+      if (items.length) groups.push({ label: ctx.label, items });
+    });
+    return groups;
+  } catch {
+    return [];
+  }
+}
+
+/* Small section-card builder for Method Detail. `num` is the section number,
+ * `title` the heading, `bodyHTML` trusted static markup. */
+function _mdSection(num, title, bodyHTML) {
+  return `<div class="md-section">
+      <div class="md-section-head">
+        <span class="md-section-num">${num}</span>
+        <span class="md-section-title">${title}</span>
+      </div>
+      <div class="md-section-body">${bodyHTML}</div>
+    </div>`;
+}
+
+/* Render the Method Detail screen for `methodId`. Pure read of authored content +
+ * the read-only TIPS adapter; touches no History/localStorage/timer state. */
+function renderMethodDetail(methodId) {
+  const m  = METHODS[methodId];
+  const md = METHOD_DETAIL[methodId];
+  const body = document.getElementById('methoddetail-body');
+  const subEl = document.getElementById('methoddetail-sub');
+  if (!body || !md || !m) return;
+
+  // Header subtitle reflects the selected method
+  subEl.textContent = md.subLabel ? `${md.label} ・ ${md.subLabel}` : md.label;
+
+  document.getElementById('methoddetail-icon').innerHTML   = methodImgHTML(methodId, 38);
+  document.getElementById('methoddetail-name').textContent = md.label;
+  document.getElementById('methoddetail-name-sub').textContent =
+    md.subLabel || m.sub || '';
+
+  const list = arr => `<ul class="md-list">${arr.map(s => `<li>${s}</li>`).join('')}</ul>`;
+
+  // 1. Overview
+  let html = _mdSection(1, 'メソッド概要', `<p class="md-text">${md.overview}</p>`);
+
+  // 2. Baseline
+  const baselineRows = md.baseline.map(r =>
+    `<div class="md-kv"><span class="md-kv-k">${r.k}</span><span class="md-kv-v">${r.v}</span></div>`
+  ).join('');
+  html += _mdSection(2, '基準レシピ', `<div class="md-kv-grid">${baselineRows}</div>`);
+
+  // 3. Equipment / premise
+  html += _mdSection(3, '器具・前提', list(md.equipment));
+
+  // 4. Grind / temperature
+  html += _mdSection(4, '挽き目・湯温の目安', list(md.grindTemp));
+
+  // 5. Pour schedule / progression model (reference only — never an active timer)
+  let scheduleBody;
+  if (md.progression) {
+    scheduleBody = list(md.progression);
+  } else {
+    const rows = md.schedule.map(s =>
+      `<div class="md-sched-row${s.done ? ' md-sched-done' : ''}">` +
+        `<span class="md-sched-t">${s.t}</span>` +
+        `<span class="md-sched-a">${s.a}</span>` +
+      `</div>`
+    ).join('');
+    scheduleBody =
+      `<div class="md-sched-head"><span>時間</span><span>${md.amountLabel}</span></div>` +
+      `<div class="md-sched">${rows}</div>`;
+  }
+  if (md.scheduleNote) {
+    scheduleBody += `<p class="md-note">${md.scheduleNote}</p>`;
+  }
+  html += _mdSection(5, md.scheduleTitle || '注湯スケジュール / 進行モデル', scheduleBody);
+
+  // 6. Taste model
+  html += _mdSection(6, '味づくりの考え方', `<p class="md-text">${md.taste}</p>`);
+
+  // 7. POINT / TIPS (aggregated, grouped by context; hidden when empty)
+  const tipGroups = selectMethodDetailTips(methodId);
+  if (tipGroups.length) {
+    const groupsHTML = tipGroups.map(g =>
+      `<div class="md-tip-group">` +
+        `<div class="md-tip-group-label">${g.label}</div>` +
+        g.items.map(it =>
+          `<div class="md-tip-item">` +
+            `<span class="md-tip-short">${it.contentShortJa}</span>` +
+            `<span class="md-tip-detail">${it.contentJa}</span>` +
+          `</div>`
+        ).join('') +
+      `</div>`
+    ).join('');
+    html += _mdSection(7, 'POINT / TIPS', groupsHTML);
+  }
+
+  // 8. Verification status (summarized, neutral)
+  html += _mdSection(8, '確認状況', `<p class="md-text">${md.verification}</p>`);
+
+  // 9. Neutral note
+  html += _mdSection(9, '中立メモ', `<p class="md-text">${METHOD_DETAIL_NEUTRAL_NOTE}</p>`);
+
+  // 10. What Pourō does not claim
+  html += _mdSection(10, 'Pourōが主張しないこと', list(METHOD_DETAIL_NOT_CLAIMED));
+
+  body.innerHTML = html;
+}
+
 /* ── Recipe Engine ──────────────────────────────────────────────────────────── */
 /*
  * RecipeEngine generates a recipe object from user inputs.
@@ -1914,6 +2218,20 @@ function wireEvents() {
   document.getElementById('btn-preview-back').addEventListener('click', () => {
     showScreen('setup');
   });
+
+  // Preview → Method Detail (PR-011R3D) — secondary, explanatory.
+  // Opens the detail for the currently selected method; does not change any
+  // draft/recipe state, start the timer, or write history.
+  document.getElementById('btn-method-detail').addEventListener('click', () => {
+    renderMethodDetail(state.selectedMethodId);
+    showScreen('methoddetail');
+  });
+
+  // Method Detail → back to Preview. Preview state (method / dose / ratio) is
+  // untouched, so simply re-showing it preserves the previewed recipe.
+  const backToPreview = () => showScreen('preview');
+  document.getElementById('btn-methoddetail-back').addEventListener('click', backToPreview);
+  document.getElementById('btn-methoddetail-to-preview').addEventListener('click', backToPreview);
 
   // Preview → Start brew
   // Passes the already-built recipe from renderPreview() to initBrew

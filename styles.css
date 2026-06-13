@@ -1466,3 +1466,220 @@ img {
   color: var(--color-text-mid);
   line-height: 1.6;
 }
+
+/* ── Method Detail entry button (PR-011R3D) ────────────────────────────────────
+ * Secondary action on Preview — quieter than the primary CTA. */
+.btn-method-detail {
+  width: 100%;
+  margin-top: 12px;
+  height: 44px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.btn-method-detail > span {
+  flex: 1;
+  text-align: left;
+}
+
+.btn-method-detail:active {
+  background: var(--color-surface-muted);
+}
+
+/* ── Method Detail screen (PR-011R3D) ──────────────────────────────────────── */
+.md-section {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-lg);
+  padding: 13px 16px 14px;
+}
+
+.md-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.md-section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-card);
+  font-family: var(--font-serif);
+  font-size: 11px;
+  color: var(--color-accent);
+}
+
+.md-section-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.md-text {
+  font-size: 13px;
+  color: var(--color-text-mid);
+  line-height: 1.75;
+}
+
+.md-note {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  margin-top: 9px;
+}
+
+.md-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.md-list li {
+  position: relative;
+  padding-left: 15px;
+  font-size: 13px;
+  color: var(--color-text-mid);
+  line-height: 1.7;
+}
+
+.md-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+}
+
+/* Baseline key/value grid */
+.md-kv-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.md-kv {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--color-border-divider);
+}
+
+.md-kv:last-child {
+  border-bottom: none;
+}
+
+.md-kv-k {
+  flex-shrink: 0;
+  width: 64px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.md-kv-v {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Pour schedule reference table (never an active timer) */
+.md-sched-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--color-text-faint);
+  padding: 0 2px 4px;
+}
+
+.md-sched {
+  display: flex;
+  flex-direction: column;
+}
+
+.md-sched-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--color-border-divider);
+}
+
+.md-sched-row:last-child {
+  border-bottom: none;
+}
+
+.md-sched-t {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--color-text-mid);
+}
+
+.md-sched-a {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.md-sched-done .md-sched-a {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+/* POINT / TIPS grouped */
+.md-tip-group + .md-tip-group {
+  margin-top: 11px;
+}
+
+.md-tip-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  margin-bottom: 7px;
+}
+
+.md-tip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-top: 1px solid var(--color-border-divider);
+}
+
+.md-tip-group-label + .md-tip-item {
+  border-top: none;
+  padding-top: 0;
+}
+
+.md-tip-short {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.md-tip-detail {
+  font-size: 12px;
+  color: var(--color-text-mid);
+  line-height: 1.65;
+}
