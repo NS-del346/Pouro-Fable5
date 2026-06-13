@@ -2,8 +2,10 @@
 
 ## 1. Status
 
-- PR status: **DRAFT / OPEN** (do not merge until independent verification is complete)
-- Independent Verification: **PENDING**
+- PR status: **MERGED**
+- Independent Verification: **PASS WITH MINOR NOTES**
+- Minor correction before merge: fixed §7 diff-scope self-reference
+  (correction commit `29d1266`).
 - Nature: **Settings-only static UI note**. A quiet, non-interactive roadmap memo
   recording future update ideas for My Recipes / Custom Recipe. The feature
   itself is **not implemented** — this is copy only.
@@ -16,9 +18,9 @@
 - Base: `main` (branched from `origin/main` @ PR #26 merge `093edc1`)
 - PR title: `PR-011R3C2 Settings future update note`
 - Commit message: `feat: add future update note to settings`
-- PR URL: _(filled at PR creation)_
-- Merge method: Squash and merge (planned)
-- Merge commit: _(placeholder — fill after merge)_
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/27
+- Merge method: Squash and merge
+- Merge commit: `b1fe52d2498846a4dfa14b1d65a1bd1e634e38b4`
 
 ## 3. What changed
 
@@ -113,10 +115,13 @@ to see fresh markup during local preview.)
 - **PR-012 My Recipes / Custom Recipe implementation** — not started; planning
   not begun. This note does not commit the project to that feature.
 
-## 10. Merge metadata placeholders
+## 10. Merge metadata
 
-- PR number: _(fill)_
-- PR URL: _(fill)_
-- Merge commit: _(fill)_
-- Merge date: _(fill)_
-- Independent Verification result: _(fill: PASS / PASS WITH MINOR NOTES / FAIL)_
+- PR number: #27
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/27
+- Merge commit: `b1fe52d2498846a4dfa14b1d65a1bd1e634e38b4`
+- Merge date: 2026-06-14
+- Merge method: Squash and merge
+- Independent Verification result: PASS WITH MINOR NOTES
+- Minor correction before merge: fixed §7 diff-scope self-reference
+  (correction commit `29d1266`).
