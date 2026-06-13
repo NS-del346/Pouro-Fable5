@@ -2,7 +2,8 @@
 
 ## 1. Status
 
-- PR status: **DRAFT — open, awaiting independent verification** (do not merge yet)
+- PR status: **MERGED**
+- Independent Verification: **PASS WITH MINOR NOTES**
 - Nature: first runtime/UI integration of POINT/TIPS Master v2.1.
 - Scope is limited to **Recipe Setup** and **Preview** surfaces only.
 - Builds on: PR-011R1 (data foundation, merged) and PR-011R2 (IA policy, merged).
@@ -14,9 +15,10 @@
 - Branch: `pr-011r3a-contextual-tips-setup-preview`
 - Base: `main` (branched from `origin/main` @ PR #20 merge `90f21f7`)
 - PR title: `PR-011R3A Contextual POINT/TIPS UI integration - Setup / Preview`
-- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/21 (draft)
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/21 (merged)
 - Commit: `9b78d60`
-- Merge method: Squash and merge (after verification)
+- Merge method: Squash and merge
+- Merge commit: `bf9cccbad790c7bbd0c663023bd113a21b85280d`
 
 ## 3. What changed
 
