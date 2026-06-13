@@ -1,0 +1,1183 @@
+{
+  "version": "coffee_app_tips_master_v2.1",
+  "generatedAt": "2026-06-13",
+  "project": "Pouro-Fable5",
+  "status": "implementation_candidate_data_foundation",
+  "methodSources": {
+    "406": {
+      "sourceType": "youtube",
+      "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+      "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+      "videoId": "lJNPp-onikk"
+    },
+    "ICE": {
+      "sourceType": "youtube",
+      "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+      "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+      "videoId": "TfSBzFeoL4s"
+    },
+    "HYB_BASE": {
+      "sourceType": "youtube",
+      "videoTitle": "【新定番】HARIOアンバサダーの粕谷世界チャンピオンが教えるスイッチの淹れ方【ハリオ】",
+      "videoUrl": "http://www.youtube.com/watch?v=sBwfcNXZhgA",
+      "videoId": "sBwfcNXZhgA"
+    },
+    "HYB_DEVIL": {
+      "sourceType": "youtube",
+      "videoTitle": "【もう戻れない】このレシピは「神」か「悪魔」か？｜どんな豆も簡単に美味しくなる究極系。",
+      "videoUrl": "http://www.youtube.com/watch?v=gC8K40kZ_6E",
+      "videoId": "gC8K40kZ_6E"
+    },
+    "HYB_NEW": {
+      "sourceType": "youtube",
+      "videoTitle": "どんなコーヒー豆も「おいしくなる」究極系レシピ、進化しました。",
+      "videoUrl": "http://www.youtube.com/watch?v=4FeUp_zNiiY",
+      "videoId": "4FeUp_zNiiY"
+    },
+    "NEO": {
+      "sourceType": "youtube",
+      "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+      "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+      "videoId": "k0nsShguOsU"
+    }
+  },
+  "notes": [
+    "This master separates official-video-derived POINT/TIPS by recipeCode.",
+    "Pourō is a non-official PWA; avoid wording implying official approval, complete reproduction, or guaranteed results.",
+    "HYB_NEW room-temperature water amount is intentionally not fixed because the source did not specify an exact amount.",
+    "NEO 1:45 / 210g step is based on a visual recipe card shown in the video screenshot supplied by the user.",
+    "v2.1 adds HYB_NEW room-temperature water placement/update notes and HYB_NEW switch close/open timing.",
+    "v2.1 adds NEO grind-start guidance and keeps NEO 1:45 / 210g as primary_visual_confirmed.",
+    "App-facing text must avoid exaggerated source-video wording such as 神, 悪魔, 究極, 完全, 必ず."
+  ],
+  "items": [
+    {
+      "id": "P-ALL-001",
+      "type": "POINT",
+      "scope": "global",
+      "recipeCode": "ALL",
+      "category": "共通",
+      "displayContext": [
+        "setup"
+      ],
+      "contentJa": "ペーパーをリンスし、ドリッパーとサーバーを温めてから抽出します。",
+      "contentShortJa": "器具を温める",
+      "whyJa": "抽出液の温度低下を抑え、ペーパー由来のにおいも抜きやすくするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:09:26",
+        "timecodeEnd": "00:09:47",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-ALL-002",
+      "type": "POINT",
+      "scope": "global",
+      "recipeCode": "ALL",
+      "category": "共通",
+      "displayContext": [
+        "setup"
+      ],
+      "contentJa": "豆を挽いたあと、粉の状態でもう一度重さを確認します。",
+      "contentShortJa": "粉で再計量する",
+      "whyJa": "挽いた後に粉量がずれることがあるため、抽出比率を安定させるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:10:44",
+        "timecodeEnd": "00:10:55",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-ALL-003",
+      "type": "POINT",
+      "scope": "global",
+      "recipeCode": "ALL",
+      "category": "共通",
+      "displayContext": [
+        "setup",
+        "timer"
+      ],
+      "contentJa": "スケールとタイマーを使い、湯量と時間を記録しながら抽出します。",
+      "contentShortJa": "量と時間を測る",
+      "whyJa": "次回の調整や再現性を高めるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "",
+        "timecodeEnd": "",
+        "sourceBasis": "summary",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "researched_summary",
+      "confidence": "medium",
+      "appAdoption": "adoptable",
+      "notes": "複数レシピに共通するアプリ運用上のPOINT。"
+    },
+    {
+      "id": "T-ALL-001",
+      "type": "TIPS",
+      "scope": "global",
+      "recipeCode": "ALL",
+      "category": "共通",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "湯温は焙煎度に合わせて調整します。浅煎りは高め、中深煎りは少し下げると設計しやすくなります。",
+      "contentShortJa": "焙煎度で湯温調整",
+      "whyJa": "豆の焙煎度によって成分の出方やガスの出方が変わるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:08:13",
+        "timecodeEnd": "00:08:37",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-406-001",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "406",
+      "category": "4:6 Method",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "各投のお湯が落ち切ってから、次の注湯に進みます。",
+      "contentShortJa": "落ち切ってから次へ",
+      "whyJa": "4:6 Methodでは落ち切りを待つことで、粗挽きでも濃度を作りやすくするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:14:20",
+        "timecodeEnd": "00:14:59",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-406-002",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "406",
+      "category": "4:6 Method",
+      "displayContext": [
+        "finish",
+        "historyDetail"
+      ],
+      "contentJa": "3分半を目安に落ち切るか確認します。長くても4分程度を目安にします。",
+      "contentShortJa": "3分半を目安に",
+      "whyJa": "落ち切り時間から、次回の挽き目調整を考えやすくするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:15:45",
+        "timecodeEnd": "00:15:58",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-406-001",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "406",
+      "category": "4:6 Method",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "1投目を少なめにすると甘み寄り、多めにすると酸味寄りに調整しやすくなります。",
+      "contentShortJa": "1投目で味を寄せる",
+      "whyJa": "前半40%のうち、1投目と2投目の配分で酸味と甘みのバランスを調整するため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:12:14",
+        "timecodeEnd": "00:12:42",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-406-002",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "406",
+      "category": "4:6 Method",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "後半60%は、注ぐ回数を増やすほど濃度を出しやすくなります。",
+      "contentShortJa": "後半で濃度調整",
+      "whyJa": "後半60%の分割回数が、濃度調整の役割を持つため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:13:18",
+        "timecodeEnd": "00:14:09",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-406-003",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "406",
+      "category": "4:6 Method",
+      "displayContext": [
+        "historyDetail"
+      ],
+      "contentJa": "4:6 Methodは固定の正解ではなく、好みの味を探すための羅針盤として使います。",
+      "contentShortJa": "好みを探す羅針盤",
+      "whyJa": "湯量、温度、挽き目を調整しながら自分の好みを探す考え方が示されているため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【教科書】世界を獲った伝説のコーヒードリップレシピ🏆４：６メソッドの全てをお伝えします！",
+        "videoUrl": "http://www.youtube.com/watch?v=lJNPp-onikk",
+        "videoId": "lJNPp-onikk",
+        "timecodeStart": "00:23:09",
+        "timecodeEnd": "00:24:29",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-ICE-001",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "ICE",
+      "category": "急冷式アイス4:6",
+      "displayContext": [
+        "setup"
+      ],
+      "contentJa": "抽出前に、サーバーへ約80gの氷を入れておきます。",
+      "contentShortJa": "氷80gを先に入れる",
+      "whyJa": "抽出液をサーバー内の氷で急冷するため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+        "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+        "videoId": "TfSBzFeoL4s",
+        "timecodeStart": "00:03:06",
+        "timecodeEnd": "00:03:54",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-ICE-002",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "ICE",
+      "category": "急冷式アイス4:6",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "1投目と2投目は、ドリッパーを軽く揺らして粉全体に湯を回します。",
+      "contentShortJa": "1・2投目は揺らす",
+      "whyJa": "細かめの粉全体に湯を行き渡らせ、抽出ムラを抑えるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+        "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+        "videoId": "TfSBzFeoL4s",
+        "timecodeStart": "00:05:27",
+        "timecodeEnd": "00:06:07",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-ICE-003",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "ICE",
+      "category": "急冷式アイス4:6",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "抜けが遅く見えても、指定のタイミング通りに注ぎ進めます。",
+      "contentShortJa": "時間通り注ぐ",
+      "whyJa": "細かめの挽き目で抜けが遅くなっても、注湯リズムを維持するため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+        "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+        "videoId": "TfSBzFeoL4s",
+        "timecodeStart": "00:06:42",
+        "timecodeEnd": "00:06:49",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-ICE-004",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "ICE",
+      "category": "急冷式アイス4:6",
+      "displayContext": [
+        "finish"
+      ],
+      "contentJa": "落ち切ったらサーバーを揺らし、氷を溶かして全体を冷やします。",
+      "contentShortJa": "氷を溶かして完成",
+      "whyJa": "抽出液を均一に冷やし、濃度をなじませるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+        "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+        "videoId": "TfSBzFeoL4s",
+        "timecodeStart": "00:08:13",
+        "timecodeEnd": "00:08:26",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-ICE-001",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "ICE",
+      "category": "急冷式アイス4:6",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "湯温を高めにすると香りやビター感を出しやすく、苦味を抑えたい時は少し下げます。",
+      "contentShortJa": "湯温で苦味を調整",
+      "whyJa": "湯温によって香りや苦味の出方を調整しやすいため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+        "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+        "videoId": "TfSBzFeoL4s",
+        "timecodeStart": "00:04:03",
+        "timecodeEnd": "00:04:31",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-ICE-002",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "ICE",
+      "category": "急冷式アイス4:6",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "1投目と2投目の配分を変えると、甘みと酸味の出方を調整できます。",
+      "contentShortJa": "1・2投目で味調整",
+      "whyJa": "アイスでも4:6の前半40%の考え方を応用できるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+        "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+        "videoId": "TfSBzFeoL4s",
+        "timecodeStart": "00:08:35",
+        "timecodeEnd": "00:09:05",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-ICE-003",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "ICE",
+      "category": "急冷式アイス4:6",
+      "displayContext": [
+        "finish",
+        "historyDetail"
+      ],
+      "contentJa": "3分を大きく超える場合は、次回は少し粗めに挽くと調整しやすくなります。",
+      "contentShortJa": "3分超なら少し粗く",
+      "whyJa": "落ち切り時間を基準に、次回の挽き目を見直しやすくするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【レシピ】世界チャンピオンが解説「急冷式アイスコーヒー」の作り方｜4：6メソッド",
+        "videoUrl": "http://www.youtube.com/watch?v=TfSBzFeoL4s",
+        "videoId": "TfSBzFeoL4s",
+        "timecodeStart": "00:07:43",
+        "timecodeEnd": "00:08:04",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-HYB-BASE-001",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_BASE",
+      "category": "HARIO Switch基本",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "1分半後、残り60gを注いで粉の層を崩します。",
+      "contentShortJa": "残り湯で層を崩す",
+      "whyJa": "浸漬後に透過要素を加え、抽出を進めやすくするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【新定番】HARIOアンバサダーの粕谷世界チャンピオンが教えるスイッチの淹れ方【ハリオ】",
+        "videoUrl": "http://www.youtube.com/watch?v=sBwfcNXZhgA",
+        "videoId": "sBwfcNXZhgA",
+        "timecodeStart": "00:03:11",
+        "timecodeEnd": "00:03:30",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-HYB-BASE-001",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "HYB_BASE",
+      "category": "HARIO Switch基本",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "浸漬に最後の透過を足すと、前味だけでなく後味の伸びも作りやすくなります。",
+      "contentShortJa": "浸漬＋透過で後味",
+      "whyJa": "浸漬だけでなく透過要素を加えることで、フレーバーや後味を出しやすくするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【新定番】HARIOアンバサダーの粕谷世界チャンピオンが教えるスイッチの淹れ方【ハリオ】",
+        "videoUrl": "http://www.youtube.com/watch?v=sBwfcNXZhgA",
+        "videoId": "sBwfcNXZhgA",
+        "timecodeStart": "00:06:41",
+        "timecodeEnd": "00:07:03",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-HYB-BASE-002",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "HYB_BASE",
+      "category": "HARIO Switch基本",
+      "displayContext": [
+        "historyDetail"
+      ],
+      "contentJa": "忙しい時は、閉じて注いで待ち、開けて落とすだけの使い方も選べます。",
+      "contentShortJa": "閉じて待つだけでも可",
+      "whyJa": "Switchの浸漬式としての簡易性を活かせるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【新定番】HARIOアンバサダーの粕谷世界チャンピオンが教えるスイッチの淹れ方【ハリオ】",
+        "videoUrl": "http://www.youtube.com/watch?v=sBwfcNXZhgA",
+        "videoId": "sBwfcNXZhgA",
+        "timecodeStart": "00:05:01",
+        "timecodeEnd": "00:05:14",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-HYB-DEV-001",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_DEVIL",
+      "category": "HARIO Switch低温ハイブリッド",
+      "displayContext": [
+        "preview",
+        "timer"
+      ],
+      "contentJa": "前半はスイッチを開き、後半はスイッチを閉じて抽出します。",
+      "contentShortJa": "前半開・後半閉",
+      "whyJa": "前半の透過と後半の浸漬を使い分けるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【もう戻れない】このレシピは「神」か「悪魔」か？｜どんな豆も簡単に美味しくなる究極系。",
+        "videoUrl": "http://www.youtube.com/watch?v=gC8K40kZ_6E",
+        "videoId": "gC8K40kZ_6E",
+        "timecodeStart": "00:08:04",
+        "timecodeEnd": "00:10:08",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "動画内呼称は中立化し、アプリでは「悪魔」等の語を使わない。"
+    },
+    {
+      "id": "P-HYB-DEV-002",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_DEVIL",
+      "category": "HARIO Switch低温ハイブリッド",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "前半はスイッチを開いたまま、60gずつ2回注ぎます。",
+      "contentShortJa": "60gを2回注ぐ",
+      "whyJa": "前半120gを2回に分けて透過抽出するため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【もう戻れない】このレシピは「神」か「悪魔」か？｜どんな豆も簡単に美味しくなる究極系。",
+        "videoUrl": "http://www.youtube.com/watch?v=gC8K40kZ_6E",
+        "videoId": "gC8K40kZ_6E",
+        "timecodeStart": "00:08:22",
+        "timecodeEnd": "00:08:37",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "追加確認で「最初2回で120g」と整理。"
+    },
+    {
+      "id": "P-HYB-DEV-003",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_DEVIL",
+      "category": "HARIO Switch低温ハイブリッド",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "1:15でスイッチを閉じ、低温側のお湯で280gまで注ぎます。",
+      "contentShortJa": "1:15で閉じる",
+      "whyJa": "後半を浸漬式に切り替え、低温で抽出を進めるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【もう戻れない】このレシピは「神」か「悪魔」か？｜どんな豆も簡単に美味しくなる究極系。",
+        "videoUrl": "http://www.youtube.com/watch?v=gC8K40kZ_6E",
+        "videoId": "gC8K40kZ_6E",
+        "timecodeStart": "00:13:17",
+        "timecodeEnd": "00:13:29",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-HYB-DEV-004",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_DEVIL",
+      "category": "HARIO Switch低温ハイブリッド",
+      "displayContext": [
+        "timer",
+        "finish"
+      ],
+      "contentJa": "1:45でスイッチを開き、3分程度で落とし切ります。",
+      "contentShortJa": "1:45で開ける",
+      "whyJa": "浸漬後に抽出液を落とし切り、終了目安を作るため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【もう戻れない】このレシピは「神」か「悪魔」か？｜どんな豆も簡単に美味しくなる究極系。",
+        "videoUrl": "http://www.youtube.com/watch?v=gC8K40kZ_6E",
+        "videoId": "gC8K40kZ_6E",
+        "timecodeStart": "00:13:42",
+        "timecodeEnd": "00:13:49",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-HYB-DEV-001",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "HYB_DEVIL",
+      "category": "HARIO Switch低温ハイブリッド",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "前半は高温の透過、後半は低温の浸漬で抽出を組み立てます。",
+      "contentShortJa": "高温透過＋低温浸漬",
+      "whyJa": "前半で成分を引き出し、後半で温度を下げて抽出を穏やかにするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【もう戻れない】このレシピは「神」か「悪魔」か？｜どんな豆も簡単に美味しくなる究極系。",
+        "videoUrl": "http://www.youtube.com/watch?v=gC8K40kZ_6E",
+        "videoId": "gC8K40kZ_6E",
+        "timecodeStart": "00:08:59",
+        "timecodeEnd": "00:11:10",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-HYB-DEV-002",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "HYB_DEVIL",
+      "category": "HARIO Switch低温ハイブリッド",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "後半の湯温を下げると、雑味を抑えながら甘みを狙いやすくなります。",
+      "contentShortJa": "後半は湯温を下げる",
+      "whyJa": "高温のまま後半を抽出すると雑味が出やすいという説明に基づくため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "【もう戻れない】このレシピは「神」か「悪魔」か？｜どんな豆も簡単に美味しくなる究極系。",
+        "videoUrl": "http://www.youtube.com/watch?v=gC8K40kZ_6E",
+        "videoId": "gC8K40kZ_6E",
+        "timecodeStart": "00:10:23",
+        "timecodeEnd": "00:11:10",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-HYB-NEW-001",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_NEW",
+      "category": "HARIO Switchニューハイブリッド",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "蒸らしはスイッチを閉じ、粉が浸る程度のお湯で行います。",
+      "contentShortJa": "蒸らしはスイッチ閉",
+      "whyJa": "蒸らし中に湯を保持し、成分が出やすい状態を作るため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "どんなコーヒー豆も「おいしくなる」究極系レシピ、進化しました。",
+        "videoUrl": "http://www.youtube.com/watch?v=4FeUp_zNiiY",
+        "videoId": "4FeUp_zNiiY",
+        "timecodeStart": "00:06:19",
+        "timecodeEnd": "00:07:38",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-HYB-NEW-002",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_NEW",
+      "category": "HARIO Switchニューハイブリッド",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "蒸らし後はスイッチを開き、透過式で120gまで注ぎます。",
+      "contentShortJa": "蒸らし後は開く",
+      "whyJa": "閉じた蒸らしから透過式へ切り替え、抽出を進めるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "どんなコーヒー豆も「おいしくなる」究極系レシピ、進化しました。",
+        "videoUrl": "http://www.youtube.com/watch?v=4FeUp_zNiiY",
+        "videoId": "4FeUp_zNiiY",
+        "timecodeStart": "00:07:59",
+        "timecodeEnd": "00:08:43",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-HYB-NEW-003",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_NEW",
+      "category": "HARIO Switchニューハイブリッド",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "後半は常温水をドリッパー内に加え、液温を70〜80℃程度へ下げる目安にします。",
+      "contentShortJa": "常温水はドリッパー内へ",
+      "whyJa": "後半のドリッパー内液温を下げ、抽出を穏やかにするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "どんなコーヒー豆も「おいしくなる」究極系レシピ、進化しました。",
+        "videoUrl": "http://www.youtube.com/watch?v=4FeUp_zNiiY",
+        "videoId": "4FeUp_zNiiY",
+        "timecodeStart": "00:06:28",
+        "timecodeEnd": "00:09:24",
+        "sourceBasis": "visual_and_transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_visual_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "常温水の投入位置はドリッパー内。量は動画内で明言なし。常温水は総湯量300gに含める扱い。"
+    },
+    {
+      "id": "P-HYB-NEW-004",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "HYB_NEW",
+      "category": "HARIO Switchニューハイブリッド",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "2:10でスイッチを閉じ、2:45で開けます。",
+      "contentShortJa": "2:10閉、2:45開",
+      "whyJa": "後半を浸漬に切り替えたあと、決めたタイミングで落とし切るため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "どんなコーヒー豆も「おいしくなる」究極系レシピ、進化しました。",
+        "videoUrl": "http://www.youtube.com/watch?v=4FeUp_zNiiY",
+        "videoId": "4FeUp_zNiiY",
+        "timecodeStart": "",
+        "timecodeEnd": "",
+        "sourceBasis": "visual_and_transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_visual_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "抽出タイムライン上の2:10 close / 2:45 openとして扱う。"
+    },
+    {
+      "id": "T-HYB-NEW-001",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "HYB_NEW",
+      "category": "HARIO Switchニューハイブリッド",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "後半の温度を下げると、雑味を抑えながら甘みを引き出しやすくなります。",
+      "contentShortJa": "低温で雑味を抑える",
+      "whyJa": "抽出後半の温度を下げることで、成分抽出を穏やかにするため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "どんなコーヒー豆も「おいしくなる」究極系レシピ、進化しました。",
+        "videoUrl": "http://www.youtube.com/watch?v=4FeUp_zNiiY",
+        "videoId": "4FeUp_zNiiY",
+        "timecodeStart": "00:09:12",
+        "timecodeEnd": "00:09:24",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-HYB-NEW-002",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "HYB_NEW",
+      "category": "HARIO Switchニューハイブリッド",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "常温水は総湯量300gに含め、液温70〜80℃を目安に調整します。",
+      "contentShortJa": "水も総湯量に含める",
+      "whyJa": "動画内で常温水の量は明言されていないため、固定量ではなく液温目安として扱う方が安全なため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "どんなコーヒー豆も「おいしくなる」究極系レシピ、進化しました。",
+        "videoUrl": "http://www.youtube.com/watch?v=4FeUp_zNiiY",
+        "videoId": "4FeUp_zNiiY",
+        "timecodeStart": "00:09:12",
+        "timecodeEnd": "00:09:24",
+        "sourceBasis": "visual_and_transcript_summary",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "researched_summary",
+      "confidence": "medium",
+      "appAdoption": "adoptable",
+      "notes": "常温水量は未確定。Pourōでは固定値ではなく、総湯量に含める温度調整用の水として扱う。"
+    },
+    {
+      "id": "P-NEO-001",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "NEO",
+      "category": "10投式ドリップ",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "30gずつ、合計10回に分けて注ぎます。",
+      "contentShortJa": "30gずつ10回注ぐ",
+      "whyJa": "細かく注湯を分け、質感やマウスフィールを狙うため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+        "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+        "videoId": "k0nsShguOsU",
+        "timecodeStart": "00:13:01",
+        "timecodeEnd": "00:15:52",
+        "sourceBasis": "visual_text",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_visual_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "動画内レシピカードで10投×30gを確認。"
+    },
+    {
+      "id": "P-NEO-002",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "NEO",
+      "category": "10投式ドリップ",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "蒸らし後は15秒間隔を目安に注ぎます。",
+      "contentShortJa": "15秒ごとに注ぐ",
+      "whyJa": "10投式の固定タイムラインに沿って注湯するため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+        "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+        "videoId": "k0nsShguOsU",
+        "timecodeStart": "00:13:06",
+        "timecodeEnd": "00:15:52",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "P-NEO-003",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "NEO",
+      "category": "10投式ドリップ",
+      "displayContext": [
+        "timer"
+      ],
+      "contentJa": "1:45の注湯も省略せず、210gまで注ぎます。",
+      "contentShortJa": "1:45も注ぐ",
+      "whyJa": "10投×30gで累計300gに到達するため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+        "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+        "videoId": "k0nsShguOsU",
+        "timecodeStart": "",
+        "timecodeEnd": "",
+        "sourceBasis": "visual_text",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_visual_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "ユーザー提供スクリーンショット内の動画レシピカードで1:45 / 210gを確認。NEOスケジュール系はprimary_visual_confirmed扱い。"
+    },
+    {
+      "id": "T-NEO-001",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "NEO",
+      "category": "10投式ドリップ",
+      "displayContext": [
+        "setup",
+        "preview"
+      ],
+      "contentJa": "超粗挽きと95〜96℃程度の高めの湯温を前提にします。",
+      "contentShortJa": "粗挽き＋高湯温",
+      "whyJa": "極粗挽きでも成分を引き出すために、高めの湯温を組み合わせるため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+        "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+        "videoId": "k0nsShguOsU",
+        "timecodeStart": "00:03:44",
+        "timecodeEnd": "00:13:13",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "挽き目はComandante C40 40〜45クリック、湯温は95〜96℃目安。"
+    },
+    {
+      "id": "T-NEO-002",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "NEO",
+      "category": "10投式ドリップ",
+      "displayContext": [
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "注湯回数を増やすことで、質感やマウスフィールを狙います。",
+      "contentShortJa": "回数で質感を狙う",
+      "whyJa": "注湯回数を増やすほど口当たりの厚みを狙いやすいという説明に基づくため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+        "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+        "videoId": "k0nsShguOsU",
+        "timecodeStart": "00:06:44",
+        "timecodeEnd": "00:06:56",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-NEO-003",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "NEO",
+      "category": "10投式ドリップ",
+      "displayContext": [
+        "finish",
+        "historyDetail"
+      ],
+      "contentJa": "短時間で終えず、約3分半までかけて成分を引き出します。",
+      "contentShortJa": "3分半までかける",
+      "whyJa": "極粗挽きで、時間をかけながらポジティブな成分を引き出すため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+        "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+        "videoId": "k0nsShguOsU",
+        "timecodeStart": "00:06:10",
+        "timecodeEnd": "00:06:22",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": ""
+    },
+    {
+      "id": "T-NEO-004",
+      "type": "TIPS",
+      "scope": "recipe",
+      "recipeCode": "NEO",
+      "category": "10投式ドリップ",
+      "displayContext": [
+        "setup",
+        "preview",
+        "historyDetail"
+      ],
+      "contentJa": "極粗挽き前提のため、通常のV60より粗い設定から始めます。",
+      "contentShortJa": "通常より粗く始める",
+      "whyJa": "10投式では極粗挽きと高めの湯温を組み合わせる設計のため。",
+      "source": {
+        "sourceType": "youtube",
+        "videoTitle": "世界制覇から10年かけて辿り着いた最新式のドリップレシピ完成しました！！",
+        "videoUrl": "http://www.youtube.com/watch?v=k0nsShguOsU",
+        "videoId": "k0nsShguOsU",
+        "timecodeStart": "00:03:44",
+        "timecodeEnd": "00:13:13",
+        "sourceBasis": "transcript",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "primary_transcript_confirmed",
+      "confidence": "high",
+      "appAdoption": "adoptable",
+      "notes": "Comandante C40 40〜45クリック / 極粗挽き目安。通常のV60より粗い設定から始める。"
+    },
+    {
+      "id": "P-OTHER-001",
+      "type": "POINT",
+      "scope": "recipe",
+      "recipeCode": "OTHER",
+      "category": "quarantine",
+      "displayContext": [
+        "quarantine"
+      ],
+      "contentJa": "MUGEN、Aeropress、Cold Brew、French Press、ネルドリップ、2スピン、冷凍庫急冷、氷水ダイレクトは今回の本体対象外として分離します。",
+      "contentShortJa": "対象外レシピを分離",
+      "whyJa": "今回のPourō本体対象メソッドと操作体系が異なるため。",
+      "source": {
+        "sourceType": "internal_quarantine",
+        "videoTitle": "",
+        "videoUrl": "",
+        "videoId": "",
+        "timecodeStart": "",
+        "timecodeEnd": "",
+        "sourceBasis": "summary",
+        "quoteOrParaphrase": "paraphrase"
+      },
+      "verificationLevel": "needs_review",
+      "confidence": "medium",
+      "appAdoption": "quarantine",
+      "notes": "将来拡張候補。現行本体には混ぜない。"
+    }
+  ],
+  "recipeScope": {
+    "inScope": [
+      "406",
+      "ICE",
+      "HYB_NEW",
+      "NEO"
+    ],
+    "supportingReferences": [
+      "HYB_BASE",
+      "HYB_DEVIL"
+    ],
+    "quarantine": [
+      "OTHER"
+    ],
+    "notes": [
+      "Hybrid / HARIO Switch本体候補はHYB_NEW。",
+      "HYB_BASEはSwitch操作理解の補助資料。",
+      "HYB_DEVILは旧版・参考扱いで、アプリ本文では中立表現を使う。",
+      "MUGEN / Aeropress / Cold Brew / French Press / ネルドリップ / 2スピン / 冷凍庫急冷 / 氷水ダイレクトはMVP本体に混ぜない。"
+    ]
+  },
+  "textRules": {
+    "avoidInAppText": [
+      "完全",
+      "100%",
+      "必ず",
+      "誰でも世界チャンピオンの味",
+      "公式完全再現",
+      "絶対に失敗しない",
+      "究極",
+      "神",
+      "悪魔",
+      "どんな豆も必ず美味しくなる",
+      "唯一の正解"
+    ],
+    "preferInAppText": [
+      "目安",
+      "調整しやすい",
+      "〜しやすくなる",
+      "〜を狙う",
+      "〜を意識する",
+      "豆に合わせて調整",
+      "動画内で紹介された方法",
+      "Pourōでは中立表現に変更"
+    ],
+    "legalNote": "Pouro-Fable5 is a non-official personal PWA. Avoid wording implying official approval, partnership, complete reproduction, or guaranteed results."
+  },
+  "displayPolicy": {
+    "setup": "POINTを1〜2件まで。準備に直結する短文を優先する。",
+    "preview": "理論TIPSを短く表示する。長い説明はMethod Detailへ送る。",
+    "timer": "現在ステップに関係するPOINTだけを短文で表示する。",
+    "finish": "落ち切り・次回調整につながるTIPSを表示する。",
+    "historyDetail": "詳しいTIPSやQ&A的補足を表示してよい。",
+    "selection": "ランダム表示ではなく、recipeCodeとdisplayContextに基づく選択表示を優先する。"
+  }
+}
