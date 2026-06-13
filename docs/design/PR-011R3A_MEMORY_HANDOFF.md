@@ -14,8 +14,8 @@
 - Branch: `pr-011r3a-contextual-tips-setup-preview`
 - Base: `main` (branched from `origin/main` @ PR #20 merge `90f21f7`)
 - PR title: `PR-011R3A Contextual POINT/TIPS UI integration - Setup / Preview`
-- PR URL: _(filled after draft PR is opened)_
-- Commit: _(filled after commit)_
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/21 (draft)
+- Commit: `9b78d60`
 - Merge method: Squash and merge (after verification)
 
 ## 3. What changed
