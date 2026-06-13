@@ -2,7 +2,7 @@
 
 ## 1. Status
 
-- PR status: **OPEN (draft)** — IA / specification doc only
+- PR status: **MERGED** — IA / specification doc only
 - Nature: docs-only. No app runtime, UI, data, timer, or schema changes.
 - Builds on: PR-011R1 (POINT/TIPS Master v2.1 data foundation, merged).
 - Does not modify PR-011R1 data.
@@ -13,10 +13,11 @@
 - Base: `main`
 - PR title: `PR-011R2 Recipe / Method Detail information architecture`
 - PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/19
-- Commit before merge: `1cd899c` _(updated at merge)_
-- Merge method: _(placeholder — expected squash and merge)_
-- Merge commit: _(placeholder)_
-- Independent Verification: _(placeholder)_
+- Commits before merge: `1cd899c`, `32e3b70`
+- Merge method: Squash and merge
+- Merge commit: `1b03c194c5a0f719b5f864ba6f50146d660b723a`
+- Final status: MERGED
+- Independent Verification: PASS
 
 ## 3. What changed
 
@@ -116,10 +117,11 @@ Keep R3 and R4 separate. Do not start either in PR-011R2.
 ```text
 PR URL:          https://github.com/NS-del346/Pouro-Fable5/pull/19
 Branch:          pr-011r2-recipe-method-detail-ia
-Commit (pre-merge): _(fill)_
-Merge method:    _(expected: squash and merge)_
-Merge commit:    _(fill after merge)_
-Independent Verification: _(fill after verification)_
+Commits (pre-merge): 1cd899c, 32e3b70
+Merge method:    Squash and merge
+Merge commit:    1b03c194c5a0f719b5f864ba6f50146d660b723a
+Final status:    MERGED
+Independent Verification: PASS
 ```
 
 ## References
