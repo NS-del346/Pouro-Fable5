@@ -1,6 +1,7 @@
 # PR-011R3D｜Method Detail UI implementation｜Memory Handoff｜Pouro-Fable5
 
-> Status: **Implemented (draft PR open, awaiting independent verification).**
+> Status: **MERGED** (PR #30, Squash and merge, merge commit `a7041314`,
+> Independent Verification: PASS).
 > This is the first Method Detail UI surface. It implements the plan defined in
 > PR-011R3C (planning) and follows the PR-011R3C3 smoke-QA baseline. It is a
 > limited, secondary, explanatory surface only — no Timer, History Detail,
@@ -23,9 +24,11 @@
 ## 2. Branch / PR info
 
 - Branch: `pr-011r3d-method-detail-ui` (from `origin/main` @ `ed8d814`).
-- PR title: `PR-011R3D Method Detail UI implementation`.
+- PR: [#30](https://github.com/NS-del346/Pouro-Fable5/pull/30) — `PR-011R3D Method Detail UI implementation`.
+- Status: **MERGED** (Squash and merge).
+- Merge commit: `a7041314f90e989534a3bfabd79633ee37f12f80`.
 - Commit: `feat: add method detail screen`.
-- PR number / merge commit: _(placeholders — see §14)_.
+- Independent Verification: **PASS**.
 
 ## 3. What changed
 
@@ -169,11 +172,14 @@ fixed, 70–80℃, 2:10 close / 2:45 open.
 - PR-012 My Recipes / Custom Recipe       (not started)
 ```
 
-## 14. Merge metadata placeholders
+## 14. Merge metadata
 
 ```text
-PR number:      #___
-Merge commit:   ___
-Merged at:      ___
-Independent Verification: ___
+PR number:      #30  (https://github.com/NS-del346/Pouro-Fable5/pull/30)
+Branch:         pr-011r3d-method-detail-ui
+Merge method:   Squash and merge
+Merge commit:   a7041314f90e989534a3bfabd79633ee37f12f80
+Merged at:      2026-06-14
+Status:         MERGED
+Independent Verification: PASS
 ```
