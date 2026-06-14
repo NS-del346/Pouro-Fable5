@@ -1124,21 +1124,13 @@ function summaryColHTML(iconSvg, label, value, unit) {
   </span>`;
 }
 
-const _icons = {
-  bean:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/></svg>`,
-  water: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>`,
-  pour:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>`,
-  timer: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`,
-  ratio: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7.5h15"/><path d="M12 4.5v14.5"/></svg>`,
-  ice:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/></svg>`,
-};
-
-/* ── Common micro icons (Brew Timer context only) ───────────────────────────────
-   Quiet, small, line-based cues that help the user read Timer context faster.
-   They are supportive, never the message: every place a micro icon appears also
-   keeps its text label, and the icons are aria-hidden. Path data only is stored
-   here; microIcon() wraps it in a consistent <svg>. Keep these abstract — no
-   brand-, device-, or maker-specific shapes. */
+/* ── Common micro icons ─────────────────────────────────────────────────────────
+   The single source of truth for the small (13px) line-icon family used across
+   the app: the Brew Timer context AND the recipe summary columns. They are quiet,
+   supportive cues, never the message — every place a micro icon appears also keeps
+   its text label, and the icons are aria-hidden. Path data only is stored here;
+   microIcon() wraps it in a consistent <svg>. Keep these abstract — no brand-,
+   device-, or maker-specific shapes. */
 const MICRO_ICON_PATHS = {
   'scale-target': '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
   'pour-plus':    '<path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/><path d="M12 10.2v4"/><path d="M10 12.2h4"/>',
@@ -1149,16 +1141,37 @@ const MICRO_ICON_PATHS = {
   'hot-water':    '<path d="M12 9c2.2 2.7 3.8 4.6 3.8 6.4a3.8 3.8 0 1 1-7.6 0C8.2 13.6 9.8 11.7 12 9Z"/><path d="M10 5.4c-.6.7-.6 1.3 0 2"/><path d="M14 5.4c-.6.7-.6 1.3 0 2"/>',
   'ice':          '<path d="M12 3v18"/><path d="M4.2 7.5l15.6 9"/><path d="M19.8 7.5l-15.6 9"/>',
   'drawdown':     '<path d="M8 5.5l4 4 4-4"/><path d="M8 11.5l4 4 4-4"/>',
+  /* Shared with the recipe summary columns (buildSummaryCols). */
+  'bean':         '<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5c-3.2 4.4-3.2 10.6 0 15"/>',
+  'droplet':      '<path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/>',
+  'ratio':        '<path d="M4.5 7.5h15"/><path d="M12 4.5v14.5"/>',
+  'snowflake':    '<path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/>',
 };
 
-/* Return a safe inline micro-icon SVG string for Timer context, or '' if unknown. */
-function microIcon(name, size = 13) {
+/* Return a safe inline micro-icon SVG string, or '' if unknown.
+   opts.strokeWidth overrides the default 1.7 (kept per-icon for summary parity);
+   opts.muted=false drops the .micro-icon dimming so the summary columns stay at
+   their original full-opacity accent. Both default to the Timer-context look. */
+function microIcon(name, size = 13, opts = {}) {
   const path = MICRO_ICON_PATHS[name];
   if (!path) return '';
-  return `<svg class="micro-icon" width="${size}" height="${size}" viewBox="0 0 24 24" `
-    + `fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" `
+  const strokeWidth = opts.strokeWidth ?? 1.7;
+  const cls = opts.muted === false ? '' : 'micro-icon';
+  return `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" `
+    + `fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" `
     + `stroke-linejoin="round" aria-hidden="true" focusable="false">${path}</svg>`;
 }
+
+/* Recipe summary column icons — same registry/helper as the Timer micro icons,
+   rendered full-opacity (muted:false) with their original per-icon stroke weights. */
+const _icons = {
+  bean:  microIcon('bean',      13, { muted: false, strokeWidth: 1.7 }),
+  water: microIcon('droplet',   13, { muted: false, strokeWidth: 1.8 }),
+  pour:  microIcon('droplet',   13, { muted: false, strokeWidth: 1.8 }),
+  timer: microIcon('elapsed',   13, { muted: false, strokeWidth: 1.7 }),
+  ratio: microIcon('ratio',     13, { muted: false, strokeWidth: 1.6 }),
+  ice:   microIcon('snowflake', 13, { muted: false, strokeWidth: 1.6 }),
+};
 
 function buildSummaryCols(recipe) {
   const pourCount = recipe.steps.filter(s => s.type === 'pour').length;
