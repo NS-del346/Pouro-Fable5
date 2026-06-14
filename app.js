@@ -38,8 +38,6 @@ const METHODS = {
       { label: '濃度',  dots: [true, true, true, false, false, false] },
     ],
     hasFlavorStrength: true,
-    icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8.5h12v5.5a6 6 0 0 1-12 0Z"/><path d="M16.5 9.5h2.2a2.6 2.6 0 0 1 0 5.2h-2.4"/></svg>`,
-    iconSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8.5h12v5.5a6 6 0 0 1-12 0Z"/><path d="M16.5 9.5h2.2a2.6 2.6 0 0 1 0 5.2h-2.4"/></svg>`,
     img: 'assets/method-46.png',
     checklist: [
       'フィルターをリンスし、ドリッパーを温めてください',
@@ -61,8 +59,6 @@ const METHODS = {
       { label: '酸味',   dots: [true, true, true, false, false, false] },
     ],
     hasFlavorStrength: false,
-    icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor" stroke="none"/></svg>`,
-    iconSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="4"/><circle cx="16" cy="12" r="3" fill="currentColor" stroke="none"/></svg>`,
     img: 'assets/method-hybrid.png',
     checklist: [
       'スイッチを「開（OPEN）」の状態にしてセットしてください',
@@ -84,8 +80,6 @@ const METHODS = {
       { label: '濃度',     dots: [true, true, true, false, false, false] },
     ],
     hasFlavorStrength: false,
-    icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10"/><path d="M7 20.5h10"/><path d="M8 3.5c0 7 8 7 8 17"/><path d="M16 3.5c0 7-8 7-8 17"/></svg>`,
-    iconSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10"/><path d="M7 20.5h10"/><path d="M8 3.5c0 7 8 7 8 17"/><path d="M16 3.5c0 7-8 7-8 17"/></svg>`,
     img: 'assets/method-10-pour.png',
     checklist: [
       'フィルターをリンスし、ドリッパーを温めてください',
@@ -107,8 +101,6 @@ const METHODS = {
       { label: 'ボディ', dots: [true, true, false, false, false, false] },
     ],
     hasFlavorStrength: false,
-    icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/></svg>`,
-    iconSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/></svg>`,
     img: 'assets/method-ice-brew.png',
     checklist: [
       '氷をサーバーにセットしてください',
@@ -1098,12 +1090,6 @@ function cacheDOM() {
   DOM.brewMethodIcon  = document.getElementById('brew-method-icon');
   DOM.brewMethodName  = document.getElementById('brew-method-name');
   DOM.brewMethodSub   = document.getElementById('brew-method-sub');
-}
-
-/* ── SVG helpers ─────────────────────────────────────────────────────────────── */
-function iconSvgFor(methodId, size = 26) {
-  const m = METHODS[methodId];
-  return m ? m.icon.replace(/width="26" height="26"/, `width="${size}" height="${size}"`) : '';
 }
 
 /* Method PNG icon — primary method visual across screens (Fable5 artifact parity) */
