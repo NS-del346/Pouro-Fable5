@@ -1,18 +1,23 @@
 # PR-011R3E — History Detail contextual TIPS integration (Memory / Handoff)
 
 ## 1. Status
-Implemented and locally verified. Draft PR opened; **not merged** — awaiting
-independent verification.
+**MERGED.** Implemented, locally verified, independently verified (PASS), and
+merged to `main` via PR #32 (squash merge `65983c0`).
 
 Adds a quiet, reflection-oriented POINT/TIPS section ("次回の調整メモ") to the
-existing History Detail screen. No new logging system, no schema migration.
+existing History Detail screen. Display-only; no new logging system, no schema
+migration. Unknown / unsupported method hides the section safely. Items come
+from the curated runtime `TIPS_DATA` subset only.
 
 ## 2. Branch / PR info
 - Base branch: `main`
 - Feature branch: `pr-011r3e-history-detail-tips`
 - Commit message: `feat: add history detail contextual tips`
+- PR: [#32](https://github.com/NS-del346/Pouro-Fable5/pull/32) — **MERGED**
 - PR title: `PR-011R3E History Detail contextual TIPS integration`
-- PR state: **draft**
+- Merge method: **Squash and merge**
+- Merge commit: `65983c00795d0d6cc4573de856380b32cad2b3e8`
+- Independent Verification: **PASS**
 
 ## 3. What changed
 - `app.js`
@@ -150,8 +155,29 @@ clear + reload was needed in the preview browser to pick up the edited
 - **PR-012** — My Recipes / Custom Recipe. **Not started.**
 - Timer POINT/TIPS implementation — out of scope, not started.
 
-## 14. Merge metadata (placeholders)
-- PR number: `#____`
-- Merge commit: `__________`
-- Independent Verification: `PASS / PASS WITH MINOR NOTES / FAIL` — pending
-- Merged at: `__________`
+## 14. Merge metadata
+- PR number: [#32](https://github.com/NS-del346/Pouro-Fable5/pull/32) — **MERGED**
+- PR URL: https://github.com/NS-del346/Pouro-Fable5/pull/32
+- Branch: `pr-011r3e-history-detail-tips`
+- Merge method: **Squash and merge**
+- Merge commit: `65983c00795d0d6cc4573de856380b32cad2b3e8`
+- Independent Verification: **PASS**
+- Progress memory: updated
+
+### Scope boundaries (final, as merged)
+- History Detail contextual TIPS were implemented; card title is `次回の調整メモ`.
+- The feature is **display-only**; unknown / unsupported method hides the
+  section safely.
+- Runtime `TIPS_DATA` only — no `docs/data` changes.
+- No `styles.css` changes (reused `.ctx-tip-card`).
+- No Timer, RecipeEngine, History schema, or localStorage schema changes.
+- No CSV / JSON export / import changes.
+- No PWA / manifest / service worker changes.
+- No PR-011R4 work; no PR-012 / My Recipes work.
+
+### Minor notes (carried from independent verification)
+- `appAdoption` safety is enforced by the curated runtime `TIPS_DATA` subset, not
+  an explicit field check.
+- The independent verification regression check was code/structure-based.
+- Local preview may require a one-time service-worker / cache clear due to
+  cache-first behavior; no SW / manifest change was made.
