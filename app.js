@@ -1771,8 +1771,12 @@ function renderPreview() {
   const noteCard = document.getElementById('rebrew-next-note-card');
   if (state.rebrewFrom) {
     banner.classList.remove('hidden');
+    // PR-011R5A — Finish-origin repeats carry source:'finish' and no history date,
+    // so use neutral same-setup wording instead of the history-origin label.
     document.getElementById('rebrew-banner-text').textContent =
-      `履歴から再現 ・ ${state.rebrewFrom.date} の記録`;
+      state.rebrewFrom.source === 'finish'
+        ? '同じ条件でもう一度'
+        : `履歴から再現 ・ ${state.rebrewFrom.date} の記録`;
     if (state.rebrewFrom.nextNote) {
       noteCard.classList.remove('hidden');
       document.getElementById('rebrew-next-note-text').textContent = state.rebrewFrom.nextNote;
@@ -2222,6 +2226,47 @@ function _applyRebrewEntry(entry) {
   showScreen('preview');
 }
 
+/* ── Finish same-setup helper (PR-011R5A) ───────────────────────────────────────
+   Re-runs the just-completed brew with the same setup, routing to Preview (never
+   the Timer). Reads only in-memory session state (activeRecipe / brewResultDraft /
+   draft) — it does NOT read or write history, mutate recipe schedules, or persist
+   anything. The user confirms on Preview and starts the Timer manually. */
+function _applyCurrentBrewAgain() {
+  const recipe = state.activeRecipe;
+  const draft  = state.brewResultDraft;
+
+  // Guard: with no finished-brew context there is nothing to repeat. Fall back
+  // to Home rather than guessing missing recipe data.
+  if (!recipe && !draft) {
+    renderHome();
+    showScreen('home');
+    return;
+  }
+
+  const methodId = recipe?.id || draft?.methodId || state.selectedMethodId;
+  state.selectedMethodId = methodId;
+
+  // Preserve dose / ratio from the completed brew.
+  if (recipe?.dose != null)       state.draft.dose  = recipe.dose;
+  else if (draft?.dose != null)   state.draft.dose  = draft.dose;
+  const ratioVal = recipe?.ratio ?? draft?.ratio;
+  if (ratioVal != null)           state.draft.ratio = ratioVal;
+  state.draft.customRatio = false;
+
+  // Flavor / strength only exist on methods that expose them (carried on recipe).
+  if (recipe?.flavor)   state.draft.flavor   = recipe.flavor;
+  if (recipe?.strength) state.draft.strength = recipe.strength;
+
+  // Neutral same-setup indicator on Preview. This is a Finish-origin repeat, not a
+  // history-origin rebrew, so it carries no history id/date. Reuse the existing
+  // rebrew pill/next-note affordance; carry the typed next-adjustment note if any.
+  const nextNote = document.getElementById('log-next-note')?.value.trim() || '';
+  state.rebrewFrom = { id: null, source: 'finish', date: '', nextNote };
+
+  renderPreview();
+  showScreen('preview');
+}
+
 /* ── Public API ─────────────────────────────────────────────────────────────── */
 window.App = {
   toggleSetting(key) {
@@ -2434,6 +2479,13 @@ function wireEvents() {
     } else {
       goHome();
     }
+  });
+
+  // Log — 同じ条件でもう一度 (PR-011R5A) — secondary next action.
+  // Does NOT save history; reuses the in-memory brew setup and routes to Preview
+  // (never the Timer). The user confirms and starts the Timer from Preview.
+  document.getElementById('btn-brew-again').addEventListener('click', () => {
+    _applyCurrentBrewAgain();
   });
 
   // Log — Save  [PR-004: real localStorage persistence]
