@@ -921,30 +921,134 @@ img {
 }
 
 /* ── Active Brew Timer ─────────────────────────────────────────────────────── */
-.timer-area {
-  position: relative;
+/* ── Brew hero: Target Total dominant (scale goal) ───────────────────────────── */
+.brew-hero {
+  margin-top: 14px;
+}
+
+.brew-hero-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-height: 200px;
-  margin: 4px 0;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.timer-svg {
-  position: absolute;
-  max-width: 70vw;
+.brew-hero-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
 }
 
-.timer-time {
+.brew-elapsed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+}
+
+.brew-mini-ring {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.brew-elapsed-cap {
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+.brew-elapsed-time {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+.brew-hero-total {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.brew-hero-num {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 72px;
+  line-height: 1.02;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.brew-hero-unit {
   font-family: var(--font-serif);
   font-weight: 500;
-  font-size: 78px;
+  font-size: 26px;
+  color: var(--color-text-muted);
+}
+
+.brew-hero-instruction {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-accent-dark);
+  margin-top: -2px;
+}
+
+.brew-hero-foot {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-card);
+}
+
+.brew-foot-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.brew-foot-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.brew-foot-val {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 22px;
   color: var(--color-text);
-  letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
-  position: relative;
-  z-index: 1;
+}
+
+.brew-foot-unit {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin-left: 1px;
+}
+
+.brew-foot-div {
+  width: 1px;
+  background: var(--color-border-card);
+  flex-shrink: 0;
+}
+
+.brew-hero-note {
+  border-top: 1px solid #F0E8D8;
+  margin-top: 12px;
+  padding-top: 10px;
+  font-size: 13px;
+  color: var(--color-text-mid);
+  line-height: 1.5;
+}
+.brew-hero-note:empty {
+  display: none;
 }
 
 /* Step progress dots (brew screen) */

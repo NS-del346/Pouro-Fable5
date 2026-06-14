@@ -423,39 +423,36 @@
         <span id="brew-chip" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-serif);font-weight:600;font-size:13px;letter-spacing:0.06em;padding:7px 16px;border-radius:var(--radius-pill);white-space:nowrap;border:1px solid var(--color-border-input);background:var(--color-surface-raised);color:var(--color-text-muted);">PAUSED</span>
       </div>
 
-      <!-- Timer circle -->
-      <div class="timer-area">
-        <svg class="timer-svg" width="252" height="252" viewBox="0 0 252 252">
-          <circle cx="126" cy="126" r="112" fill="none" stroke="#E2D5BE" stroke-width="1.5" stroke-dasharray="1.5 7.5"/>
-          <circle id="brew-arc" cx="126" cy="126" r="112" fill="none" stroke="#B98A63" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="703.7 703.7" transform="rotate(-90 126 126)"/>
-        </svg>
-        <span class="timer-time" id="brew-time-display">0:00</span>
-      </div>
-
-      <!-- Step progress dots -->
-      <div class="brew-dots" id="brew-dots-row"></div>
-
-      <!-- Pour info card -->
-      <div id="brew-pour-card" class="card" style="box-shadow:var(--shadow-brew);">
-        <div style="display:flex;align-items:center;gap:7px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/></svg>
-          <span style="font-size:12.5px;font-weight:700;color:var(--color-text);white-space:nowrap;">今回の注湯</span>
-        </div>
-        <div style="display:flex;align-items:center;margin-top:2px;">
-          <span style="flex:1;">
-            <span id="brew-pour-amt" style="font-family:var(--font-serif);font-weight:600;font-size:54px;color:var(--color-text);line-height:1.1;">60</span>
-            <span style="font-family:var(--font-serif);font-size:20px;color:var(--color-text-muted);margin-left:3px;">g</span>
-          </span>
-          <span style="width:1px;align-self:stretch;background:#EDE4D2;margin:6px 16px;"></span>
-          <span style="text-align:center;padding-right:4px;">
-            <span id="brew-cum-label" style="display:block;font-size:11px;color:var(--color-text-muted);">累計</span>
-            <span style="display:block;margin-top:1px;">
-              <span id="brew-cum-amt" style="font-family:var(--font-serif);font-weight:600;font-size:24px;color:var(--color-text);">60</span>
-              <span style="font-family:var(--font-serif);font-size:13px;color:var(--color-text-muted);">g</span>
-            </span>
+      <!-- HERO: Target Total (scale goal — the single number the user matches on the scale) -->
+      <div id="brew-pour-card" class="card brew-hero" style="box-shadow:var(--shadow-brew);">
+        <div class="brew-hero-top">
+          <span class="brew-hero-label" id="brew-cum-label">スケール目標</span>
+          <span class="brew-elapsed" aria-label="経過時間">
+            <svg class="brew-mini-ring" viewBox="0 0 252 252" aria-hidden="true">
+              <circle cx="126" cy="126" r="112" fill="none" stroke="var(--color-border-card)" stroke-width="10"/>
+              <circle id="brew-arc" cx="126" cy="126" r="112" fill="none" stroke="var(--color-accent-warm)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 703.7" transform="rotate(-90 126 126)"/>
+            </svg>
+            <span class="brew-elapsed-cap">経過</span>
+            <span class="brew-elapsed-time" id="brew-time-display">0:00</span>
           </span>
         </div>
-        <div id="brew-pour-note" style="border-top:1px solid #F0E8D8;margin-top:9px;padding-top:9px;font-size:13px;color:var(--color-text-mid);"></div>
+        <div class="brew-hero-total">
+          <span id="brew-cum-amt" class="brew-hero-num">180</span><span class="brew-hero-unit">g</span>
+        </div>
+        <div class="brew-hero-instruction" id="brew-target-instruction">180g まで注ぐ</div>
+
+        <div class="brew-hero-foot">
+          <span class="brew-foot-cell">
+            <span class="brew-foot-label">今回の注湯</span>
+            <span class="brew-foot-val"><span id="brew-pour-amt">+60</span><span class="brew-foot-unit">g</span></span>
+          </span>
+          <span class="brew-foot-div"></span>
+          <span class="brew-foot-cell">
+            <span class="brew-foot-label">次</span>
+            <span class="brew-foot-val" id="brew-next-target">240g まで</span>
+          </span>
+        </div>
+        <div id="brew-pour-note" class="brew-hero-note"></div>
       </div>
 
       <!-- Draw-down card (shown during drawdown phase) -->
@@ -464,19 +461,8 @@
         <div id="brew-draw-sub"   style="font-size:13px;color:var(--color-text-muted);margin-top:6px;"></div>
       </div>
 
-      <!-- Next step hint -->
-      <div id="brew-next-hint" class="hidden" style="display:flex;align-items:center;gap:10px;background:var(--color-next-hint-bg);border:1px solid var(--color-next-hint-border);border-radius:var(--radius-md);padding:11px 16px;margin-top:10px;">
-        <span style="font-size:11px;font-weight:700;color:var(--color-text-muted);display:flex;flex-direction:column;align-items:center;gap:1px;">次
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10"/><path d="M7 20.5h10"/><path d="M8 3.5c0 7 8 7 8 17"/><path d="M16 3.5c0 7-8 7-8 17"/></svg>
-        </span>
-        <span style="display:flex;flex-direction:column;gap:1px;">
-          <span id="brew-next-time" style="font-family:var(--font-serif);font-weight:600;font-size:21px;color:var(--color-text);line-height:1.1;"></span>
-          <span id="brew-next-countdown" style="font-size:10.5px;color:var(--color-text-faint);white-space:nowrap;"></span>
-        </span>
-        <span id="brew-next-amt"  style="font-family:var(--font-serif);font-weight:600;font-size:19px;color:var(--color-text);"></span>
-        <span style="width:1px;height:22px;background:#DCCFB4;"></span>
-        <span id="brew-next-tip"  style="font-size:12px;color:var(--color-text-mid);flex:1;line-height:1.45;"></span>
-      </div>
+      <!-- Step progress dots -->
+      <div class="brew-dots" id="brew-dots-row"></div>
 
       <!-- Controls -->
       <div class="brew-controls">
