@@ -1073,15 +1073,13 @@ function cacheDOM() {
   DOM.brewPourCard    = document.getElementById('brew-pour-card');
   DOM.brewPourAmt     = document.getElementById('brew-pour-amt');
   DOM.brewCumAmt      = document.getElementById('brew-cum-amt');
+  DOM.brewCumLabel    = document.getElementById('brew-cum-label');
   DOM.brewPourNote    = document.getElementById('brew-pour-note');
   DOM.brewDrawCard    = document.getElementById('brew-draw-card');
   DOM.brewDrawTitle   = document.getElementById('brew-draw-title');
   DOM.brewDrawSub     = document.getElementById('brew-draw-sub');
-  DOM.brewNextHint      = document.getElementById('brew-next-hint');
-  DOM.brewNextTime      = document.getElementById('brew-next-time');
-  DOM.brewNextAmt       = document.getElementById('brew-next-amt');
-  DOM.brewNextTip       = document.getElementById('brew-next-tip');
-  DOM.brewNextCountdown = document.getElementById('brew-next-countdown');
+  DOM.brewTargetInstruction = document.getElementById('brew-target-instruction');
+  DOM.brewNextTarget        = document.getElementById('brew-next-target');
   DOM.brewChipWrap    = document.getElementById('brew-chip-wrap');
   DOM.brewChip        = document.getElementById('brew-chip');
   DOM.brewPauseIcon   = document.getElementById('brew-pause-icon');
@@ -1255,6 +1253,7 @@ function _updateTimerDisplay() {
     DOM.brewTimeDisplay.textContent = timeStr;
   }
 
+  // Compact progress ring around the elapsed time (supporting cue, not the hero)
   const recipe        = state.activeRecipe;
   const progress      = Math.min(1, elapsedMs / 1000 / recipe.targetDrawdownSec);
   const circumference = 2 * Math.PI * 112;
@@ -1262,24 +1261,6 @@ function _updateTimerDisplay() {
     'stroke-dasharray',
     `${(circumference * progress).toFixed(1)} ${circumference.toFixed(1)}`
   );
-
-  // Next-pour countdown: show seconds until next step
-  const cdEl = DOM.brewNextCountdown;
-  if (cdEl) {
-    const recipe = state.activeRecipe;
-    if (recipe) {
-      const nextStep = recipe.steps[t.currentStepIndex + 1];
-      if (nextStep && nextStep.type !== 'drawdown') {
-        const secs = Math.max(0, nextStep.timeSec - elapsedSec);
-        cdEl.textContent = secs > 0 ? `${secs}秒後` : '注湯タイム';
-      } else if (nextStep && nextStep.type === 'drawdown') {
-        const secs = Math.max(0, nextStep.timeSec - elapsedSec);
-        cdEl.textContent = secs > 0 ? `${secs}秒後` : '落ち切り待ち';
-      } else {
-        cdEl.textContent = '';
-      }
-    }
-  }
 }
 
 // RAF loop — runs at up to 60 fps when the page is visible.
@@ -1372,35 +1353,65 @@ function updateBrewStep() {
     DOM.brewPourCard.classList.remove('hidden');
     DOM.brewDrawCard.classList.add('hidden');
 
+    // HERO: cumulative Target Total — the value the user matches on the scale,
+    // with zero in-brew arithmetic ("stop at 180g").
+    DOM.brewCumAmt.textContent            = step.totalAmount;
+    DOM.brewTargetInstruction.textContent = `${step.totalAmount}g まで注ぐ`;
+
+    // Secondary: This Pour, always shown with + notation and visually smaller.
     if (step.type === 'pour') {
-      DOM.brewPourAmt.textContent  = step.pourAmount;
+      DOM.brewPourAmt.textContent  = `+${step.pourAmount}`;
       DOM.brewPourAmt.style.color  = 'var(--color-text)';
     } else {
-      // switch step: no pour amount
+      // switch / non-pour step: no incremental amount
       DOM.brewPourAmt.textContent  = '—';
       DOM.brewPourAmt.style.color  = 'var(--color-text-muted)';
     }
-    DOM.brewCumAmt.textContent   = step.totalAmount;
+
+    // Next: the next cumulative target (not vague prose).
+    const next = steps[idx + 1];
+    if (!next) {
+      DOM.brewNextTarget.textContent = '—';
+    } else if (next.type === 'drawdown') {
+      DOM.brewNextTarget.textContent = '落とし切り';
+    } else {
+      DOM.brewNextTarget.textContent = `${next.totalAmount}g まで`;
+    }
+
     DOM.brewPourNote.textContent = step.instruction;
   }
 
-  // Context chip row — Hybrid switch state / Ice hot-ice reminder.
+  // Hybrid-only Switch instruction layer (案D). Shown only for Hybrid / HYB_NEW.
   // OPEN = percolation (water drains), CLOSED = immersion (water held).
+  // State is conveyed by 閉/開 + OPEN/CLOSED text, never by colour alone.
   if (recipe.id === 'hybrid' && step.switchState) {
     DOM.brewSwitchRow.classList.remove('hidden');
     DOM.brewSwitchRow.style.display = 'flex';
+
+    // Next Switch action: the first upcoming step whose switch state differs.
+    let nextSwitchText = '';
+    for (let j = idx + 1; j < steps.length; j++) {
+      if (steps[j].switchState && steps[j].switchState !== step.switchState) {
+        const act = steps[j].switchState === 'closed' ? '閉じる' : '開く';
+        nextSwitchText = `${formatTime(steps[j].timeSec)}で${act}`;
+        break;
+      }
+    }
+
     if (step.switchState === 'open') {
-      DOM.brewSwitchChip.textContent  = 'OPEN';
+      DOM.brewSwitchChip.textContent  = 'スイッチ 開 / OPEN';
       DOM.brewSwitchChip.style.background = '#FBF6EC';
       DOM.brewSwitchChip.style.border     = '1px solid #D9C3A6';
       DOM.brewSwitchChip.style.color      = '#8C5535';
-      DOM.brewSwitchDesc.textContent  = 'スイッチ開・湯が落ちています（透過）';
+      DOM.brewSwitchDesc.textContent  = nextSwitchText
+        ? `透過（湯が落ちる）・${nextSwitchText}` : '透過（湯が落ちる）';
     } else {
-      DOM.brewSwitchChip.textContent  = 'CLOSED';
+      DOM.brewSwitchChip.textContent  = 'スイッチ 閉 / CLOSED';
       DOM.brewSwitchChip.style.background = '#8C5535';
       DOM.brewSwitchChip.style.border     = '1px solid #8C5535';
       DOM.brewSwitchChip.style.color      = '#FBF4EA';
-      DOM.brewSwitchDesc.textContent  = 'スイッチ閉・湯を溜めています（浸漬）';
+      DOM.brewSwitchDesc.textContent  = nextSwitchText
+        ? `浸漬（湯を溜める）・${nextSwitchText}` : '浸漬（湯を溜める）';
     }
   } else if (recipe.id === 'ice') {
     DOM.brewSwitchRow.classList.remove('hidden');
@@ -1414,24 +1425,6 @@ function updateBrewStep() {
     // No context for this step (e.g. Hybrid drawdown) — hide instead of
     // letting the previous step's state linger
     DOM.brewSwitchRow.classList.add('hidden');
-  }
-
-  // Next step hint
-  const nextStep = steps[idx + 1];
-  if (nextStep && nextStep.type !== 'drawdown') {
-    DOM.brewNextHint.classList.remove('hidden');
-    DOM.brewNextHint.style.display = 'flex';
-    DOM.brewNextTime.textContent   = formatTime(nextStep.timeSec);
-    DOM.brewNextAmt.textContent    = nextStep.pourAmount > 0 ? `${nextStep.pourAmount}g` : '';
-    DOM.brewNextTip.textContent    = nextStep.instruction;
-  } else if (nextStep && nextStep.type === 'drawdown') {
-    DOM.brewNextHint.classList.remove('hidden');
-    DOM.brewNextHint.style.display = 'flex';
-    DOM.brewNextTime.textContent   = formatTime(nextStep.timeSec);
-    DOM.brewNextAmt.textContent    = '';
-    DOM.brewNextTip.textContent    = 'ドローダウン待機';
-  } else {
-    DOM.brewNextHint.classList.add('hidden');
   }
 
   // Next / Finish button
@@ -1506,9 +1499,9 @@ function initBrew(recipe) {
   DOM.brewMethodName.textContent  = recipe.name;
   DOM.brewMethodSub.textContent   = m.sub;
 
-  // Ice Brew counts hot water only — say so in the cumulative header
-  document.getElementById('brew-cum-label').textContent =
-    recipe.id === 'ice' ? '累計（湯のみ）' : '累計';
+  // Hero label is the scale goal; Ice Brew counts hot water only — say so.
+  DOM.brewCumLabel.textContent =
+    recipe.id === 'ice' ? 'スケール目標（湯のみ）' : 'スケール目標';
 
   // Reset timer display
   DOM.brewTimeDisplay.textContent = '0:00';
