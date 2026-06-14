@@ -412,10 +412,11 @@
         </span>
       </div>
 
-      <!-- Hybrid switch state row (shown only for Hybrid method during brew) -->
-      <div id="brew-switch-row" class="hidden" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;">
-        <span id="brew-switch-chip" style="font-size:10px;font-weight:700;letter-spacing:0.08em;padding:4px 12px;border-radius:var(--radius-pill);"></span>
-        <span id="brew-switch-desc" style="font-size:12px;color:var(--color-text-muted);"></span>
+      <!-- Generic Timer context row: Hybrid Switch state, or Ice HOT/ICE reminder.
+           Hidden for 4:6 / NEO (Standard Timer). Not a Switch-only row. -->
+      <div id="brew-context-row" class="hidden" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;">
+        <span id="brew-context-chip" class="brew-context-chip" style="font-size:10px;font-weight:700;letter-spacing:0.08em;padding:4px 12px;border-radius:var(--radius-pill);"></span>
+        <span id="brew-context-desc" style="font-size:12px;color:var(--color-text-muted);"></span>
       </div>
 
       <!-- State chip (PAUSED etc.) -->
@@ -426,7 +427,7 @@
       <!-- HERO: Target Total (scale goal — the single number the user matches on the scale) -->
       <div id="brew-pour-card" class="card brew-hero" style="box-shadow:var(--shadow-brew);">
         <div class="brew-hero-top">
-          <span class="brew-hero-label" id="brew-cum-label">スケール目標</span>
+          <span class="brew-hero-label"><span class="brew-cum-icon" id="brew-cum-icon"></span><span id="brew-cum-label">スケール目標</span></span>
           <span class="brew-elapsed" aria-label="経過時間">
             <svg class="brew-mini-ring" viewBox="0 0 252 252" aria-hidden="true">
               <circle cx="126" cy="126" r="112" fill="none" stroke="var(--color-border-card)" stroke-width="10"/>
@@ -443,12 +444,12 @@
 
         <div class="brew-hero-foot">
           <span class="brew-foot-cell">
-            <span class="brew-foot-label">今回の注湯</span>
+            <span class="brew-foot-label" id="brew-pour-label">今回の注湯</span>
             <span class="brew-foot-val"><span id="brew-pour-amt">+60</span><span class="brew-foot-unit">g</span></span>
           </span>
           <span class="brew-foot-div"></span>
           <span class="brew-foot-cell">
-            <span class="brew-foot-label">次</span>
+            <span class="brew-foot-label" id="brew-next-label-txt">次</span>
             <span class="brew-foot-val" id="brew-next-target">240g まで</span>
           </span>
         </div>
@@ -457,7 +458,7 @@
 
       <!-- Draw-down card (shown during drawdown phase) -->
       <div id="brew-draw-card" class="card hidden" style="text-align:center;box-shadow:var(--shadow-brew);">
-        <div id="brew-draw-title" style="font-family:var(--font-mincho);font-weight:600;font-size:26px;color:var(--color-text);"></div>
+        <div id="brew-draw-title" style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-mincho);font-weight:600;font-size:26px;color:var(--color-text);"></div>
         <div id="brew-draw-sub"   style="font-size:13px;color:var(--color-text-muted);margin-top:6px;"></div>
       </div>
 

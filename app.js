@@ -1089,9 +1089,12 @@ function cacheDOM() {
   DOM.brewFinishIcon  = document.getElementById('brew-finish-icon');
   DOM.brewNextLabel   = document.getElementById('brew-next-label');
   DOM.brewBtnNext     = document.getElementById('btn-brew-next');
-  DOM.brewSwitchRow   = document.getElementById('brew-switch-row');
-  DOM.brewSwitchChip  = document.getElementById('brew-switch-chip');
-  DOM.brewSwitchDesc  = document.getElementById('brew-switch-desc');
+  DOM.brewContextRow  = document.getElementById('brew-context-row');
+  DOM.brewContextChip = document.getElementById('brew-context-chip');
+  DOM.brewContextDesc = document.getElementById('brew-context-desc');
+  DOM.brewCumIcon     = document.getElementById('brew-cum-icon');
+  DOM.brewPourLabel   = document.getElementById('brew-pour-label');
+  DOM.brewNextLabelTxt = document.getElementById('brew-next-label-txt');
   DOM.brewMethodIcon  = document.getElementById('brew-method-icon');
   DOM.brewMethodName  = document.getElementById('brew-method-name');
   DOM.brewMethodSub   = document.getElementById('brew-method-sub');
@@ -1129,6 +1132,33 @@ const _icons = {
   ratio: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7.5h15"/><path d="M12 4.5v14.5"/></svg>`,
   ice:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 7l5-4 5 4"/><path d="M7 17l5 4 5-4"/><path d="M3 12h18"/></svg>`,
 };
+
+/* ── Common micro icons (Brew Timer context only) ───────────────────────────────
+   Quiet, small, line-based cues that help the user read Timer context faster.
+   They are supportive, never the message: every place a micro icon appears also
+   keeps its text label, and the icons are aria-hidden. Path data only is stored
+   here; microIcon() wraps it in a consistent <svg>. Keep these abstract — no
+   brand-, device-, or maker-specific shapes. */
+const MICRO_ICON_PATHS = {
+  'scale-target': '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  'pour-plus':    '<path d="M12 3.5c3.3 4 5.6 6.9 5.6 9.5a5.6 5.6 0 1 1-11.2 0c0-2.6 2.3-5.5 5.6-9.5Z"/><path d="M12 10.2v4"/><path d="M10 12.2h4"/>',
+  'next-target':  '<path d="M3.5 12h11"/><path d="M10.5 8l4 4-4 4"/><path d="M19 5.5v13"/>',
+  'elapsed':      '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  'switch-open':  '<rect x="3" y="8.5" width="18" height="7" rx="3.5"/><circle cx="16.5" cy="12" r="1.9"/>',
+  'switch-closed':'<rect x="3" y="8.5" width="18" height="7" rx="3.5"/><circle cx="7.5" cy="12" r="1.9"/>',
+  'hot-water':    '<path d="M12 9c2.2 2.7 3.8 4.6 3.8 6.4a3.8 3.8 0 1 1-7.6 0C8.2 13.6 9.8 11.7 12 9Z"/><path d="M10 5.4c-.6.7-.6 1.3 0 2"/><path d="M14 5.4c-.6.7-.6 1.3 0 2"/>',
+  'ice':          '<path d="M12 3v18"/><path d="M4.2 7.5l15.6 9"/><path d="M19.8 7.5l-15.6 9"/>',
+  'drawdown':     '<path d="M8 5.5l4 4 4-4"/><path d="M8 11.5l4 4 4-4"/>',
+};
+
+/* Return a safe inline micro-icon SVG string for Timer context, or '' if unknown. */
+function microIcon(name, size = 13) {
+  const path = MICRO_ICON_PATHS[name];
+  if (!path) return '';
+  return `<svg class="micro-icon" width="${size}" height="${size}" viewBox="0 0 24 24" `
+    + `fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" `
+    + `stroke-linejoin="round" aria-hidden="true" focusable="false">${path}</svg>`;
+}
 
 function buildSummaryCols(recipe) {
   const pourCount = recipe.steps.filter(s => s.type === 'pour').length;
@@ -1347,7 +1377,7 @@ function updateBrewStep() {
     DOM.brewPourCard.classList.add('hidden');
     DOM.brewDrawCard.classList.remove('hidden');
     DOM.brewDrawCard.style.display = '';
-    DOM.brewDrawTitle.textContent  = step.label;
+    DOM.brewDrawTitle.innerHTML    = `${microIcon('drawdown', 20)}<span>${step.label}</span>`;
     DOM.brewDrawSub.textContent    = step.instruction;
   } else {
     DOM.brewPourCard.classList.remove('hidden');
@@ -1381,12 +1411,15 @@ function updateBrewStep() {
     DOM.brewPourNote.textContent = step.instruction;
   }
 
-  // Hybrid-only Switch instruction layer (案D). Shown only for Hybrid / HYB_NEW.
-  // OPEN = percolation (water drains), CLOSED = immersion (water held).
-  // State is conveyed by 閉/開 + OPEN/CLOSED text, never by colour alone.
+  // Generic Timer context row (#brew-context-row). It is NOT a Switch-only row:
+  //   • Hybrid / HYB_NEW → shows the HARIO Switch state (OPEN/CLOSED).
+  //   • Ice 4:6          → shows a HOT/ICE reminder, never an OPEN/CLOSED state.
+  //   • 4:6 / NEO        → no context (Standard Timer), row stays hidden.
+  // State is always conveyed by text (閉/開 + OPEN/CLOSED, or HOT/ICE), never by
+  // colour or icon alone; the micro icon is a quiet supporting cue.
   if (recipe.id === 'hybrid' && step.switchState) {
-    DOM.brewSwitchRow.classList.remove('hidden');
-    DOM.brewSwitchRow.style.display = 'flex';
+    DOM.brewContextRow.classList.remove('hidden');
+    DOM.brewContextRow.style.display = 'flex';
 
     // Next Switch action: the first upcoming step whose switch state differs.
     let nextSwitchText = '';
@@ -1399,32 +1432,36 @@ function updateBrewStep() {
     }
 
     if (step.switchState === 'open') {
-      DOM.brewSwitchChip.textContent  = 'スイッチ 開 / OPEN';
-      DOM.brewSwitchChip.style.background = '#FBF6EC';
-      DOM.brewSwitchChip.style.border     = '1px solid #D9C3A6';
-      DOM.brewSwitchChip.style.color      = '#8C5535';
-      DOM.brewSwitchDesc.textContent  = nextSwitchText
+      DOM.brewContextChip.innerHTML   = `${microIcon('switch-open')}<span>スイッチ 開 / OPEN</span>`;
+      DOM.brewContextChip.style.background = '#FBF6EC';
+      DOM.brewContextChip.style.border     = '1px solid #D9C3A6';
+      DOM.brewContextChip.style.color      = '#8C5535';
+      DOM.brewContextDesc.textContent  = nextSwitchText
         ? `透過（湯が落ちる）・${nextSwitchText}` : '透過（湯が落ちる）';
     } else {
-      DOM.brewSwitchChip.textContent  = 'スイッチ 閉 / CLOSED';
-      DOM.brewSwitchChip.style.background = '#8C5535';
-      DOM.brewSwitchChip.style.border     = '1px solid #8C5535';
-      DOM.brewSwitchChip.style.color      = '#FBF4EA';
-      DOM.brewSwitchDesc.textContent  = nextSwitchText
+      DOM.brewContextChip.innerHTML   = `${microIcon('switch-closed')}<span>スイッチ 閉 / CLOSED</span>`;
+      DOM.brewContextChip.style.background = '#8C5535';
+      DOM.brewContextChip.style.border     = '1px solid #8C5535';
+      DOM.brewContextChip.style.color      = '#FBF4EA';
+      DOM.brewContextDesc.textContent  = nextSwitchText
         ? `浸漬（湯を溜める）・${nextSwitchText}` : '浸漬（湯を溜める）';
     }
   } else if (recipe.id === 'ice') {
-    DOM.brewSwitchRow.classList.remove('hidden');
-    DOM.brewSwitchRow.style.display = 'flex';
-    DOM.brewSwitchChip.textContent  = `HOT ${recipe.hotWater}g ・ ICE ${recipe.ice}g`;
-    DOM.brewSwitchChip.style.background = '#FBF6EC';
-    DOM.brewSwitchChip.style.border     = '1px solid #D9C3A6';
-    DOM.brewSwitchChip.style.color      = '#8C5535';
-    DOM.brewSwitchDesc.textContent  = '氷はサーバーに先入れ';
+    // Ice context: a HOT/ICE reminder — explicitly not a Switch OPEN/CLOSED state.
+    DOM.brewContextRow.classList.remove('hidden');
+    DOM.brewContextRow.style.display = 'flex';
+    DOM.brewContextChip.innerHTML   =
+      `${microIcon('hot-water')}<span>HOT ${recipe.hotWater}g</span>`
+      + `<span class="brew-context-sep">・</span>`
+      + `${microIcon('ice')}<span>ICE ${recipe.ice}g</span>`;
+    DOM.brewContextChip.style.background = '#FBF6EC';
+    DOM.brewContextChip.style.border     = '1px solid #D9C3A6';
+    DOM.brewContextChip.style.color      = '#8C5535';
+    DOM.brewContextDesc.textContent  = '氷はサーバーに先入れ';
   } else {
-    // No context for this step (e.g. Hybrid drawdown) — hide instead of
+    // No context for this step (4:6 / NEO, or Hybrid drawdown) — hide instead of
     // letting the previous step's state linger
-    DOM.brewSwitchRow.classList.add('hidden');
+    DOM.brewContextRow.classList.add('hidden');
   }
 
   // Next / Finish button
@@ -1502,6 +1539,11 @@ function initBrew(recipe) {
   // Hero label is the scale goal; Ice Brew counts hot water only — say so.
   DOM.brewCumLabel.textContent =
     recipe.id === 'ice' ? 'スケール目標（湯のみ）' : 'スケール目標';
+
+  // Quiet supporting micro icons on the constant Timer labels (text is kept).
+  DOM.brewCumIcon.innerHTML      = microIcon('scale-target');
+  DOM.brewPourLabel.innerHTML    = `${microIcon('pour-plus')}<span>今回の注湯</span>`;
+  DOM.brewNextLabelTxt.innerHTML = `${microIcon('next-target')}<span>次</span>`;
 
   // Reset timer display
   DOM.brewTimeDisplay.textContent = '0:00';
