@@ -440,6 +440,61 @@ function selectMethodDetailTips(methodId) {
   }
 }
 
+/* ── History Detail contextual TIPS (PR-011R3E) ────────────────────────────────
+ * Reflection-oriented hints shown on the saved-brew detail screen. Reuses the
+ * read-only TIPS_DATA adapter; no History/localStorage/export/timer involvement.
+ *
+ * Resolve a saved record's recipeCode using the same mapping policy as
+ * Setup/Preview/Finish/Method Detail. Saved records store the canonical app
+ * methodId ('yon-roku'/'ice'/'hybrid'/'neo'), so METHOD_RECIPE_CODE is the
+ * primary path. As a defensive fallback for any older record that only carried a
+ * display name, known method names are matched to a canonical code. This neither
+ * reads nor writes the record schema — it only derives a code for tip selection.
+ * Returns null when nothing safe maps (caller then hides the section). */
+function historyRecipeCode(entry) {
+  if (!entry) return null;
+  const byId = METHOD_RECIPE_CODE[entry.methodId];
+  if (byId) return byId;
+  const name = `${entry.methodName || ''} ${entry.methodId || ''}`.toLowerCase();
+  if (/4:6|four[- ]?six|yon[- ]?roku|ヨンロク|四六/.test(name)) return '406';
+  if (/ice|アイス|氷/.test(name))                               return 'ICE';
+  if (/hybrid|switch|スイッチ|ハイブリッド/.test(name))          return 'HYB_NEW';
+  if (/neo|10投|十投|ネオ/.test(name))                          return 'NEO';
+  return null;
+}
+
+/* Select up to `limit` reflection items for History Detail (planning §7.3 / §9).
+ * Prefers displayContext "historyDetail" (the authored reflection surface);
+ * every adoptable "finish" item that supports next adjustment also carries
+ * "historyDetail" in TIPS_DATA, so this single filter covers method-specific
+ * reflection + next-adjustment hints. Ordering: method-specific before the ALL
+ * fallback, then stable id ascending, so ALL only appears as filler when a
+ * method has fewer than `limit` of its own items. Timer / quarantine / P-OTHER /
+ * HYB_DEVIL items are absent from TIPS_DATA and so can never surface. Never
+ * throws — returns [] on any problem (the section then hides). */
+function selectHistoryDetailTips(entry, limit = 3) {
+  try {
+    const code = historyRecipeCode(entry);
+    if (!code || !Array.isArray(TIPS_DATA)) return [];
+    return TIPS_DATA
+      .filter(it =>
+        it &&
+        (it.type === 'POINT' || it.type === 'TIPS') &&
+        Array.isArray(it.displayContext) &&
+        it.displayContext.includes('historyDetail') &&
+        !it.displayContext.includes('quarantine') &&
+        (it.recipeCode === code || it.recipeCode === 'ALL'))
+      .sort((a, b) => {
+        const aAll = a.recipeCode === 'ALL', bAll = b.recipeCode === 'ALL';
+        if (aAll !== bAll) return aAll ? 1 : -1;            // method-specific first
+        return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;      // stable id order
+      })
+      .slice(0, limit);
+  } catch {
+    return [];   // graceful no-op — History Detail still renders normally
+  }
+}
+
 /* Small section-card builder for Method Detail. `num` is the section number,
  * `title` the heading, `bodyHTML` trusted static markup. */
 function _mdSection(num, title, bodyHTML) {
@@ -1950,6 +2005,13 @@ function renderDetail() {
   } else {
     memoCard.classList.add('hidden');
   }
+
+  // Contextual reflection TIPS (PR-011R3E) — quiet card; hides when no safe item.
+  renderContextualTips(
+    document.getElementById('detail-tips'),
+    '次回の調整メモ',
+    selectHistoryDetailTips(entry),
+  );
 
   const eq = entry.log || entry.equip || {};
   document.getElementById('detail-equip-bean').textContent     = eq.bean           || '—';
