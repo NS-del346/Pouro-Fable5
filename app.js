@@ -1617,9 +1617,13 @@ function updateBrewStep() {
     DOM.brewContextChip.style.color      = '#8C5535';
     DOM.brewContextDesc.textContent  = '氷はサーバーに先入れ';
   } else {
-    // No context for this step (4:6 / NEO, or Hybrid drawdown) — hide instead of
-    // letting the previous step's state linger
+    // No context for this step (4:6 / NEO, or Hybrid drawdown) — hide the row AND
+    // clear its children, so no stale Hybrid/Ice text lingers in the hidden DOM
+    // when switching method/step (PR-013D). Text is the only state to clear; the
+    // chip's inline colours are always overwritten by the next visible context.
     DOM.brewContextRow.classList.add('hidden');
+    DOM.brewContextChip.innerHTML  = '';
+    DOM.brewContextDesc.textContent = '';
   }
 
   // Next / Finish button
