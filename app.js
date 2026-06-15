@@ -1949,6 +1949,70 @@ function renderPreview() {
     'TIPS',
     selectContextualTips(m.id, 'preview'),
   );
+
+  // Reset the Save as My Recipe field/feedback each time Preview is shown so a
+  // prior save's status never lingers. The empty input falls back to the
+  // method/recipe display name on save (see normalizeMyRecipe). Transient input
+  // is intentionally not persisted — it only lives until an actual save.
+  resetMyRecipeSaveUI(recipe.name);
+}
+
+// PR-012C — quiet, secondary "Save as My Recipe" on Preview. Builds a setup
+// preset from the current draft + selected method via the PR-012B helpers and
+// appends it to localStorage. It never mutates state.draft/activeRecipe/
+// brewResultDraft/rebrewFrom, navigates, starts the timer, or writes History.
+function resetMyRecipeSaveUI(placeholder) {
+  const input = document.getElementById('my-recipe-name-input');
+  if (input) {
+    input.value = '';
+    if (placeholder) input.placeholder = placeholder;
+  }
+  const feedback = document.getElementById('my-recipe-save-feedback');
+  if (feedback) {
+    feedback.textContent = '';
+    feedback.className = 'my-recipe-feedback';
+  }
+}
+
+function showMyRecipeSaveFeedback(message, ok) {
+  const feedback = document.getElementById('my-recipe-save-feedback');
+  if (!feedback) return;
+  feedback.textContent = message;
+  feedback.className = `my-recipe-feedback ${ok ? 'is-success' : 'is-error'}`;
+}
+
+function handleSaveMyRecipe() {
+  const input = document.getElementById('my-recipe-name-input');
+  const name  = input ? input.value : '';
+
+  // Setup descriptor only — method + the four tuning parameters. No steps,
+  // timing, or brew/history state is read or written here.
+  const setup = {
+    methodId: state.selectedMethodId,
+    dose:     state.draft.dose,
+    ratio:    state.draft.ratio,
+    flavor:   state.draft.flavor,
+    strength: state.draft.strength,
+  };
+
+  const recipe = buildMyRecipeFromDraft(setup, name);
+  if (!recipe) {
+    showMyRecipeSaveFeedback('保存できませんでした', false);
+    return;
+  }
+
+  // Append as a new recipe each time; duplicate names are allowed for now —
+  // rename/delete management lands in a later PR (PR-012E).
+  const recipes = safeReadMyRecipes();
+  recipes.push(recipe);
+  const ok = safeWriteMyRecipes(recipes);
+
+  if (ok) {
+    showMyRecipeSaveFeedback('マイレシピに保存しました', true);
+    if (input) input.value = '';
+  } else {
+    showMyRecipeSaveFeedback('保存できませんでした', false);
+  }
 }
 
 function clearLogEquipmentInputs() {
@@ -2503,6 +2567,10 @@ function wireEvents() {
     renderMethodDetail(state.selectedMethodId);
     showScreen('methoddetail');
   });
+
+  // Preview → Save as My Recipe (PR-012C) — secondary, quiet. Saves the
+  // previewed setup parameters only; does not navigate or start the brew.
+  document.getElementById('btn-save-my-recipe')?.addEventListener('click', handleSaveMyRecipe);
 
   // Method Detail → back to Preview. Preview state (method / dose / ratio) is
   // untouched, so simply re-showing it preserves the previewed recipe.

@@ -339,6 +339,22 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
       </button>
 
+      <!-- Save as My Recipe (PR-012C) — secondary, quiet. Saves the previewed
+           setup parameters only (method + dose/ratio/flavor/strength); never
+           stores steps/timing, starts the brew, or writes History. The list /
+           select-recipe routes are intentionally out of scope until later PRs. -->
+      <div class="card my-recipe-save" style="margin-top:12px;padding:13px 16px 14px;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h11l3 3v12a0 0 0 0 1 0 0H5a0 0 0 0 1 0 0Z"/><path d="M8 4.5v5h7"/><path d="M8 19v-6h8v6"/></svg>
+          <span style="font-size:13px;font-weight:700;color:var(--color-text);">マイレシピに保存</span>
+        </div>
+        <div class="my-recipe-save-row">
+          <input type="text" id="my-recipe-name-input" class="my-recipe-name-input" maxlength="40" placeholder="レシピ名" autocomplete="off" />
+          <button type="button" class="btn-save-my-recipe" id="btn-save-my-recipe">保存</button>
+        </div>
+        <div id="my-recipe-save-feedback" class="my-recipe-feedback" role="status" aria-live="polite"></div>
+      </div>
+
       <div style="height:8px;"></div>
     </div>
 

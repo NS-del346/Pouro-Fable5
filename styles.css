@@ -1676,6 +1676,66 @@ img {
   background: var(--color-surface-muted);
 }
 
+/* ── Save as My Recipe (PR-012C) — secondary save on Preview ───────────────── */
+.my-recipe-save-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.my-recipe-name-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.my-recipe-name-input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.my-recipe-name-input:focus {
+  outline: none;
+  border-color: var(--color-accent-soft);
+}
+
+.btn-save-my-recipe {
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 0 16px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-accent-dark);
+}
+
+.btn-save-my-recipe:active {
+  background: var(--color-border-divider);
+}
+
+.my-recipe-feedback {
+  margin-top: 8px;
+  min-height: 16px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.my-recipe-feedback.is-success {
+  color: var(--color-accent-dark);
+}
+
+.my-recipe-feedback.is-error {
+  color: #B4532E;
+}
+
 /* ── Method Detail screen (PR-011R3D) ──────────────────────────────────────── */
 .md-section {
   background: var(--color-surface-raised);
