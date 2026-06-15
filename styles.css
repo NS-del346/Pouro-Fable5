@@ -1057,62 +1057,129 @@ img {
   margin-top: -2px;
 }
 
-.brew-hero-foot {
-  display: flex;
-  align-items: stretch;
-  gap: 14px;
-  margin-top: 13px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border-card);
+/* Quiet cross-fade of the Target Total numeral on step change (transform/opacity
+   only). Disabled under prefers-reduced-motion below. */
+.brew-hero-num.brew-num-fade {
+  animation: brewNumFade 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes brewNumFade {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
 }
 
-.brew-foot-cell {
+/* Target Total gauge: 0 → final scale target. Supporting, not a second hero. */
+.brew-gauge {
+  margin-top: 14px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-card);
+  overflow: hidden;
+}
+.brew-gauge-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  transition: width 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ── Countdown row (rank 2, subordinate — never rivals Target Total) ─────────── */
+.brew-cd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-lg);
+}
+.brew-cd-ring-wrap {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+.brew-cd-ring {
+  width: 38px;
+  height: 38px;
+  transform: rotate(0);
+}
+.brew-cd-ring-bg {
+  fill: none;
+  stroke: var(--color-border-card);
+  stroke-width: 2.5;
+}
+.brew-cd-ring-fg {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.2s linear;
+}
+.brew-cd-drop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  opacity: 0.85;
+}
+.brew-cd-main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  gap: 1px;
 }
-
-.brew-foot-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.brew-cd-label {
   font-size: 11px;
+  letter-spacing: 0.02em;
   color: var(--color-text-muted);
 }
-
-.brew-foot-val {
+.brew-cd-secs {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
   font-family: var(--font-serif);
   font-weight: 600;
-  font-size: 22px;
+  font-size: 29px;
+  line-height: 1.04;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+.brew-cd-unit {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+.brew-cd-pour {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+.brew-cd-pour-label {
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+}
+.brew-cd-pour-val {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 18px;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
-
-.brew-foot-unit {
-  font-size: 14px;
+.brew-cd-pour-unit {
+  font-size: 12px;
   color: var(--color-text-muted);
   margin-left: 1px;
 }
-
-.brew-foot-div {
-  width: 1px;
-  background: var(--color-border-card);
-  flex-shrink: 0;
-}
-
-.brew-hero-note {
-  border-top: 1px solid #F0E8D8;
-  margin-top: 12px;
-  padding-top: 10px;
-  font-size: 13px;
-  color: var(--color-text-mid);
-  line-height: 1.5;
-}
-.brew-hero-note:empty {
-  display: none;
-}
+/* Last phase (drawdown / no next): keep the row calm. */
+.brew-cd.is-last .brew-cd-secs { color: var(--color-text-muted); }
+.brew-cd.is-last .brew-cd-ring-fg { stroke: var(--color-accent-soft); }
 
 /* Generic Timer context chip (Hybrid Switch state / Ice HOT·ICE reminder).
    Icons align with the text; the text always carries the meaning. */
@@ -1129,50 +1196,129 @@ img {
   margin: 0 1px;
 }
 
-/* Step progress dots (brew screen) */
-.brew-dots {
+/* ── Sequence Bar (brew screen, Timer Ver.2.0) ──────────────────────────────────
+   Windowed Previous / Current / Next / Later rows with a vertical progress line.
+   Absorbs leftover height (flex:1) so the controls stay bottom-fixed at 375×667.
+   Strength order is opacity-led: Current (1.0) > Next (.72) > Previous (.4) >
+   Later (.28). State is never colour-only — size, ring, opacity and the rail all
+   carry it. */
+.brew-seq {
+  flex: 1;
+  min-height: 0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  gap: 0;
-  padding: 0 4px 14px;
+  gap: 2px;
+  margin-top: 12px;
+  padding: 0 2px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px,
+                      #000 calc(100% - 14px), transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 14px,
+                      #000 calc(100% - 14px), transparent 100%);
 }
 
-.brew-dot-col {
-  flex: 1;
-  max-width: 64px;
+.brew-seq-row {
+  display: flex;
+  gap: 11px;
+  align-items: stretch;
+  padding: 5px 0;
+  transition: opacity 0.42s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.brew-seq-rail {
+  width: 14px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  position: relative;
 }
-
-.brew-dot-line {
-  position: absolute;
-  top: 5.5px;
-  left: -50%;
-  right: 50%;
-  height: 1.5px;
-}
-
-.brew-dot-circle {
-  width: 12px;
-  height: 12px;
+.brew-seq-dot {
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  border: 1.5px solid var(--color-border-card);
+  background: var(--color-surface-raised);
+}
+.brew-seq-track {
   position: relative;
-  z-index: 1;
-  border: 1.5px solid transparent;
+  flex: 1;
+  width: 2px;
+  margin-top: 3px;
+  background: var(--color-border-card);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.brew-seq-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: top center;
+  transform: scaleY(0);
+  background: var(--color-accent);
+  transition: transform 0.25s linear;
 }
 
-.brew-dot-circle.active   { background: var(--color-accent); border-color: var(--color-accent); }
-.brew-dot-circle.done     { background: var(--color-accent-soft); border-color: var(--color-accent-soft); }
-.brew-dot-circle.upcoming { background: var(--color-surface-raised); border-color: var(--color-border-card); }
-
-.brew-dot-label {
+.brew-seq-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.brew-seq-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.brew-seq-label {
+  font-size: 13px;
+  color: var(--color-text-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.brew-seq-cum {
   font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-mid);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.brew-seq-tip {
   font-size: 11px;
   color: var(--color-text-muted);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* ── Row states ─────────────────────────────────────────────────────────────── */
+.brew-seq-row.state-prev    { opacity: 0.4; }
+.brew-seq-row.state-prev .brew-seq-dot { background: var(--color-accent-soft); border-color: var(--color-accent-soft); }
+
+.brew-seq-row.state-current { opacity: 1; }
+.brew-seq-row.state-current .brew-seq-dot {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(162, 103, 78, 0.16);
+}
+.brew-seq-row.state-current .brew-seq-label {
+  font-weight: 700;
+  color: var(--color-text);
+}
+.brew-seq-row.state-current .brew-seq-cum { color: var(--color-accent-dark); }
+
+.brew-seq-row.state-next    { opacity: 0.72; }
+.brew-seq-row.state-next .brew-seq-dot { border-color: var(--color-accent-soft); }
+
+.brew-seq-row.state-later   { opacity: 0.28; filter: blur(0.4px); }
 
 /* Brew controls */
 .brew-controls {
@@ -1551,6 +1697,16 @@ img {
   }
   .toast {
     animation: none;
+  }
+  /* Timer Ver.2.0: immediate cross-fade / no sliding (PR-013A §12). */
+  .brew-hero-num.brew-num-fade {
+    animation: none;
+  }
+  .brew-gauge-fill,
+  .brew-cd-ring-fg,
+  .brew-seq-fill,
+  .brew-seq-row {
+    transition: none;
   }
 }
 

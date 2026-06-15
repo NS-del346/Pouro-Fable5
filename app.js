@@ -1206,17 +1206,22 @@ function cacheDOM() {
   DOM.brewArc         = document.getElementById('brew-arc');
   DOM.brewStepBig     = document.getElementById('brew-step-big');
   DOM.brewStepSmall   = document.getElementById('brew-step-small');
-  DOM.brewDotsRow     = document.getElementById('brew-dots-row');
+  DOM.brewSeq         = document.getElementById('brew-seq');
+  DOM.brewGaugeFill   = document.getElementById('brew-gauge-fill');
   DOM.brewPourCard    = document.getElementById('brew-pour-card');
   DOM.brewPourAmt     = document.getElementById('brew-pour-amt');
   DOM.brewCumAmt      = document.getElementById('brew-cum-amt');
   DOM.brewCumLabel    = document.getElementById('brew-cum-label');
-  DOM.brewPourNote    = document.getElementById('brew-pour-note');
   DOM.brewDrawCard    = document.getElementById('brew-draw-card');
   DOM.brewDrawTitle   = document.getElementById('brew-draw-title');
   DOM.brewDrawSub     = document.getElementById('brew-draw-sub');
   DOM.brewTargetInstruction = document.getElementById('brew-target-instruction');
-  DOM.brewNextTarget        = document.getElementById('brew-next-target');
+  // Countdown row (Timer Ver.2.0)
+  DOM.brewCountdownRow = document.getElementById('brew-countdown-row');
+  DOM.brewCdLabel      = document.getElementById('brew-cd-label');
+  DOM.brewCdSecs       = document.getElementById('brew-cd-secs');
+  DOM.brewCdArc        = document.getElementById('brew-cd-arc');
+  DOM.brewCdDrop       = document.getElementById('brew-cd-drop');
   DOM.brewChipWrap    = document.getElementById('brew-chip-wrap');
   DOM.brewChip        = document.getElementById('brew-chip');
   DOM.brewPauseIcon   = document.getElementById('brew-pause-icon');
@@ -1231,7 +1236,6 @@ function cacheDOM() {
   DOM.brewContextDesc = document.getElementById('brew-context-desc');
   DOM.brewCumIcon     = document.getElementById('brew-cum-icon');
   DOM.brewPourLabel   = document.getElementById('brew-pour-label');
-  DOM.brewNextLabelTxt = document.getElementById('brew-next-label-txt');
   DOM.brewMethodIcon  = document.getElementById('brew-method-icon');
   DOM.brewMethodName  = document.getElementById('brew-method-name');
   DOM.brewMethodSub   = document.getElementById('brew-method-sub');
@@ -1435,6 +1439,9 @@ function _updateTimerDisplay() {
     'stroke-dasharray',
     `${(circumference * progress).toFixed(1)} ${circumference.toFixed(1)}`
   );
+
+  // Live Countdown cue + synced Sequence progress line for the current step.
+  _updateBrewCountdown();
 }
 
 // RAF loop — runs at up to 60 fps when the page is visible.
@@ -1513,8 +1520,8 @@ function updateBrewStep() {
     DOM.brewStepSmall.textContent = ` / ${totalPours}`;
   }
 
-  // Progress dots (pour steps only)
-  _updateBrewDots(pourSteps, donePours);
+  // Sequence Bar: windowed Previous / Current / Next / Later rows (replaces dots).
+  _updateBrewSequence(steps, idx);
 
   // Cards
   if (step.type === 'drawdown') {
@@ -1523,16 +1530,32 @@ function updateBrewStep() {
     DOM.brewDrawCard.style.display = '';
     DOM.brewDrawTitle.innerHTML    = `${microIcon('drawdown', 20)}<span>${step.label}</span>`;
     DOM.brewDrawSub.textContent    = step.instruction;
+
+    // No incremental pour during drawdown.
+    DOM.brewPourAmt.textContent = '—';
+    DOM.brewPourAmt.style.color = 'var(--color-text-muted)';
   } else {
     DOM.brewPourCard.classList.remove('hidden');
     DOM.brewDrawCard.classList.add('hidden');
 
-    // HERO: cumulative Target Total — the value the user matches on the scale,
-    // with zero in-brew arithmetic ("stop at 180g").
+    // HERO (king): cumulative Target Total — the value the user matches on the
+    // scale, with zero in-brew arithmetic ("stop at 180g"). Quiet cross-fade on
+    // step change (disabled under prefers-reduced-motion via CSS).
+    if (DOM.brewCumAmt.textContent !== String(step.totalAmount)) {
+      DOM.brewCumAmt.classList.remove('brew-num-fade');
+      // force reflow so the animation can restart on consecutive step changes
+      void DOM.brewCumAmt.offsetWidth;
+      DOM.brewCumAmt.classList.add('brew-num-fade');
+    }
     DOM.brewCumAmt.textContent            = step.totalAmount;
     DOM.brewTargetInstruction.textContent = `${step.totalAmount}g まで注ぐ`;
 
-    // Secondary: This Pour, always shown with + notation and visually smaller.
+    // Target Total gauge: 0 → final scale target.
+    const finalTarget = Math.max(...steps.map(s => s.totalAmount || 0)) || 1;
+    DOM.brewGaugeFill.style.width =
+      `${Math.min(100, (step.totalAmount / finalTarget) * 100).toFixed(1)}%`;
+
+    // Secondary: This Pour, always shown with + notation, in the Countdown row.
     if (step.type === 'pour') {
       DOM.brewPourAmt.textContent  = `+${step.pourAmount}`;
       DOM.brewPourAmt.style.color  = 'var(--color-text)';
@@ -1541,19 +1564,10 @@ function updateBrewStep() {
       DOM.brewPourAmt.textContent  = '—';
       DOM.brewPourAmt.style.color  = 'var(--color-text-muted)';
     }
-
-    // Next: the next cumulative target (not vague prose).
-    const next = steps[idx + 1];
-    if (!next) {
-      DOM.brewNextTarget.textContent = '—';
-    } else if (next.type === 'drawdown') {
-      DOM.brewNextTarget.textContent = '落とし切り';
-    } else {
-      DOM.brewNextTarget.textContent = `${next.totalAmount}g まで`;
-    }
-
-    DOM.brewPourNote.textContent = step.instruction;
   }
+
+  // Countdown row: timing cue derived from the real step schedule.
+  _updateBrewCountdown();
 
   // Generic Timer context row (#brew-context-row). It is NOT a Switch-only row:
   //   • Hybrid / HYB_NEW → shows the HARIO Switch state (OPEN/CLOSED).
@@ -1625,19 +1639,122 @@ function updateBrewStep() {
   }
 }
 
-function _updateBrewDots(pourSteps, donePours) {
-  const maxDots = Math.min(pourSteps.length, 10);
-  DOM.brewDotsRow.innerHTML = Array.from({ length: maxDots }, (_, i) => {
-    const num = i + 1;
-    const cls = num < donePours ? 'done' : (num === donePours ? 'active' : 'upcoming');
-    const lineBg = i > 0 && i < donePours
-      ? 'var(--color-accent-soft)' : 'var(--color-border-card)';
-    return `<span class="brew-dot-col">
-      <span class="brew-dot-line" style="background:${lineBg};"></span>
-      <span class="brew-dot-circle ${cls}"></span>
-      <span class="brew-dot-label">${num}</span>
-    </span>`;
-  }).join('');
+/* ── Brew: Sequence Bar (Timer Ver.2.0) ─────────────────────────────────────────
+   Windowed Previous / Current / Next / Later rows over the REAL recipe steps
+   (PR-013A §8). At most 4 rows; the current row is max-emphasis with a one-line
+   tip; a progress line in the rail grows from Current toward Next, synced to the
+   Countdown ring. No step count / order / timing values are changed here. */
+function _updateBrewSequence(steps, idx) {
+  const n     = steps.length;
+  let   start = Math.max(0, idx - 1);
+  start       = Math.min(start, Math.max(0, n - 4));
+  const end   = Math.min(n, start + 4);
+
+  let html = '';
+  for (let i = start; i < end; i++) {
+    const s         = steps[i];
+    const isLastRow = (i === end - 1);
+
+    let state, fillV;
+    if      (i <  idx)     { state = 'prev';    fillV = 1; }  // completed
+    else if (i === idx)    { state = 'current'; fillV = 0; }  // live-updated
+    else if (i === idx + 1){ state = 'next';    fillV = 0; }
+    else                   { state = 'later';   fillV = 0; }
+
+    // Cumulative scale target (pours only); drawdown leans on its label.
+    const cum = (s.type === 'pour') ? `${s.totalAmount}g` : '';
+
+    // Progress connector — omit on the last visible row. Animate via transform
+    // (scaleY) only, so no layout property animates (PR-013A §12).
+    const fillId = (state === 'current') ? ' id="brew-seq-fill-cur"' : '';
+    const track  = isLastRow ? '' :
+      `<span class="brew-seq-track"><span class="brew-seq-fill"${fillId} style="transform:scaleY(${fillV});"></span></span>`;
+
+    // One-line tip on the Current row only.
+    const tip = (state === 'current' && s.instruction)
+      ? `<span class="brew-seq-tip">${s.instruction}</span>` : '';
+
+    html += `<div class="brew-seq-row state-${state}">
+      <span class="brew-seq-rail">
+        <span class="brew-seq-dot"></span>
+        ${track}
+      </span>
+      <span class="brew-seq-body">
+        <span class="brew-seq-head">
+          <span class="brew-seq-label">${s.label}</span>
+          <span class="brew-seq-cum">${cum}</span>
+        </span>
+        ${tip}
+      </span>
+    </div>`;
+  }
+  DOM.brewSeq.innerHTML = html;
+}
+
+/* ── Brew: Countdown row (Timer Ver.2.0) ────────────────────────────────────────
+   A subordinate timing cue for the current step, derived from the real step
+   schedule (steps[idx].timeSec → steps[idx+1].timeSec). It signals only — at 0 it
+   never auto-advances, auto-confirms, or writes History (PR-013A §7, §15). */
+const _BREW_CD_CIRC = 2 * Math.PI * 15; // ring r=15
+
+function _countdownLabel(recipe, step, next) {
+  // Hybrid: a Switch action at the boundary takes precedence in the copy.
+  if (recipe.id === 'hybrid' && next.switchState && step.switchState &&
+      next.switchState !== step.switchState) {
+    return next.switchState === 'closed' ? 'Switch を閉じるまで' : 'Switch を開けるまで';
+  }
+  if (next.type === 'drawdown') return '落とし切りまで';
+  if (next.type === 'pour')     return '次の注湯まで';
+  return '次の操作まで';
+}
+
+function _setSeqProgress(frac) {
+  const fill = document.getElementById('brew-seq-fill-cur');
+  if (fill) fill.style.transform = `scaleY(${Math.max(0, Math.min(1, frac)).toFixed(3)})`;
+}
+
+function _updateBrewCountdown() {
+  const recipe = state.activeRecipe;
+  const t      = state.timer;
+  if (!recipe) return;
+  const steps = recipe.steps;
+  const idx   = t.currentStepIndex;
+  const step  = steps[idx];
+  if (!step) return;
+  const next  = steps[idx + 1];
+
+  // Quiet supporting drop icon (set once).
+  if (DOM.brewCdDrop && !DOM.brewCdDrop.dataset.set) {
+    DOM.brewCdDrop.innerHTML  = microIcon('pour-plus', 14);
+    DOM.brewCdDrop.dataset.set = '1';
+  }
+
+  if (!next) {
+    // Last phase: no countdown — a calm phrase, ring stays full and faint.
+    DOM.brewCdLabel.textContent = '最後のフェーズ・落とし切りへ';
+    DOM.brewCdSecs.textContent  = '—';
+    DOM.brewCdArc.setAttribute('stroke-dasharray',
+      `${_BREW_CD_CIRC.toFixed(2)} ${_BREW_CD_CIRC.toFixed(2)}`);
+    DOM.brewCountdownRow.classList.add('is-last');
+    _setSeqProgress(0);
+    return;
+  }
+  DOM.brewCountdownRow.classList.remove('is-last');
+
+  const dur    = Math.max(1, next.timeSec - step.timeSec);
+  const into   = Math.max(0, Math.min(dur, t.elapsedSec - step.timeSec));
+  const remain = Math.max(0, dur - into);
+
+  DOM.brewCdLabel.textContent = _countdownLabel(recipe, step, next);
+  DOM.brewCdSecs.textContent  = remain;
+
+  // Ring depletes with remaining time (no glow; styled in CSS).
+  const frac = remain / dur;
+  DOM.brewCdArc.setAttribute('stroke-dasharray',
+    `${(_BREW_CD_CIRC * frac).toFixed(2)} ${_BREW_CD_CIRC.toFixed(2)}`);
+
+  // Sequence progress line synced to the ring (same into/dur).
+  _setSeqProgress(into / dur);
 }
 
 function _updateBrewPauseUI(running) {
@@ -1684,10 +1801,10 @@ function initBrew(recipe) {
   DOM.brewCumLabel.textContent =
     recipe.id === 'ice' ? 'スケール目標（湯のみ）' : 'スケール目標';
 
-  // Quiet supporting micro icons on the constant Timer labels (text is kept).
-  DOM.brewCumIcon.innerHTML      = microIcon('scale-target');
-  DOM.brewPourLabel.innerHTML    = `${microIcon('pour-plus')}<span>今回の注湯</span>`;
-  DOM.brewNextLabelTxt.innerHTML = `${microIcon('next-target')}<span>次</span>`;
+  // Quiet supporting micro icon on the scale-target label (text is kept). The
+  // Countdown row's "この投" label is static; This Pour carries the + sign.
+  DOM.brewCumIcon.innerHTML   = microIcon('scale-target');
+  DOM.brewPourLabel.textContent = 'この投';
 
   // Reset timer display
   DOM.brewTimeDisplay.textContent = '0:00';
