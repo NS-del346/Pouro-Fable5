@@ -885,8 +885,9 @@ const METHOD_DISPLAY_NAMES = {
 
 /* ── Storage ────────────────────────────────────────────────────────────────── */
 const STORAGE_KEYS = {
-  history:  'pouroFable5.history.v1',
-  settings: 'pouroFable5.settings.v1',
+  history:   'pouroFable5.history.v1',
+  settings:  'pouroFable5.settings.v1',
+  myRecipes: 'pouroFable5.myRecipes.v1',
 };
 const MAX_HISTORY_ENTRIES = 500;
 
@@ -1035,6 +1036,141 @@ function safeWriteSettings(settings) {
     console.warn('[Pouro] Failed to write settings:', err);
     return false;
   }
+}
+
+/* ── My Recipes storage (PR-012B) ───────────────────────────────────────────────
+ * My Recipes are user-named, reusable *setup presets* (method + parameters),
+ * derived from app-defined methods and user-selected parameters. Generated steps
+ * are never stored here — they are re-derived through RecipeEngine.build() when a
+ * recipe is later selected, so a preset can never drift from the engine.
+ *
+ * This PR adds the data model and safe storage/normalize helpers only. There is
+ * no UI, no Save action, no list, and no Preview routing yet (those land in
+ * PR-012C / PR-012D). My Recipes never reads or writes the history/settings keys.
+ */
+const MY_RECIPES_SCHEMA_VERSION = 1;
+const MAX_MY_RECIPES = 200;
+
+// Setup-parameter bounds mirror the existing Setup / Settings steppers
+// (dose 10–40g, ratio 1:10–1:20). ice ignores ratio on rebuild, matching engine.
+const MY_RECIPE_DOSE_MIN  = 10;
+const MY_RECIPE_DOSE_MAX  = 40;
+const MY_RECIPE_RATIO_MIN = 10;
+const MY_RECIPE_RATIO_MAX = 20;
+
+function createMyRecipeId() {
+  return `mr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function _clampInt(value, min, max, fallback) {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+function _isoOrFallback(value, fallbackIso) {
+  if (typeof value === 'string') {
+    const t = Date.parse(value);
+    if (!Number.isNaN(t)) return new Date(t).toISOString();
+  }
+  return fallbackIso;
+}
+
+// Returns a normalized setup-preset object, or null if the input cannot be a
+// valid recipe (only an unknown/missing methodId is fatal — other fields are
+// clamped or defaulted using the app's existing conventions).
+function normalizeMyRecipe(input) {
+  if (!input || typeof input !== 'object') return null;
+
+  const methodId = input.methodId;
+  if (!METHODS[methodId]) return null;
+
+  const now = new Date().toISOString();
+
+  const name = String(input.name ?? '').trim()
+    || METHOD_DISPLAY_NAMES[methodId] || methodId;
+
+  const dose  = _clampInt(input.dose,  MY_RECIPE_DOSE_MIN,  MY_RECIPE_DOSE_MAX,  20);
+  const ratio = _clampInt(input.ratio, MY_RECIPE_RATIO_MIN, MY_RECIPE_RATIO_MAX, 15);
+
+  // flavor/strength validated against the same label maps the rest of the app uses.
+  const flavor   = FLAVOR_LABELS[input.flavor]     ? input.flavor   : 'balanced';
+  const strength = STRENGTH_LABELS[input.strength] ? input.strength : 'standard';
+
+  const createdAt = _isoOrFallback(input.createdAt, now);
+  const updatedAt = _isoOrFallback(input.updatedAt, createdAt);
+
+  return {
+    schemaVersion: MY_RECIPES_SCHEMA_VERSION,
+    id:   (typeof input.id === 'string' && input.id) ? input.id : createMyRecipeId(),
+    name,
+    methodId,
+    dose,
+    ratio,
+    flavor,
+    strength,
+    createdAt,
+    updatedAt,
+  };
+}
+
+function isValidMyRecipe(recipe) {
+  return normalizeMyRecipe(recipe) !== null;
+}
+
+function safeReadMyRecipes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.myRecipes);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeMyRecipe).filter(Boolean);
+  } catch (error) {
+    console.warn('[Pouro] Failed to read My Recipes:', error);
+    return [];
+  }
+}
+
+function safeWriteMyRecipes(recipes) {
+  try {
+    const normalized = (Array.isArray(recipes) ? recipes : [])
+      .map(normalizeMyRecipe)
+      .filter(Boolean)
+      .slice(0, MAX_MY_RECIPES);
+    localStorage.setItem(STORAGE_KEYS.myRecipes, JSON.stringify(normalized));
+    return true;
+  } catch (error) {
+    console.warn('[Pouro] Failed to write My Recipes:', error);
+    return false;
+  }
+}
+
+function findMyRecipeById(id, recipes) {
+  const list = Array.isArray(recipes) ? recipes : safeReadMyRecipes();
+  return list.find((r) => r && r.id === id) || null;
+}
+
+// Pure transform: a setup descriptor (method + parameters) → a normalized My
+// Recipe object. It does NOT write to localStorage, mutate state.draft, call
+// renderPreview()/showScreen(), or create History entries — it only returns a
+// normalized recipe (or null). The caller must supply methodId on `setup`
+// (e.g. { ...state.draft, methodId: state.selectedMethodId }); wiring this to a
+// Save action lands in PR-012C.
+function buildMyRecipeFromDraft(setup, name, now) {
+  if (!setup || typeof setup !== 'object') return null;
+  const ts = _isoOrFallback(now, new Date().toISOString());
+  return normalizeMyRecipe({
+    schemaVersion: MY_RECIPES_SCHEMA_VERSION,
+    id:        createMyRecipeId(),
+    name,
+    methodId:  setup.methodId,
+    dose:      setup.dose,
+    ratio:     setup.ratio,
+    flavor:    setup.flavor,
+    strength:  setup.strength,
+    createdAt: ts,
+    updatedAt: ts,
+  });
 }
 
 // Display-only Japanese date format — stored data stays ISO
