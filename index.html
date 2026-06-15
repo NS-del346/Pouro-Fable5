@@ -487,7 +487,9 @@
         <span id="brew-chip" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-serif);font-weight:600;font-size:13px;letter-spacing:0.06em;padding:7px 16px;border-radius:var(--radius-pill);white-space:nowrap;border:1px solid var(--color-border-input);background:var(--color-surface-raised);color:var(--color-text-muted);">PAUSED</span>
       </div>
 
-      <!-- HERO: Target Total (scale goal — the single number the user matches on the scale) -->
+      <!-- HERO: Target Total (scale goal — the single number the user matches on the
+           scale). This is the king of the Timer hierarchy (PR-013A §5); nothing below
+           may rival its size or colour weight. -->
       <div id="brew-pour-card" class="card brew-hero" style="box-shadow:var(--shadow-brew);">
         <div class="brew-hero-top">
           <span class="brew-hero-label"><span class="brew-cum-icon" id="brew-cum-icon"></span><span id="brew-cum-label">スケール目標</span></span>
@@ -505,28 +507,41 @@
         </div>
         <div class="brew-hero-instruction" id="brew-target-instruction">180g まで注ぐ</div>
 
-        <div class="brew-hero-foot">
-          <span class="brew-foot-cell">
-            <span class="brew-foot-label" id="brew-pour-label">今回の注湯</span>
-            <span class="brew-foot-val"><span id="brew-pour-amt">+60</span><span class="brew-foot-unit">g</span></span>
-          </span>
-          <span class="brew-foot-div"></span>
-          <span class="brew-foot-cell">
-            <span class="brew-foot-label" id="brew-next-label-txt">次</span>
-            <span class="brew-foot-val" id="brew-next-target">240g まで</span>
-          </span>
+        <!-- Target Total gauge: 0 → final scale target, current cumulative filled. -->
+        <div class="brew-gauge" aria-hidden="true">
+          <span id="brew-gauge-fill" class="brew-gauge-fill"></span>
         </div>
-        <div id="brew-pour-note" class="brew-hero-note"></div>
       </div>
 
-      <!-- Draw-down card (shown during drawdown phase) -->
+      <!-- Draw-down card (shown during drawdown phase, replacing the hero) -->
       <div id="brew-draw-card" class="card hidden" style="text-align:center;box-shadow:var(--shadow-brew);">
         <div id="brew-draw-title" style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-mincho);font-weight:600;font-size:26px;color:var(--color-text);"></div>
         <div id="brew-draw-sub"   style="font-size:13px;color:var(--color-text-muted);margin-top:6px;"></div>
       </div>
 
-      <!-- Step progress dots -->
-      <div class="brew-dots" id="brew-dots-row"></div>
+      <!-- COUNTDOWN row (rank 2, subordinate): thin ring + timing cue for the current
+           step, with This Pour (+Ng) on the right. Signals only — never auto-advances. -->
+      <div id="brew-countdown-row" class="brew-cd">
+        <span class="brew-cd-ring-wrap" aria-hidden="true">
+          <svg class="brew-cd-ring" viewBox="0 0 36 36">
+            <circle class="brew-cd-ring-bg" cx="18" cy="18" r="15"/>
+            <circle id="brew-cd-arc" class="brew-cd-ring-fg" cx="18" cy="18" r="15" stroke-dasharray="94.25 94.25" transform="rotate(-90 18 18)"/>
+          </svg>
+          <span class="brew-cd-drop" id="brew-cd-drop"></span>
+        </span>
+        <span class="brew-cd-main">
+          <span class="brew-cd-label" id="brew-cd-label">次の注湯まで</span>
+          <span class="brew-cd-secs" aria-label="次までの目安"><span id="brew-cd-secs">8</span><span class="brew-cd-unit">s</span></span>
+        </span>
+        <span class="brew-cd-pour">
+          <span class="brew-cd-pour-label" id="brew-pour-label">この投</span>
+          <span class="brew-cd-pour-val"><span id="brew-pour-amt">+60</span><span class="brew-cd-pour-unit">g</span></span>
+        </span>
+      </div>
+
+      <!-- SEQUENCE bar (rank 3–5): windowed Previous / Current / Next / Later rows with
+           a progress line synced to the Countdown ring. Rendered by app.js. -->
+      <div class="brew-seq" id="brew-seq"></div>
 
       <!-- Controls -->
       <div class="brew-controls">
