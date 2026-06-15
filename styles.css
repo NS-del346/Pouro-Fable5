@@ -1838,6 +1838,101 @@ img {
   background: var(--color-border-divider);
 }
 
+/* ── My Recipes item management (PR-012E) ──────────────────────────────────────
+   Quiet secondary row under the primary プレビューで確認 action. Two equal-width
+   buttons share the row so neither overflows at 375px; both are deliberately
+   lighter than the primary action, and 削除 is the quietest (no fill). */
+.my-recipe-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.my-recipe-item-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.my-recipe-item-btn.is-rename {
+  color: var(--color-text-muted);
+}
+
+.my-recipe-item-btn.is-rename:active {
+  background: var(--color-surface-muted);
+}
+
+/* Destructive but quiet — muted red text, no fill, never visually dominant. */
+.my-recipe-item-btn.is-delete {
+  color: #B4532E;
+}
+
+.my-recipe-item-btn.is-delete:active {
+  background: rgba(180, 83, 46, 0.08);
+}
+
+/* Inline rename panel — replaces the secondary row while editing one item. */
+.my-recipe-rename {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.my-recipe-rename-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent-dark);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--color-text);
+}
+
+.my-recipe-rename-save,
+.my-recipe-rename-cancel {
+  flex-shrink: 0;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.my-recipe-rename-save {
+  background: var(--color-accent-dark);
+  border: 1px solid var(--color-accent-dark);
+  color: #fff;
+}
+
+.my-recipe-rename-save:active {
+  opacity: 0.85;
+}
+
+.my-recipe-rename-cancel {
+  background: transparent;
+  border: 1px solid var(--color-border-card);
+  color: var(--color-text-muted);
+}
+
+.my-recipe-rename-cancel:active {
+  background: var(--color-surface-muted);
+}
+
 .my-recipe-empty-home {
   display: inline-flex;
   align-items: center;

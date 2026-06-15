@@ -840,6 +840,11 @@ const state = {
   // History replays, so they must not blur History/Rebrew semantics.
   recipeFrom: null,
 
+  // PR-012E — transient (in-memory only, never persisted) rename UI state for the
+  // My Recipes list. `myRecipeEditingId` holds the id of the recipe whose inline
+  // rename panel is open, or null when none is being edited.
+  myRecipeEditingId: null,
+
   // Active recipe — set by RecipeEngine.build() before brew starts
   activeRecipe: null,
 
@@ -1781,11 +1786,15 @@ function renderHome() {
   });
 }
 
-/* ── My Recipes list (PR-012D) ──────────────────────────────────────────────────
- * Read-only list of saved setup presets. Reads via safeReadMyRecipes(); never
- * writes localStorage or History. Each item exposes a single primary action —
- * プレビューで確認 — which restores the setup and routes to Preview (see
- * _applySelectedMyRecipe). Rename/delete/edit are out of scope (PR-012E). */
+/* ── My Recipes list (PR-012D, management added PR-012E) ─────────────────────────
+ * List of saved setup presets. Reads via safeReadMyRecipes(); never writes
+ * History. Each item's primary action — プレビューで確認 — restores the setup and
+ * routes to Preview (see _applySelectedMyRecipe). PR-012E adds two quiet,
+ * visually-secondary management actions per item: 名前を変更 (inline rename panel,
+ * writes name + updatedAt only) and 削除 (confirm() then remove that one recipe).
+ * Both write the My Recipes store via safeWriteMyRecipes(); neither touches
+ * History/Settings, recipe IDs, setup parameters, or RecipeEngine output. Editing
+ * the saved setup parameters themselves remains out of scope. */
 function _myRecipeParamLine(recipe) {
   const m = METHODS[recipe.methodId];
   const parts = [m?.name || METHOD_DISPLAY_NAMES[recipe.methodId] || recipe.methodId];
@@ -1849,8 +1858,134 @@ function renderMyRecipes() {
     action.innerHTML = 'プレビューで確認 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
 
     item.append(head, params, action);
+
+    // PR-012E — when this item is being renamed, show an inline rename panel in
+    // place of the secondary action row; otherwise show the quiet 名前を変更 / 削除
+    // controls. プレビューで確認 stays the dominant action either way.
+    if (state.myRecipeEditingId === r.id) {
+      const panel = document.createElement('div');
+      panel.className = 'my-recipe-rename';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'my-recipe-rename-input';
+      input.maxLength = 40;
+      input.autocomplete = 'off';
+      input.value = r.name;
+      input.dataset.renameInputId = r.id;
+      input.setAttribute('aria-label', '新しいレシピ名');
+
+      const save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'my-recipe-rename-save';
+      save.dataset.renameSave = r.id;
+      save.textContent = '保存';
+
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'my-recipe-rename-cancel';
+      cancel.dataset.renameCancel = '1';
+      cancel.textContent = 'キャンセル';
+
+      panel.append(input, save, cancel);
+      item.appendChild(panel);
+
+      // Focus the field so the user can type immediately; select existing text so
+      // a full replace is one keystroke away.
+      requestAnimationFrame(() => { input.focus(); input.select(); });
+    } else {
+      const actions = document.createElement('div');
+      actions.className = 'my-recipe-item-actions';
+
+      const rename = document.createElement('button');
+      rename.type = 'button';
+      rename.className = 'my-recipe-item-btn is-rename';
+      rename.dataset.renameId = r.id;
+      rename.textContent = '名前を変更';
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'my-recipe-item-btn is-delete';
+      del.dataset.deleteId = r.id;
+      del.textContent = '削除';
+
+      actions.append(rename, del);
+      item.appendChild(actions);
+    }
+
     list.appendChild(item);
   });
+}
+
+/* ── My Recipes management (PR-012E) ─────────────────────────────────────────────
+ * Rename and delete write the My Recipes store via safeWriteMyRecipes() and never
+ * touch History/Settings/RecipeEngine/Timer or recipe IDs. All transient UI state
+ * (which row is open) lives in memory on `state.myRecipeEditingId` and is never
+ * persisted. */
+function showMyRecipesListFeedback(message, ok) {
+  const feedback = document.getElementById('my-recipes-feedback');
+  if (!feedback) return;
+  feedback.textContent = message || '';
+  feedback.className = `my-recipe-feedback ${ok ? 'is-success' : 'is-error'}`;
+}
+
+function _beginRenameMyRecipe(id) {
+  if (!findMyRecipeById(id)) return;   // stale/tampered id — do nothing
+  state.myRecipeEditingId = id;
+  showMyRecipesListFeedback('', true);  // clear any prior message
+  renderMyRecipes();
+}
+
+function _cancelRenameMyRecipe() {
+  state.myRecipeEditingId = null;
+  renderMyRecipes();
+}
+
+function _commitRenameMyRecipe(id) {
+  const input = document.querySelector(`.my-recipe-rename-input[data-rename-input-id="${id}"]`);
+  const raw   = input ? input.value : '';
+
+  const recipes = safeReadMyRecipes();
+  const target  = findMyRecipeById(id, recipes);
+  if (!target) {                       // recipe vanished (e.g. cleared elsewhere)
+    state.myRecipeEditingId = null;
+    renderMyRecipes();
+    showMyRecipesListFeedback('レシピが見つかりませんでした', false);
+    return;
+  }
+
+  // Empty/whitespace names must not produce an empty visible name — fall back to
+  // the recipe's current name. normalizeMyRecipe() (via safeWriteMyRecipes) then
+  // applies the same trim/fallback rules used everywhere else.
+  const trimmed   = String(raw).trim();
+  const finalName = trimmed || target.name;
+
+  // Update only name + updatedAt; every other field (id, methodId, dose, ratio,
+  // flavor, strength, createdAt) is carried through untouched.
+  const updated = recipes.map(r =>
+    r.id === id ? { ...r, name: finalName, updatedAt: new Date().toISOString() } : r
+  );
+
+  const ok = safeWriteMyRecipes(updated);
+  state.myRecipeEditingId = null;
+  renderMyRecipes();
+  showMyRecipesListFeedback(ok ? '名前を変更しました' : '変更できませんでした', ok);
+}
+
+function _deleteMyRecipe(id) {
+  const recipes = safeReadMyRecipes();
+  const target  = findMyRecipeById(id, recipes);
+  if (!target) return;                 // stale/tampered id — do nothing
+
+  if (!window.confirm('このマイレシピを削除しますか？')) return;
+
+  // Remove only the targeted id; all other recipes are preserved verbatim.
+  const remaining = recipes.filter(r => r.id !== id);
+  const ok = safeWriteMyRecipes(remaining);
+
+  if (state.myRecipeEditingId === id) state.myRecipeEditingId = null;
+  renderMyRecipes();
+  showMyRecipesListFeedback(ok ? '削除しました' : '削除できませんでした', ok);
 }
 
 /* ── Setup screen ───────────────────────────────────────────────────────────── */
@@ -2085,8 +2220,8 @@ function handleSaveMyRecipe() {
     return;
   }
 
-  // Append as a new recipe each time; duplicate names are allowed for now —
-  // rename/delete management lands in a later PR (PR-012E).
+  // Append as a new recipe each time; duplicate names are allowed (rename/delete
+  // management from the My Recipes list lands in PR-012E).
   const recipes = safeReadMyRecipes();
   recipes.push(recipe);
   const ok = safeWriteMyRecipes(recipes);
@@ -2612,6 +2747,9 @@ function wireEvents() {
 
   // Home → My Recipes (PR-012D) — quiet, secondary entry to the saved-setup list.
   document.getElementById('btn-open-my-recipes')?.addEventListener('click', () => {
+    // Open the list in a clean state — no rename panel left open, no stale message.
+    state.myRecipeEditingId = null;
+    showMyRecipesListFeedback('', true);
     renderMyRecipes();
     showScreen('myrecipes');
   });
@@ -2625,10 +2763,34 @@ function wireEvents() {
   document.getElementById('btn-myrecipes-empty-home')?.addEventListener('click', myRecipesToHome);
 
   // My Recipes — select a saved recipe → restore setup → Preview (never Timer).
-  // Delegated so it covers items rendered on each renderMyRecipes() call.
-  document.getElementById('my-recipes-list')?.addEventListener('click', e => {
-    const btn = e.target.closest('.my-recipe-item-action');
-    if (btn && btn.dataset.recipeId) _applySelectedMyRecipe(btn.dataset.recipeId);
+  // Delegated so it covers items rendered on each renderMyRecipes() call. The same
+  // handler also routes the PR-012E rename/delete controls and the inline rename
+  // panel's 保存 / キャンセル buttons.
+  const myRecipesList = document.getElementById('my-recipes-list');
+  myRecipesList?.addEventListener('click', e => {
+    const selectBtn = e.target.closest('.my-recipe-item-action');
+    if (selectBtn && selectBtn.dataset.recipeId) { _applySelectedMyRecipe(selectBtn.dataset.recipeId); return; }
+
+    const renameBtn = e.target.closest('[data-rename-id]');
+    if (renameBtn) { _beginRenameMyRecipe(renameBtn.dataset.renameId); return; }
+
+    const deleteBtn = e.target.closest('[data-delete-id]');
+    if (deleteBtn) { _deleteMyRecipe(deleteBtn.dataset.deleteId); return; }
+
+    const saveBtn = e.target.closest('[data-rename-save]');
+    if (saveBtn) { _commitRenameMyRecipe(saveBtn.dataset.renameSave); return; }
+
+    const cancelBtn = e.target.closest('[data-rename-cancel]');
+    if (cancelBtn) { _cancelRenameMyRecipe(); return; }
+  });
+
+  // Inline rename input — Enter commits, Escape cancels (keyboard parity with the
+  // 保存 / キャンセル buttons). Delegated because the input is rebuilt each render.
+  myRecipesList?.addEventListener('keydown', e => {
+    const input = e.target.closest('.my-recipe-rename-input');
+    if (!input) return;
+    if (e.key === 'Enter')       { e.preventDefault(); _commitRenameMyRecipe(input.dataset.renameInputId); }
+    else if (e.key === 'Escape') { e.preventDefault(); _cancelRenameMyRecipe(); }
   });
 
   // Setup — dose spinner
