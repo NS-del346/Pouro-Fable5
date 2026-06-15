@@ -835,6 +835,10 @@ const state = {
   selectedMethodId: 'yon-roku',
   draft: { dose: 20, ratio: 15, flavor: 'balanced', strength: 'standard', customRatio: false },
   rebrewFrom: null,
+  // PR-012D — neutral origin marker set when a saved My Recipe is loaded into
+  // Preview. Deliberately NOT named "rebrew": My Recipes are setup presets, not
+  // History replays, so they must not blur History/Rebrew semantics.
+  recipeFrom: null,
 
   // Active recipe — set by RecipeEngine.build() before brew starts
   activeRecipe: null,
@@ -1765,6 +1769,7 @@ function renderHome() {
 
   document.getElementById('btn-go-setup')?.addEventListener('click', () => {
     state.rebrewFrom = null;
+    state.recipeFrom = null;
     renderSetup();
     showScreen('setup');
   });
@@ -1773,6 +1778,78 @@ function renderHome() {
       state.selectedMethodId = row.dataset.methodId;
       renderHome();
     });
+  });
+}
+
+/* ── My Recipes list (PR-012D) ──────────────────────────────────────────────────
+ * Read-only list of saved setup presets. Reads via safeReadMyRecipes(); never
+ * writes localStorage or History. Each item exposes a single primary action —
+ * プレビューで確認 — which restores the setup and routes to Preview (see
+ * _applySelectedMyRecipe). Rename/delete/edit are out of scope (PR-012E). */
+function _myRecipeParamLine(recipe) {
+  const m = METHODS[recipe.methodId];
+  const parts = [m?.name || METHOD_DISPLAY_NAMES[recipe.methodId] || recipe.methodId];
+  parts.push(`${recipe.dose}g`);
+  // Ice Brew ignores ratio (fixed formula), matching the engine — omit it there.
+  if (recipe.methodId !== 'ice') parts.push(`1:${recipe.ratio}`);
+  if (m?.hasFlavorStrength) {
+    parts.push(`${FLAVOR_LABELS[recipe.flavor]} / ${STRENGTH_LABELS[recipe.strength]}`);
+  }
+  return parts.join(' ・ ');
+}
+
+function renderMyRecipes() {
+  const list  = document.getElementById('my-recipes-list');
+  const empty = document.getElementById('my-recipes-empty');
+  if (!list || !empty) return;
+
+  const recipes = safeReadMyRecipes();
+
+  if (!recipes.length) {
+    list.innerHTML = '';
+    list.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+
+  empty.classList.add('hidden');
+  list.classList.remove('hidden');
+
+  // Newest first by save/update time, falling back to creation time.
+  const ordered = [...recipes].sort((a, b) =>
+    String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || ''))
+  );
+
+  // Built with DOM nodes (not innerHTML interpolation) because the recipe name
+  // is free user input — textContent keeps it safe, matching how the rest of the
+  // app renders user-supplied text (e.g. history notes).
+  list.innerHTML = '';
+  ordered.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'my-recipe-item';
+
+    const head = document.createElement('div');
+    head.className = 'my-recipe-item-head';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'my-recipe-item-name';
+    nameEl.textContent = r.name;
+    const dateEl = document.createElement('span');
+    dateEl.className = 'my-recipe-item-date';
+    dateEl.textContent = _formatDate(r.updatedAt || r.createdAt);
+    head.append(nameEl, dateEl);
+
+    const params = document.createElement('div');
+    params.className = 'my-recipe-item-params';
+    params.textContent = _myRecipeParamLine(r);
+
+    const action = document.createElement('button');
+    action.type = 'button';
+    action.className = 'my-recipe-item-action';
+    action.dataset.recipeId = r.id;
+    action.innerHTML = 'プレビューで確認 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+
+    item.append(head, params, action);
+    list.appendChild(item);
   });
 }
 
@@ -1904,7 +1981,14 @@ function renderPreview() {
 
   const banner   = document.getElementById('rebrew-banner');
   const noteCard = document.getElementById('rebrew-next-note-card');
-  if (state.rebrewFrom) {
+  if (state.recipeFrom) {
+    // PR-012D — origin is a saved My Recipe (a setup preset), not a History
+    // replay. Reuse the existing pill affordance with neutral wording and no
+    // history date / next-note (presets carry no brew context).
+    banner.classList.remove('hidden');
+    document.getElementById('rebrew-banner-text').textContent = 'マイレシピから読み込み';
+    noteCard.classList.add('hidden');
+  } else if (state.rebrewFrom) {
     banner.classList.remove('hidden');
     // PR-011R5A — Finish-origin repeats carry source:'finish' and no history date,
     // so use neutral same-setup wording instead of the history-origin label.
@@ -2421,6 +2505,33 @@ function _applyRebrewEntry(entry) {
     date: dateStr,
     nextNote: entry.log?.nextNote || entry.nextNote || '',
   };
+  state.recipeFrom          = null;  // History origin, not a My Recipe preset
+  renderPreview();
+  showScreen('preview');
+}
+
+/* ── My Recipes select helper (PR-012D) ─────────────────────────────────────────
+   Loads a saved setup preset into Preview. Mirrors _applyRebrewEntry, differing
+   only in origin: it restores method + the four tuning parameters, re-derives the
+   recipe through the existing RecipeEngine path in renderPreview(), and routes to
+   Preview (never the Timer). It is strictly read-only — it does NOT write
+   localStorage, mutate the saved recipe, or create a History entry. */
+function _applySelectedMyRecipe(id) {
+  const recipe = findMyRecipeById(id);
+  if (!recipe) return;  // tampered/stale id — stay on the list, do nothing
+
+  state.selectedMethodId  = recipe.methodId;
+  state.draft.dose        = recipe.dose;
+  // Ice ignores ratio on rebuild, but keep a sane value in the draft.
+  state.draft.ratio       = recipe.ratio != null ? recipe.ratio : 15;
+  state.draft.flavor      = recipe.flavor;
+  state.draft.strength    = recipe.strength;
+  state.draft.customRatio = false;
+
+  // Neutral origin marker — a setup preset, not a History replay.
+  state.recipeFrom = { source: 'myRecipe', id: recipe.id, name: recipe.name };
+  state.rebrewFrom = null;
+
   renderPreview();
   showScreen('preview');
 }
@@ -2461,6 +2572,7 @@ function _applyCurrentBrewAgain() {
   // rebrew pill/next-note affordance; carry the typed next-adjustment note if any.
   const nextNote = document.getElementById('log-next-note')?.value.trim() || '';
   state.rebrewFrom = { id: null, source: 'finish', date: '', nextNote };
+  state.recipeFrom = null;  // Finish-origin repeat, not a My Recipe preset
 
   renderPreview();
   showScreen('preview');
@@ -2496,6 +2608,27 @@ function wireEvents() {
   // Setup ← back
   document.getElementById('btn-setup-back').addEventListener('click', () => {
     showScreen('home');
+  });
+
+  // Home → My Recipes (PR-012D) — quiet, secondary entry to the saved-setup list.
+  document.getElementById('btn-open-my-recipes')?.addEventListener('click', () => {
+    renderMyRecipes();
+    showScreen('myrecipes');
+  });
+
+  // My Recipes ← back to Home (header + empty-state button)
+  const myRecipesToHome = () => {
+    renderHome();
+    showScreen('home');
+  };
+  document.getElementById('btn-myrecipes-back')?.addEventListener('click', myRecipesToHome);
+  document.getElementById('btn-myrecipes-empty-home')?.addEventListener('click', myRecipesToHome);
+
+  // My Recipes — select a saved recipe → restore setup → Preview (never Timer).
+  // Delegated so it covers items rendered on each renderMyRecipes() call.
+  document.getElementById('my-recipes-list')?.addEventListener('click', e => {
+    const btn = e.target.closest('.my-recipe-item-action');
+    if (btn && btn.dataset.recipeId) _applySelectedMyRecipe(btn.dataset.recipeId);
   });
 
   // Setup — dose spinner

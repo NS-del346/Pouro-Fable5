@@ -41,6 +41,18 @@
       <!-- Method list — rendered by JS -->
       <div id="method-list" style="margin-top:14px;display:flex;flex-direction:column;"></div>
 
+      <!-- My Recipes entry (PR-012D) — quiet, secondary. Opens the saved-setup
+           list; intentionally placed below and visually lighter than the method
+           choice so it never competes with method selection. -->
+      <button class="home-myrecipes-entry" id="btn-open-my-recipes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5h12v16l-6-3.5-6 3.5Z"/></svg>
+        <span class="home-myrecipes-entry-text">
+          <span class="home-myrecipes-entry-name">マイレシピ</span>
+          <span class="home-myrecipes-entry-sub">保存した条件をプレビューで確認</span>
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+
     </div>
   </div><!-- /screen-home -->
 
@@ -407,6 +419,38 @@
       </button>
     </div>
   </div><!-- /screen-methoddetail -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       03c  MY RECIPES  (PR-012D)
+       Read-only list of saved setup presets. Selecting one restores the setup
+       parameters and routes to Preview (never the Timer). No rename/delete/edit
+       here; never writes localStorage or History.
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="screen-myrecipes" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-myrecipes-back" aria-label="ホームに戻る">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+      </button>
+      <div class="screen-header-title">マイレシピ</div>
+      <span></span>
+    </div>
+
+    <div class="screen-scroll" data-scroll style="padding:10px 18px 8px;">
+      <!-- Saved recipes — rendered by JS -->
+      <div id="my-recipes-list" style="margin-top:4px;display:flex;flex-direction:column;gap:10px;"></div>
+
+      <!-- Empty state -->
+      <div id="my-recipes-empty" class="hidden" style="text-align:center;padding:64px 20px 40px;color:var(--color-text-faint);">
+        <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-faint)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto;display:block;"><path d="M6 4.5h12v16l-6-3.5-6 3.5Z"/></svg>
+        <div style="font-family:var(--font-mincho);font-size:16px;color:var(--color-text-muted);margin-top:14px;">まだマイレシピはありません</div>
+        <div style="font-size:12.5px;margin-top:6px;line-height:1.6;">Previewで現在の条件を保存すると、<br>ここに表示されます。</div>
+        <button class="my-recipe-empty-home" id="btn-myrecipes-empty-home">ホームに戻る</button>
+      </div>
+
+      <div style="height:8px;"></div>
+    </div>
+  </div><!-- /screen-myrecipes -->
 
 
   <!-- ═══════════════════════════════════════════════════════════════════════
