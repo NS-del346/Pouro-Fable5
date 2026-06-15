@@ -1736,6 +1736,129 @@ img {
   color: #B4532E;
 }
 
+/* ── My Recipes entry + list (PR-012D) ─────────────────────────────────────── */
+/* Quiet, secondary Home entry — deliberately lighter than the method choice. */
+.home-myrecipes-entry {
+  width: 100%;
+  margin-top: 22px;
+  min-height: 56px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+}
+
+.home-myrecipes-entry:active {
+  background: var(--color-surface-muted);
+}
+
+.home-myrecipes-entry-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-myrecipes-entry-name {
+  display: block;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.home-myrecipes-entry-sub {
+  display: block;
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* Saved-recipe item cards */
+.my-recipe-item {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px 12px;
+}
+
+.my-recipe-item-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.my-recipe-item-name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-recipe-item-date {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+
+.my-recipe-item-params {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.my-recipe-item-action {
+  width: 100%;
+  margin-top: 12px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-accent-dark);
+  cursor: pointer;
+}
+
+.my-recipe-item-action:active {
+  background: var(--color-border-divider);
+}
+
+.my-recipe-empty-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 22px;
+  min-height: 44px;
+  padding: 0 22px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.my-recipe-empty-home:active {
+  background: var(--color-surface-muted);
+}
+
 /* ── Method Detail screen (PR-011R3D) ──────────────────────────────────────── */
 .md-section {
   background: var(--color-surface-raised);
