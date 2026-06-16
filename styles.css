@@ -272,6 +272,36 @@ img {
   background: var(--color-border-divider);
 }
 
+/* ── Save helper + action split — PR-014B ──────────────────────────────────────
+   .cta-bar-save-hint makes the "saving writes History" outcome explicit directly
+   under the primary Save button. .cta-bar-split is a quiet "または" divider that
+   separates "record this brew" (Save) from "do the next brew" (same setup). */
+.cta-bar-save-hint {
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  margin-top: 9px;
+}
+
+.cta-bar-split {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 13px 4px 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--color-text-faint);
+}
+
+.cta-bar-split::before,
+.cta-bar-split::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-divider);
+}
+
 /* ── Primary CTA Button ────────────────────────────────────────────────────── */
 .btn-primary {
   width: 100%;
@@ -904,6 +934,65 @@ img {
   display: inline-flex;
   gap: 5px;
   flex-shrink: 0;
+}
+
+/* ── History row readability — PR-014B ─────────────────────────────────────────
+   Stronger method/date hierarchy and a more scannable brew-parameter line. The
+   name truncates (min-width:0 on its flex parents) so a long method name never
+   pushes the date or chevron off-screen at 375px. Presentation-only. */
+.history-row {
+  padding: 15px 8px;
+  border-radius: var(--radius-md);
+  transition: background 0.12s;
+}
+
+.history-row:active {
+  background: var(--color-surface-muted);
+}
+
+.history-row-name {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.history-row-date {
+  font-size: 10.5px;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.history-row-meta {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text-mid);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* ── History Detail record tag — PR-014B ───────────────────────────────────────
+   Quiet pill labelling the Detail screen as a saved History record (a completed
+   brew), distinct from a My Recipe setup preset. */
+.detail-record-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-accent-dark);
+  background: var(--color-chip-bg);
+  border: 1px solid var(--color-border-chip);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
 }
 
 .tag-chip {
