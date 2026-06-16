@@ -2497,12 +2497,12 @@ function renderHistory() {
     return `<div class="history-row" data-history-id="${h.id}">
       <span style="display:inline-flex;flex-shrink:0;">${methodImgHTML(h.methodId, 30)}</span>
       <span style="flex:1;min-width:0;">
-        <span style="display:flex;align-items:baseline;gap:8px;">
-          <span style="font-family:var(--font-serif);font-weight:600;font-size:16px;color:var(--color-text);">${h.methodName || hm.name}</span>
-          <span style="font-size:10.5px;color:var(--color-text-faint);white-space:nowrap;">${dateStr}</span>
+        <span style="display:flex;align-items:baseline;gap:8px;min-width:0;">
+          <span class="history-row-name">${h.methodName || hm.name}</span>
+          <span class="history-row-date">${dateStr}</span>
         </span>
-        <span style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-          <span style="font-family:var(--font-serif);font-size:12.5px;color:var(--color-text-muted);white-space:nowrap;">${meta}</span>
+        <span style="display:flex;align-items:center;gap:8px;margin-top:5px;min-width:0;">
+          <span class="history-row-meta">${meta}</span>
           ${ratingDisp}
         </span>
       </span>
